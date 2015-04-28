@@ -1,0 +1,13 @@
+#Alt, Bar, IsFri, Hungry, Patrons, Price, Raining, Reservation, Type, WaitEstimate, WillWait
+Y, N, N, Y, Some, Exp, N, Y, French, 0-10, Y
+Y, N, N, Y, Full, Chp, N, N, Thai, 30-60, N
+N, Y, N, N, Some, Chp, N, N, Burger, 0-10, Y
+Y, N, Y, Y, Full, Chp, Y, N, Thai, 10-30, Y
+Y, N, Y, N, Full, Exp, N, Y, French, >60, N
+N, Y, N, Y, Some, Mod, Y, Y, Italian, 0-10, Y
+N, Y, N, N, None, Chp, Y, N, Burger, 0-10, N
+N, N, N, Y, Some, Mod, Y, Y, Thai, 0-10, Y
+N, Y, Y, N, Full, Chp, Y, N, Burger, >60, N
+Y, Y, Y, Y, Full, Exp, N, Y, Italian, 10-30, N
+N, N, N, N, None, Chp, N, N, Thai, 0-10, N
+Y, Y, Y, Y, Full, Chp, N, N, Burger, 30-60, Y
