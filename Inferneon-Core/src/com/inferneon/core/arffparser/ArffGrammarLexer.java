@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:50:56 Resources/ArffGrammar.g 2015-04-28 18:17:58
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 Resources/ArffGrammar.g 2015-04-29 14:37:50
  package com.inferneon.core.arffparser;
 				import com.inferneon.core.Attribute;
                
@@ -10,9 +10,9 @@ import java.util.ArrayList;
 
 public class ArffGrammarLexer extends Lexer {
     public static final int EOF=-1;
-    public static final int T__18=18;
     public static final int T__19=19;
     public static final int T__20=20;
+    public static final int T__21=21;
     public static final int NUMERIC=4;
     public static final int REAL=5;
     public static final int RELATION=6;
@@ -24,9 +24,10 @@ public class ArffGrammarLexer extends Lexer {
     public static final int END_CURLY=12;
     public static final int NEWLINE=13;
     public static final int LINE_COMMENT=14;
-    public static final int LETTER=15;
-    public static final int NAME_OR_NOMINAL_VALUE=16;
-    public static final int WHITESPACE=17;
+    public static final int ALPHA=15;
+    public static final int OTHER_CHARS=16;
+    public static final int NAME=17;
+    public static final int WHITESPACE=18;
 
     // delegates
     // delegators
@@ -41,36 +42,15 @@ public class ArffGrammarLexer extends Lexer {
     }
     public String getGrammarFileName() { return "Resources/ArffGrammar.g"; }
 
-    // $ANTLR start "T__18"
-    public final void mT__18() throws RecognitionException {
-        try {
-            int _type = T__18;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:11:7: ( '@' )
-            // Resources/ArffGrammar.g:11:9: '@'
-            {
-            match('@'); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__18"
-
     // $ANTLR start "T__19"
     public final void mT__19() throws RecognitionException {
         try {
             int _type = T__19;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:12:7: ( 'mm-dd-yy' )
-            // Resources/ArffGrammar.g:12:9: 'mm-dd-yy'
+            // Resources/ArffGrammar.g:11:7: ( '@' )
+            // Resources/ArffGrammar.g:11:9: '@'
             {
-            match("mm-dd-yy"); 
-
+            match('@'); 
 
             }
 
@@ -87,6 +67,27 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = T__20;
             int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Resources/ArffGrammar.g:12:7: ( 'mm-dd-yy' )
+            // Resources/ArffGrammar.g:12:9: 'mm-dd-yy'
+            {
+            match("mm-dd-yy"); 
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "T__20"
+
+    // $ANTLR start "T__21"
+    public final void mT__21() throws RecognitionException {
+        try {
+            int _type = T__21;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
             // Resources/ArffGrammar.g:13:7: ( 'mm-dd-yyyy' )
             // Resources/ArffGrammar.g:13:9: 'mm-dd-yyyy'
             {
@@ -101,14 +102,14 @@ public class ArffGrammarLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__20"
+    // $ANTLR end "T__21"
 
     // $ANTLR start "NUMERIC"
     public final void mNUMERIC() throws RecognitionException {
         try {
             int _type = NUMERIC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:86:9: ( 'numeric' | 'NUMERIC' )
+            // Resources/ArffGrammar.g:103:9: ( 'numeric' | 'NUMERIC' )
             int alt1=2;
             int LA1_0 = input.LA(1);
 
@@ -126,7 +127,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt1) {
                 case 1 :
-                    // Resources/ArffGrammar.g:86:11: 'numeric'
+                    // Resources/ArffGrammar.g:103:11: 'numeric'
                     {
                     match("numeric"); 
 
@@ -134,7 +135,7 @@ public class ArffGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // Resources/ArffGrammar.g:86:23: 'NUMERIC'
+                    // Resources/ArffGrammar.g:103:23: 'NUMERIC'
                     {
                     match("NUMERIC"); 
 
@@ -156,7 +157,7 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = REAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:87:6: ( 'real' | 'REAL' )
+            // Resources/ArffGrammar.g:104:6: ( 'real' | 'REAL' )
             int alt2=2;
             int LA2_0 = input.LA(1);
 
@@ -174,7 +175,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt2) {
                 case 1 :
-                    // Resources/ArffGrammar.g:87:8: 'real'
+                    // Resources/ArffGrammar.g:104:8: 'real'
                     {
                     match("real"); 
 
@@ -182,7 +183,7 @@ public class ArffGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // Resources/ArffGrammar.g:87:17: 'REAL'
+                    // Resources/ArffGrammar.g:104:17: 'REAL'
                     {
                     match("REAL"); 
 
@@ -204,7 +205,7 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = RELATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:88:10: ( 'relation' | 'RELATION' )
+            // Resources/ArffGrammar.g:105:10: ( 'relation' | 'RELATION' )
             int alt3=2;
             int LA3_0 = input.LA(1);
 
@@ -222,7 +223,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt3) {
                 case 1 :
-                    // Resources/ArffGrammar.g:88:12: 'relation'
+                    // Resources/ArffGrammar.g:105:12: 'relation'
                     {
                     match("relation"); 
 
@@ -230,7 +231,7 @@ public class ArffGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // Resources/ArffGrammar.g:88:25: 'RELATION'
+                    // Resources/ArffGrammar.g:105:25: 'RELATION'
                     {
                     match("RELATION"); 
 
@@ -252,7 +253,7 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = ATTRIBUTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:89:11: ( 'attribute' | 'ATTRIBUTE' )
+            // Resources/ArffGrammar.g:106:11: ( 'attribute' | 'ATTRIBUTE' )
             int alt4=2;
             int LA4_0 = input.LA(1);
 
@@ -270,7 +271,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt4) {
                 case 1 :
-                    // Resources/ArffGrammar.g:89:13: 'attribute'
+                    // Resources/ArffGrammar.g:106:13: 'attribute'
                     {
                     match("attribute"); 
 
@@ -278,7 +279,7 @@ public class ArffGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // Resources/ArffGrammar.g:89:27: 'ATTRIBUTE'
+                    // Resources/ArffGrammar.g:106:27: 'ATTRIBUTE'
                     {
                     match("ATTRIBUTE"); 
 
@@ -300,7 +301,7 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = STRING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:90:8: ( 'string' | 'STRING' )
+            // Resources/ArffGrammar.g:107:8: ( 'string' | 'STRING' )
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -318,7 +319,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt5) {
                 case 1 :
-                    // Resources/ArffGrammar.g:90:10: 'string'
+                    // Resources/ArffGrammar.g:107:10: 'string'
                     {
                     match("string"); 
 
@@ -326,7 +327,7 @@ public class ArffGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // Resources/ArffGrammar.g:90:21: 'STRING'
+                    // Resources/ArffGrammar.g:107:21: 'STRING'
                     {
                     match("STRING"); 
 
@@ -348,8 +349,8 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:91:7: ( ',' )
-            // Resources/ArffGrammar.g:91:9: ','
+            // Resources/ArffGrammar.g:108:7: ( ',' )
+            // Resources/ArffGrammar.g:108:9: ','
             {
             match(','); 
 
@@ -368,7 +369,7 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = DATA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:93:6: ( 'data' | 'DATA' )
+            // Resources/ArffGrammar.g:110:6: ( 'data' | 'DATA' )
             int alt6=2;
             int LA6_0 = input.LA(1);
 
@@ -386,7 +387,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt6) {
                 case 1 :
-                    // Resources/ArffGrammar.g:93:8: 'data'
+                    // Resources/ArffGrammar.g:110:8: 'data'
                     {
                     match("data"); 
 
@@ -394,7 +395,7 @@ public class ArffGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // Resources/ArffGrammar.g:93:17: 'DATA'
+                    // Resources/ArffGrammar.g:110:17: 'DATA'
                     {
                     match("DATA"); 
 
@@ -416,8 +417,8 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = START_CURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:94:13: ( '{' )
-            // Resources/ArffGrammar.g:94:15: '{'
+            // Resources/ArffGrammar.g:111:13: ( '{' )
+            // Resources/ArffGrammar.g:111:15: '{'
             {
             match('{'); 
 
@@ -436,8 +437,8 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = END_CURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:95:11: ( '}' )
-            // Resources/ArffGrammar.g:95:13: '}'
+            // Resources/ArffGrammar.g:112:11: ( '}' )
+            // Resources/ArffGrammar.g:112:13: '}'
             {
             match('}'); 
 
@@ -456,10 +457,10 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = NEWLINE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:96:9: ( ( '\\r' )? '\\n' )
-            // Resources/ArffGrammar.g:96:11: ( '\\r' )? '\\n'
+            // Resources/ArffGrammar.g:113:9: ( ( '\\r' )? '\\n' )
+            // Resources/ArffGrammar.g:113:11: ( '\\r' )? '\\n'
             {
-            // Resources/ArffGrammar.g:96:11: ( '\\r' )?
+            // Resources/ArffGrammar.g:113:11: ( '\\r' )?
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -468,7 +469,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt7) {
                 case 1 :
-                    // Resources/ArffGrammar.g:96:11: '\\r'
+                    // Resources/ArffGrammar.g:113:11: '\\r'
                     {
                     match('\r'); 
 
@@ -494,11 +495,11 @@ public class ArffGrammarLexer extends Lexer {
         try {
             int _type = LINE_COMMENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:97:14: ( '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
-            // Resources/ArffGrammar.g:97:16: '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
+            // Resources/ArffGrammar.g:114:14: ( '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
+            // Resources/ArffGrammar.g:114:16: '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
             {
             match('%'); 
-            // Resources/ArffGrammar.g:97:20: (~ ( '\\n' | '\\r' ) )*
+            // Resources/ArffGrammar.g:114:20: (~ ( '\\n' | '\\r' ) )*
             loop8:
             do {
                 int alt8=2;
@@ -511,7 +512,7 @@ public class ArffGrammarLexer extends Lexer {
 
                 switch (alt8) {
             	case 1 :
-            	    // Resources/ArffGrammar.g:97:20: ~ ( '\\n' | '\\r' )
+            	    // Resources/ArffGrammar.g:114:20: ~ ( '\\n' | '\\r' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\uFFFF') ) {
             	        input.consume();
@@ -531,7 +532,7 @@ public class ArffGrammarLexer extends Lexer {
                 }
             } while (true);
 
-            // Resources/ArffGrammar.g:97:34: ( '\\r' )?
+            // Resources/ArffGrammar.g:114:34: ( '\\r' )?
             int alt9=2;
             int LA9_0 = input.LA(1);
 
@@ -540,7 +541,7 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt9) {
                 case 1 :
-                    // Resources/ArffGrammar.g:97:34: '\\r'
+                    // Resources/ArffGrammar.g:114:34: '\\r'
                     {
                     match('\r'); 
 
@@ -562,16 +563,16 @@ public class ArffGrammarLexer extends Lexer {
     }
     // $ANTLR end "LINE_COMMENT"
 
-    // $ANTLR start "NAME_OR_NOMINAL_VALUE"
-    public final void mNAME_OR_NOMINAL_VALUE() throws RecognitionException {
+    // $ANTLR start "NAME"
+    public final void mNAME() throws RecognitionException {
         try {
-            int _type = NAME_OR_NOMINAL_VALUE;
+            int _type = NAME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:98:23: ( ( LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )* ) | ( '\\'' LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )* '\\'' ) )
+            // Resources/ArffGrammar.g:116:6: ( ( ALPHA | OTHER_CHARS )+ | '\\'' ( ALPHA | OTHER_CHARS )+ '\\'' )
             int alt12=2;
             int LA12_0 = input.LA(1);
 
-            if ( ((LA12_0>='A' && LA12_0<='Z')||(LA12_0>='a' && LA12_0<='z')) ) {
+            if ( (LA12_0=='$'||(LA12_0>='-' && LA12_0<='.')||(LA12_0>='0' && LA12_0<='9')||(LA12_0>='<' && LA12_0<='>')||(LA12_0>='A' && LA12_0<='Z')||LA12_0=='_'||(LA12_0>='a' && LA12_0<='z')) ) {
                 alt12=1;
             }
             else if ( (LA12_0=='\'') ) {
@@ -585,19 +586,16 @@ public class ArffGrammarLexer extends Lexer {
             }
             switch (alt12) {
                 case 1 :
-                    // Resources/ArffGrammar.g:98:26: ( LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )* )
+                    // Resources/ArffGrammar.g:116:8: ( ALPHA | OTHER_CHARS )+
                     {
-                    // Resources/ArffGrammar.g:98:26: ( LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )* )
-                    // Resources/ArffGrammar.g:98:27: LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )*
-                    {
-                    mLETTER(); 
-                    // Resources/ArffGrammar.g:98:34: ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )*
+                    // Resources/ArffGrammar.g:116:8: ( ALPHA | OTHER_CHARS )+
+                    int cnt10=0;
                     loop10:
                     do {
                         int alt10=2;
                         int LA10_0 = input.LA(1);
 
-                        if ( (LA10_0=='!'||(LA10_0>='#' && LA10_0<='$')||LA10_0=='&'||(LA10_0>='(' && LA10_0<='*')||LA10_0=='-'||(LA10_0>='0' && LA10_0<='9')||LA10_0=='<'||(LA10_0>='>' && LA10_0<='Z')||(LA10_0>='^' && LA10_0<='_')||(LA10_0>='a' && LA10_0<='z')) ) {
+                        if ( (LA10_0=='$'||(LA10_0>='-' && LA10_0<='.')||(LA10_0>='0' && LA10_0<='9')||(LA10_0>='<' && LA10_0<='>')||(LA10_0>='A' && LA10_0<='Z')||LA10_0=='_'||(LA10_0>='a' && LA10_0<='z')) ) {
                             alt10=1;
                         }
 
@@ -606,7 +604,7 @@ public class ArffGrammarLexer extends Lexer {
                     	case 1 :
                     	    // Resources/ArffGrammar.g:
                     	    {
-                    	    if ( input.LA(1)=='!'||(input.LA(1)>='#' && input.LA(1)<='$')||input.LA(1)=='&'||(input.LA(1)>='(' && input.LA(1)<='*')||input.LA(1)=='-'||(input.LA(1)>='0' && input.LA(1)<='9')||input.LA(1)=='<'||(input.LA(1)>='>' && input.LA(1)<='Z')||(input.LA(1)>='^' && input.LA(1)<='_')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+                    	    if ( input.LA(1)=='$'||(input.LA(1)>='-' && input.LA(1)<='.')||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='<' && input.LA(1)<='>')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                     	        input.consume();
 
                     	    }
@@ -620,31 +618,29 @@ public class ArffGrammarLexer extends Lexer {
                     	    break;
 
                     	default :
-                    	    break loop10;
+                    	    if ( cnt10 >= 1 ) break loop10;
+                                EarlyExitException eee =
+                                    new EarlyExitException(10, input);
+                                throw eee;
                         }
+                        cnt10++;
                     } while (true);
-
-
-                    }
 
 
                     }
                     break;
                 case 2 :
-                    // Resources/ArffGrammar.g:99:10: ( '\\'' LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )* '\\'' )
-                    {
-                    // Resources/ArffGrammar.g:99:10: ( '\\'' LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )* '\\'' )
-                    // Resources/ArffGrammar.g:99:11: '\\'' LETTER ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )* '\\''
+                    // Resources/ArffGrammar.g:117:9: '\\'' ( ALPHA | OTHER_CHARS )+ '\\''
                     {
                     match('\''); 
-                    mLETTER(); 
-                    // Resources/ArffGrammar.g:99:23: ( LETTER | '0' .. '9' | '!' | '@' | '#' | '$' | '^' | '&' | '*' | '(' | ')' | '-' | '_' | '<' | '>' | '?' )*
+                    // Resources/ArffGrammar.g:117:14: ( ALPHA | OTHER_CHARS )+
+                    int cnt11=0;
                     loop11:
                     do {
                         int alt11=2;
                         int LA11_0 = input.LA(1);
 
-                        if ( (LA11_0=='!'||(LA11_0>='#' && LA11_0<='$')||LA11_0=='&'||(LA11_0>='(' && LA11_0<='*')||LA11_0=='-'||(LA11_0>='0' && LA11_0<='9')||LA11_0=='<'||(LA11_0>='>' && LA11_0<='Z')||(LA11_0>='^' && LA11_0<='_')||(LA11_0>='a' && LA11_0<='z')) ) {
+                        if ( (LA11_0=='$'||(LA11_0>='-' && LA11_0<='.')||(LA11_0>='0' && LA11_0<='9')||(LA11_0>='<' && LA11_0<='>')||(LA11_0>='A' && LA11_0<='Z')||LA11_0=='_'||(LA11_0>='a' && LA11_0<='z')) ) {
                             alt11=1;
                         }
 
@@ -653,7 +649,7 @@ public class ArffGrammarLexer extends Lexer {
                     	case 1 :
                     	    // Resources/ArffGrammar.g:
                     	    {
-                    	    if ( input.LA(1)=='!'||(input.LA(1)>='#' && input.LA(1)<='$')||input.LA(1)=='&'||(input.LA(1)>='(' && input.LA(1)<='*')||input.LA(1)=='-'||(input.LA(1)>='0' && input.LA(1)<='9')||input.LA(1)=='<'||(input.LA(1)>='>' && input.LA(1)<='Z')||(input.LA(1)>='^' && input.LA(1)<='_')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+                    	    if ( input.LA(1)=='$'||(input.LA(1)>='-' && input.LA(1)<='.')||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='<' && input.LA(1)<='>')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                     	        input.consume();
 
                     	    }
@@ -667,14 +663,15 @@ public class ArffGrammarLexer extends Lexer {
                     	    break;
 
                     	default :
-                    	    break loop11;
+                    	    if ( cnt11 >= 1 ) break loop11;
+                                EarlyExitException eee =
+                                    new EarlyExitException(11, input);
+                                throw eee;
                         }
+                        cnt11++;
                     } while (true);
 
                     match('\''); 
-
-                    }
-
 
                     }
                     break;
@@ -686,12 +683,12 @@ public class ArffGrammarLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "NAME_OR_NOMINAL_VALUE"
+    // $ANTLR end "NAME"
 
-    // $ANTLR start "LETTER"
-    public final void mLETTER() throws RecognitionException {
+    // $ANTLR start "ALPHA"
+    public final void mALPHA() throws RecognitionException {
         try {
-            // Resources/ArffGrammar.g:102:2: ( 'A' .. 'Z' | 'a' .. 'z' )
+            // Resources/ArffGrammar.g:120:2: ( 'A' .. 'Z' | 'a' .. 'z' )
             // Resources/ArffGrammar.g:
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
@@ -710,17 +707,41 @@ public class ArffGrammarLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "LETTER"
+    // $ANTLR end "ALPHA"
+
+    // $ANTLR start "OTHER_CHARS"
+    public final void mOTHER_CHARS() throws RecognitionException {
+        try {
+            // Resources/ArffGrammar.g:125:2: ( '$' | '_' | '-' | '0' .. '9' | '>' | '<' | '=' | '.' )
+            // Resources/ArffGrammar.g:
+            {
+            if ( input.LA(1)=='$'||(input.LA(1)>='-' && input.LA(1)<='.')||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='<' && input.LA(1)<='>')||input.LA(1)=='_' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "OTHER_CHARS"
 
     // $ANTLR start "WHITESPACE"
     public final void mWHITESPACE() throws RecognitionException {
         try {
             int _type = WHITESPACE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Resources/ArffGrammar.g:105:12: ( ( '\\t' | ' ' | '\\r' | '\\n' | '\\u000C' )+ )
-            // Resources/ArffGrammar.g:105:14: ( '\\t' | ' ' | '\\r' | '\\n' | '\\u000C' )+
+            // Resources/ArffGrammar.g:135:12: ( ( '\\t' | ' ' | '\\r' | '\\n' | '\\u000C' )+ )
+            // Resources/ArffGrammar.g:135:14: ( '\\t' | ' ' | '\\r' | '\\n' | '\\u000C' )+
             {
-            // Resources/ArffGrammar.g:105:14: ( '\\t' | ' ' | '\\r' | '\\n' | '\\u000C' )+
+            // Resources/ArffGrammar.g:135:14: ( '\\t' | ' ' | '\\r' | '\\n' | '\\u000C' )+
             int cnt13=0;
             loop13:
             do {
@@ -771,28 +792,28 @@ public class ArffGrammarLexer extends Lexer {
     // $ANTLR end "WHITESPACE"
 
     public void mTokens() throws RecognitionException {
-        // Resources/ArffGrammar.g:1:8: ( T__18 | T__19 | T__20 | NUMERIC | REAL | RELATION | ATTRIBUTE | STRING | COMMA | DATA | START_CURLY | END_CURLY | NEWLINE | LINE_COMMENT | NAME_OR_NOMINAL_VALUE | WHITESPACE )
+        // Resources/ArffGrammar.g:1:8: ( T__19 | T__20 | T__21 | NUMERIC | REAL | RELATION | ATTRIBUTE | STRING | COMMA | DATA | START_CURLY | END_CURLY | NEWLINE | LINE_COMMENT | NAME | WHITESPACE )
         int alt14=16;
         alt14 = dfa14.predict(input);
         switch (alt14) {
             case 1 :
-                // Resources/ArffGrammar.g:1:10: T__18
-                {
-                mT__18(); 
-
-                }
-                break;
-            case 2 :
-                // Resources/ArffGrammar.g:1:16: T__19
+                // Resources/ArffGrammar.g:1:10: T__19
                 {
                 mT__19(); 
 
                 }
                 break;
-            case 3 :
-                // Resources/ArffGrammar.g:1:22: T__20
+            case 2 :
+                // Resources/ArffGrammar.g:1:16: T__20
                 {
                 mT__20(); 
+
+                }
+                break;
+            case 3 :
+                // Resources/ArffGrammar.g:1:22: T__21
+                {
+                mT__21(); 
 
                 }
                 break;
@@ -874,14 +895,14 @@ public class ArffGrammarLexer extends Lexer {
                 }
                 break;
             case 15 :
-                // Resources/ArffGrammar.g:1:121: NAME_OR_NOMINAL_VALUE
+                // Resources/ArffGrammar.g:1:121: NAME
                 {
-                mNAME_OR_NOMINAL_VALUE(); 
+                mNAME(); 
 
                 }
                 break;
             case 16 :
-                // Resources/ArffGrammar.g:1:143: WHITESPACE
+                // Resources/ArffGrammar.g:1:126: WHITESPACE
                 {
                 mWHITESPACE(); 
 
@@ -906,11 +927,11 @@ public class ArffGrammarLexer extends Lexer {
         "\124\1\uffff\1\141\1\101\2\uffff\1\12\1\11\3\uffff\1\55\1\155\1"+
         "\115\1\141\1\101\1\164\1\124\1\162\1\122\1\164\1\124\1\uffff\1\144"+
         "\1\145\1\105\1\154\1\141\1\114\1\101\1\162\1\122\1\151\1\111\1\141"+
-        "\1\101\1\144\1\162\1\122\1\41\1\164\1\41\1\124\1\151\1\111\1\156"+
-        "\1\116\2\41\1\55\1\151\1\111\1\uffff\1\151\1\111\1\142\1\102\1\147"+
-        "\1\107\1\uffff\1\171\1\143\1\103\1\157\1\117\1\165\1\125\2\41\1"+
-        "\171\2\41\1\156\1\116\1\164\1\124\1\uffff\1\41\1\uffff\2\41\1\145"+
-        "\1\105\1\171\2\uffff\3\41\2\uffff";
+        "\1\101\1\144\1\162\1\122\1\44\1\164\1\44\1\124\1\151\1\111\1\156"+
+        "\1\116\2\44\1\55\1\151\1\111\1\uffff\1\151\1\111\1\142\1\102\1\147"+
+        "\1\107\1\uffff\1\171\1\143\1\103\1\157\1\117\1\165\1\125\2\44\1"+
+        "\171\2\44\1\156\1\116\1\164\1\124\1\uffff\1\44\1\uffff\2\44\1\145"+
+        "\1\105\1\171\2\uffff\3\44\2\uffff";
     static final String DFA14_maxS =
         "\1\175\1\uffff\1\155\1\165\1\125\1\145\1\105\1\164\1\124\1\164"+
         "\1\124\1\uffff\1\141\1\101\2\uffff\1\12\1\40\3\uffff\1\55\1\155"+
@@ -928,10 +949,11 @@ public class ArffGrammarLexer extends Lexer {
     static final String DFA14_specialS =
         "\145\uffff}>";
     static final String[] DFA14_transitionS = {
-            "\1\24\1\21\1\uffff\1\24\1\20\22\uffff\1\24\4\uffff\1\22\1\uffff"+
-            "\1\23\4\uffff\1\13\23\uffff\1\1\1\10\2\23\1\15\11\23\1\4\3\23"+
-            "\1\6\1\12\7\23\6\uffff\1\7\2\23\1\14\10\23\1\2\1\3\3\23\1\5"+
-            "\1\11\7\23\1\16\1\uffff\1\17",
+            "\1\24\1\21\1\uffff\1\24\1\20\22\uffff\1\24\3\uffff\1\23\1\22"+
+            "\1\uffff\1\23\4\uffff\1\13\2\23\1\uffff\12\23\2\uffff\3\23\1"+
+            "\uffff\1\1\1\10\2\23\1\15\11\23\1\4\3\23\1\6\1\12\7\23\4\uffff"+
+            "\1\23\1\uffff\1\7\2\23\1\14\10\23\1\2\1\3\3\23\1\5\1\11\7\23"+
+            "\1\16\1\uffff\1\17",
             "",
             "\1\25",
             "\1\26",
@@ -980,24 +1002,20 @@ public class ArffGrammarLexer extends Lexer {
             "\1\73",
             "\1\74",
             "\1\75",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
             "\1\77",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
             "\1\100",
             "\1\101",
             "\1\102",
             "\1\103",
             "\1\104",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
             "\1\106",
             "\1\107",
             "\1\110",
@@ -1016,48 +1034,38 @@ public class ArffGrammarLexer extends Lexer {
             "\1\123",
             "\1\124",
             "\1\125",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
             "\1\127",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
             "\1\131",
             "\1\132",
             "\1\133",
             "\1\134",
             "",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\30\23\1\135\1\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\30\23\1\135\1\23",
             "",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
             "\1\140",
             "\1\141",
             "\1\142",
             "",
             "",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
-            "\1\23\1\uffff\2\23\1\uffff\1\23\1\uffff\3\23\2\uffff\1\23"+
-            "\2\uffff\12\23\2\uffff\1\23\1\uffff\35\23\3\uffff\2\23\1\uffff"+
-            "\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
+            "\1\23\10\uffff\2\23\1\uffff\12\23\2\uffff\3\23\2\uffff\32"+
+            "\23\4\uffff\1\23\1\uffff\32\23",
             "",
             ""
     };
@@ -1092,7 +1100,7 @@ public class ArffGrammarLexer extends Lexer {
             this.transition = DFA14_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( T__18 | T__19 | T__20 | NUMERIC | REAL | RELATION | ATTRIBUTE | STRING | COMMA | DATA | START_CURLY | END_CURLY | NEWLINE | LINE_COMMENT | NAME_OR_NOMINAL_VALUE | WHITESPACE );";
+            return "1:1: Tokens : ( T__19 | T__20 | T__21 | NUMERIC | REAL | RELATION | ATTRIBUTE | STRING | COMMA | DATA | START_CURLY | END_CURLY | NEWLINE | LINE_COMMENT | NAME | WHITESPACE );";
         }
     }
  

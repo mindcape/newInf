@@ -4,6 +4,7 @@ options { language=Java;
 	output=AST;
     backtrack=true;
     memoize=true;
+    k=1;
 }
                          
 @header{
@@ -34,9 +35,25 @@ options { language=Java;
 	 private List <Attribute> attributes = new ArrayList<Attribute>();	 
 	 private List<String> nominalAttributeValueNames = new ArrayList<String>();
 	
-	private void createNewAttribute(String name, AttributeDataType attributeDataType){
-		Attribute newAttribute = null; 
+	public void setRelationshipName(String name)  throws RecognitionException {
 		name = trimName(name);
+		char firstChar = name.charAt(0);
+        if(!Character.isLetter(firstChar)){
+     			throw new RecognitionException();
+        }
+        		
+        relationshipName = name;
+        
+	}
+	
+	private void createNewAttribute(String name, AttributeDataType attributeDataType)  throws RecognitionException{		
+		name = trimName(name);
+		char firstChar = name.charAt(0);
+        if(!Character.isLetter(firstChar)){
+     			throw new RecognitionException();
+        }
+        
+		Attribute newAttribute = null; 
 		if(attributeDataType == AttributeDataType.NUMERIC_INTEGER){
 			newAttribute = new Attribute(name, Attribute.NumericType.INTEGER);
 		}
@@ -95,32 +112,45 @@ START_CURLY : '{';
 END_CURLY : '}';
 NEWLINE	:	'\r'?'\n';
 LINE_COMMENT : '%' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;};
-NAME_OR_NOMINAL_VALUE :  (LETTER (LETTER |'0'..'9' | '!' | '@'  | '#' | '$'  | '^' | '&'  | '*' | '('  | ')' | '-' | '_' | '<' | '>' | '?')*)
-				   | ('\'' LETTER (LETTER |'0'..'9' | '!' | '@'  | '#' | '$'  | '^' | '&'  | '*' | '('  | ')' | '-' | '_' | '<' | '>' | '?')* '\'');
-fragment
-LETTER
-	:   'A'..'Z'
+
+NAME : (ALPHA | OTHER_CHARS)+
+      | '\'' (ALPHA | OTHER_CHARS)+ '\''
+      ;
+fragment ALPHA
+	: 'A'..'Z'
 	|	'a'..'z'
 	;
+fragment
+OTHER_CHARS
+	:	'$'
+	|	'_'
+	|	'-'
+	|   '0'..'9'
+	|   '>'
+	|   '<'
+	|   '='
+	|   '.'
+		;
+	
 WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ { $channel = HIDDEN; };
 
 // NON-TERMINALS
 arff: NEWLINE* relation_element attribute_elements data_element;
-relation_element: ats RELATION e1=NAME_OR_NOMINAL_VALUE {relationshipName = trimName($e1.text);} NEWLINE*;
+relation_element: ats RELATION e1=NAME {setRelationshipName($e1.text);} NEWLINE*;
 attribute_elements : (attribute_element)+;
-attribute_element: ats ATTRIBUTE e1=NAME_OR_NOMINAL_VALUE e2=data_type {createNewAttribute($e1.text, $e2.attrDataType);} NEWLINE*;
-data_element : ats e1=DATA (NEWLINE)* (.*) { dataStartLine = $e1.line;};
+attribute_element: ats ATTRIBUTE e1=NAME e2=data_type {createNewAttribute($e1.text, $e2.attrDataType);} NEWLINE*;
+data_element : ats e1=DATA (NEWLINE)* e2=(.)*{ System.out.println("Data found = " + $e2.text); dataStartLine = $e1.line;};
 data_type returns [AttributeDataType attrDataType] : NUMERIC               {$attrDataType = AttributeDataType.NUMERIC_INTEGER;}
 													| REAL                 {$attrDataType = AttributeDataType.NUMERIC_REAL;}
                                                     | nominal_value_list   {$attrDataType = AttributeDataType.NOMINAL_VALUE_LIST;}
                                                     | STRING               {$attrDataType = AttributeDataType.STRING;}
                                                     | date_type            {$attrDataType = AttributeDataType.DATE;}
                                                     ;
-nominal_value_list : (START_CURLY e1=NAME_OR_NOMINAL_VALUE)
+nominal_value_list : (START_CURLY e1=NAME)
 	{
 		addAttibuteValue($e1.text);
     } nominal_value* END_CURLY;               
-nominal_value : COMMA e1=NAME_OR_NOMINAL_VALUE
+nominal_value : COMMA e1=NAME
            {
                 addAttibuteValue($e1.text);
            };

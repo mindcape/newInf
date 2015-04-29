@@ -46,7 +46,6 @@ public class ArffParserTests {
 		Assert.assertTrue(arffElements.getRelationName().equals( "play-tennis"));		
 		Assert.assertTrue(arffElements.getDataStartLine() == 10);
 	}
-
 	
 	@Test
 	public void testNewLinesCommentsAndDataStartingLine(){
@@ -108,6 +107,7 @@ public class ArffParserTests {
 
 		checkAttributes(attributes, attributeNames, attrValueNames, types);
 		Assert.assertTrue(arffElements.getRelationName().equals( "play-tennis"));
+		Assert.assertTrue(arffElements.getDataStartLine() == 10);
 	}
 
 	@Test
@@ -131,6 +131,7 @@ public class ArffParserTests {
 
 		checkAttributes(attributes, attributeNames, attrValueNames, types);
 		Assert.assertTrue(arffElements.getRelationName().equals("cpu"));
+		Assert.assertTrue(arffElements.getDataStartLine() == 17);
 	}
 
 	@Test
@@ -158,6 +159,7 @@ public class ArffParserTests {
 
 		checkAttributes(attributes, attributeNames, attrValueNames, types);
 		Assert.assertTrue(arffElements.getRelationName().equals( "play-tennis"));
+		Assert.assertTrue(arffElements.getDataStartLine() == 10);
 	}
 	
 	@Test
@@ -186,7 +188,60 @@ public class ArffParserTests {
 		checkAttributes(attributes, attributeNames, attrValueNames, types);
 		
 		Assert.assertTrue(arffElements.getRelationName().equals( "play-tennis"));
+		Assert.assertTrue(arffElements.getDataStartLine() == 10);	
+	}
 	
+	@Test
+	public void testSpecialCharsInNominalVals(){	
+		String fileName = "SpecialCharsInNominalVals.arff";
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+
+		List<String> attributeNames = new ArrayList<>();
+		attributeNames.add("Alt"); attributeNames.add("Bar"); attributeNames.add("IsFri"); 
+		attributeNames.add("Hungry"); attributeNames.add("Patrons"); attributeNames.add("Price"); 
+		attributeNames.add("Raining"); attributeNames.add("Reservation"); attributeNames.add("Type"); 
+		attributeNames.add("WaitEstimate"); attributeNames.add("WillWait"); 
+		
+		String [] attr1Values = new String[]{"Y", "N"};
+		String [] attr2Values = new String[]{"Y", "N"};
+		String [] attr3Values = new String[]{"Y", "N"};
+		String [] attr4Values = new String[]{"Y", "N"};
+		String [] attr5Values = new String[]{"Some", "Full", "None"};
+		String [] attr6Values = new String[]{"Exp", "Mod", "Chp"};
+		String [] attr7Values = new String[]{"Y", "N"};
+		String [] attr8Values = new String[]{"Y", "N"};
+		String [] attr9Values = new String[]{"French", "Thai", "Italian", "Burger"};
+		String [] attr10Values = new String[]{"0-10", "10-30", "30-60", ">60"};
+		String [] attr11Values = new String[]{"Y", "N"};
+		
+		List<String[]> attrValueNames = new ArrayList<>();
+		attrValueNames.add(attr1Values);attrValueNames.add(attr2Values);attrValueNames.add(attr3Values);
+		attrValueNames.add(attr4Values);attrValueNames.add(attr5Values);attrValueNames.add(attr6Values);
+		attrValueNames.add(attr7Values);attrValueNames.add(attr8Values);attrValueNames.add(attr9Values);
+		attrValueNames.add(attr10Values);attrValueNames.add(attr11Values);
+
+		List<Attribute.Type> types = new ArrayList<>();
+		types.add(Attribute.Type.NOMINAL); types.add(Attribute.Type.NOMINAL); types.add(Attribute.Type.NOMINAL);
+		types.add(Attribute.Type.NOMINAL); types.add(Attribute.Type.NOMINAL); types.add(Attribute.Type.NOMINAL);
+		types.add(Attribute.Type.NOMINAL); types.add(Attribute.Type.NOMINAL); types.add(Attribute.Type.NOMINAL);
+		types.add(Attribute.Type.NOMINAL); types.add(Attribute.Type.NOMINAL);
+
+		checkAttributes(attributes, attributeNames, attrValueNames, types);
+		
+		Assert.assertTrue(arffElements.getRelationName().equals("restaurant-visit"));
+		Assert.assertTrue(arffElements.getDataStartLine() == 15);
+	}
+	
+	@Test
+	public void testInvalidAttributeName(){
+		String fileName = "InvalidAttributeName.arff";
+		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+
+		Assert.assertTrue(attributes.size() == 4);
+		
 	}
 
 	private void checkAttributes(List<Attribute> attributes,
