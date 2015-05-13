@@ -325,6 +325,27 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 	
+	@Test
+	public void testC45ManyMissingValuesAtRandom() throws Exception {
+
+		String fileName = "C45ManyMissingValuesAtRandom.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
+	}
+	
 	private void verifyTree(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, DecisionTreeNode rootNode,
 			String rootNodeName, Map<String, List<String>> parentAndOutgoingEdgeNames, Map<String, String> edgeAndTargetNode){
 		

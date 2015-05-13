@@ -241,19 +241,20 @@ public class C45 {
 		// There are some instances with missing values for this attribute. Add each of those instances to each of the 
 		// splits with appropriate weights
 
-		double instancesSize = sumofWeights - instancesWithMissingValue.size();
+		double instancesSize = sumofWeights - DataLoader.getSumOfWeights(instancesWithMissingValue);
 
 		Iterator<Entry<DecisionTreeEdge, Instances>> iterator = instancesSplitForAttribute.entrySet().iterator();
 		while(iterator.hasNext()){
 			Entry<DecisionTreeEdge, Instances> entry = iterator.next();
 			Instances split = entry.getValue();
 			
-			for(Instance instanceWithMissingValue : instancesWithMissingValue){
-				Double ratio = (double) split.sumOfWeights() / (double) instancesSize;
+			Double ratio = (double) split.sumOfWeights() / instancesSize;
+			for(Instance instanceWithMissingValue : instancesWithMissingValue){				
 				Double weight = ratio * instanceWithMissingValue.getWeight();
 				Instance newInstance = new Instance(instanceWithMissingValue.getValues());
 				newInstance.setWeight(weight);
 				split.addInstance(newInstance);
+				
 			}						
 		}		
 	}
@@ -310,7 +311,7 @@ public class C45 {
 		}
 
 		// Adjust against missing values in these instances.
-		adjustForMissingValues(attribute, valueAndInstancesHavingValue, frequencyCounts,  instances.size());
+		adjustForMissingValues(attribute, valueAndInstancesHavingValue, frequencyCounts,  instances.sumOfWeights());
 
 		if(attribute.getName().equals("Windy")){
 			System.out.println("WAIT HERE");

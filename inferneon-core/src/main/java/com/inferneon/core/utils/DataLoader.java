@@ -253,6 +253,15 @@ public class DataLoader {
 		return frequencyCounts;
 	}
 
+	public static Double getSumOfWeights(List<Instance> instances){
+		double sum = 0L;
+		for(Instance inst: instances){
+			sum += inst.getWeight();
+		}
+		
+		return sum;
+	}
+	
 	private static Value getMaxTargetValue( Map<Value, Double> totalTargetCounts) {
 
 		Double maxValue = 0.0;
