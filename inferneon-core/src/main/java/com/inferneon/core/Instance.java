@@ -6,10 +6,10 @@ public class Instance {
 
 	// Values for this instance. Matches with corresponding attributes
 	private List<Value> values;
-	
+
 	// Indicates an approximate probability of this instance in a given split
 	private double weight = 1.0;
-	
+
 	public Instance(List<Value> values){
 		this.values = values;
 	}
@@ -17,11 +17,11 @@ public class Instance {
 	public Value getValue(int i){
 		return values.get(i);
 	}
-	
+
 	public List<Value> getValues(){
 		return values;
 	}
-	
+
 	public void setWeight(double weight){
 		this.weight = weight;
 	}
@@ -29,7 +29,7 @@ public class Instance {
 	public double getWeight(){
 		return weight;
 	}
-	
+
 	public Value attributeValue(Attribute attribute){
 
 		List<Value> valuesForAttribute = attribute.getAllValues();
@@ -39,11 +39,11 @@ public class Instance {
 				return value;
 			}
 		}
-		
+
 		// TODO Log warning here: invalid attribute?
 		return null;
 	}
-	
+
 	@Override
 	public String toString(){
 		String description = "";
@@ -52,11 +52,11 @@ public class Instance {
 			description += value.toString() + (count < values.size() -1?  "," : "");
 			count++;
 		}
-		
+
 		if(Double.compare(weight, 1.0) != 0){
 			description += "{" + weight + "}";
 		}
-		
+
 		return description.trim();
 	}	
 }

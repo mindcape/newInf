@@ -16,6 +16,12 @@ public class Instances {
 		instances = new ArrayList<>();
 	}
 
+	public Instances(List<Instance> instances, List<Attribute> attributes, int classIndex){
+		this.instances = instances;
+		this.attributes = attributes;
+		this.classIndex = classIndex;
+	}
+	
 	public List<Instance> getInstances() {
 		return instances;
 	}
@@ -165,6 +171,17 @@ public class Instances {
 	public Double sumOfWeights() {
 		double sum = 0L;
 		for(Instance inst: instances){
+			sum += inst.getWeight();
+		}
+		
+		return sum;
+	}
+	
+	public Double sumOfWeights(long startIndex, long endIndex) {
+		double sum = 0L;
+
+		for(long i = startIndex; i < endIndex; i++){
+			Instance inst = instances.get((int)i);
 			sum += inst.getWeight();
 		}
 		

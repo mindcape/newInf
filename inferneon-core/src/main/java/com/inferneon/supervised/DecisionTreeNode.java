@@ -2,7 +2,10 @@ package com.inferneon.supervised;
 
 import java.util.Map;
 
+import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+
 import com.inferneon.core.Attribute;
+import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
 
 public class DecisionTreeNode {
@@ -13,22 +16,30 @@ public class DecisionTreeNode {
 	private Attribute attribute;
 	private Value value;
 	private Double numInstances;	
-	private Map<Value, Double> targetClassCounts;
-	
-	public DecisionTreeNode(Attribute attribute, Double numInstances, Map<Value, Double> targetClassCounts){
+	private FrequencyCounts frequencyCounts;
+
+	public DecisionTreeNode(FrequencyCounts frequencyCounts, Attribute attribute){
 		this.attribute = attribute;
 		type = Type.ATTRIBUTE;
-		this.numInstances = numInstances;
-		this.targetClassCounts = targetClassCounts;
+		this.numInstances = frequencyCounts.getSumOfWeights();
+		this.frequencyCounts = frequencyCounts; 
 	}
 	
-	public DecisionTreeNode(Value value, Double numInstances, Map<Value, Double> targetClassCounts){
+	public DecisionTreeNode(FrequencyCounts frequencyCounts, Value value){
 		this.value = value;
 		type = Type.VALUE;
-		this.numInstances = numInstances;
-		this.targetClassCounts = targetClassCounts;
+		this.numInstances = frequencyCounts.getSumOfWeights();
+		this.frequencyCounts = frequencyCounts;
 	}
 
+	public FrequencyCounts getFrequencyCounts() {
+		return frequencyCounts;
+	}
+
+	public void setFrequencyCounts(FrequencyCounts frequencyCounts) {
+		this.frequencyCounts = frequencyCounts;
+	}
+	
 	public Attribute getAttribute() {
 		return attribute;
 	}	
@@ -45,10 +56,10 @@ public class DecisionTreeNode {
 		return numInstances;
 	}
 
-	public Map<Value, Double> getTargetClassCounts() {
-		return targetClassCounts;
+	public boolean isLeaf() {
+		return type == Type.VALUE;
 	}
-	
+
 	public String toString(){
 		if(type == Type.ATTRIBUTE){
 			return attribute.getName();
@@ -59,5 +70,6 @@ public class DecisionTreeNode {
 		}
 		
 		return "UNKNOWN";
+		
 	}
 }

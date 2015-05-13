@@ -58,10 +58,22 @@ public class DecisionTreeEdge extends DefaultEdge{
 		}
 
 		DecisionTreeEdge other = (DecisionTreeEdge) object;
-		if(this.value.equals(other.getValue())){
-			return true;
+		
+		if(type != other.getType()){
+			return false;
 		}
-
+		
+		if(type == Type.VALUE){
+			if(this.value.equals(other.getValue())){
+				return true;
+			}
+		}
+		else{
+			if(this.predicateEdge.toString().equals(other.getPredicateEdge().toString())){
+				return true;
+			}
+		}
+		
 		return false;
 	}	
 }

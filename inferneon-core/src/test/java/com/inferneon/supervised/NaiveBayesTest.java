@@ -3,6 +3,7 @@ package com.inferneon.supervised;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Assert;
 
@@ -14,6 +15,7 @@ import com.inferneon.core.utils.DataLoader;
 
 public class NaiveBayesTest  extends SupervisedLearningTest  {
 	
+	@Ignore	
 	@Test
 	public void testSimpleNaiveBayes() throws Exception {
 		
@@ -34,7 +36,7 @@ public class NaiveBayesTest  extends SupervisedLearningTest  {
 		
 		List<Attribute> attributes = createAttributesWithNominalValues(attrNames, lengths, attrNominalValues); 
 		
-		Instances instances = DataLoader.loadData(attributes, "/TestResources/PlayTennis.csv");
+		Instances instances = DataLoader.loadData(attributes, "TestResources/PlayTennis.csv");
 		
 		nb.train(instances);
 		

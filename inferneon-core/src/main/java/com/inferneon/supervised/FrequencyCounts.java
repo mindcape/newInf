@@ -23,7 +23,11 @@ public class FrequencyCounts {
 	private static final String NON_UNIFORM_TARGET_COUNTS = "Target value counts will be not be uniform across attributes for data with missing values.";
 	
 	private Long numInstances;
+	private Double sumOfWeights;
 	private Long totalInstancesWithMissingValues;
+	private Map<Value, Double> totalTargetCounts;
+	private Value maxTargetValue;
+	private Double maxTargetValueCount;
 	private Map<Attribute, Map<Value, Double>> attributeAndTargetClassCounts;
 	private Map<Attribute, Long> attributeAndNonMissingValueCount;
 
@@ -39,6 +43,38 @@ public class FrequencyCounts {
 		this.numInstances = numInstances;
 	}
 
+	public Double getSumOfWeights() {
+		return sumOfWeights;
+	}
+
+	public void setSumOfWeights(Double sumOfWeights) {
+		this.sumOfWeights = sumOfWeights;
+	}
+	
+	public Map<Value, Double> getTotalTargetCounts() {
+		return totalTargetCounts;
+	}
+
+	public Value getMaxTargetValue() {
+		return maxTargetValue;
+	}
+
+	public void setMaxTargetValue(Value maxTargetValue) {
+		this.maxTargetValue = maxTargetValue;
+	}
+
+	public Double getMaxTargetValueCount() {
+		return maxTargetValueCount;
+	}
+
+	public void setMaxTargetValueCount(Double maxTargetValueCount) {
+		this.maxTargetValueCount = maxTargetValueCount;
+	}
+	
+	public void setTotalTargetCounts(Map<Value, Double> totalTargetCounts) {
+		this.totalTargetCounts = totalTargetCounts;
+	}
+	
 	public Map<Value, Double> getTargetCountsForAttribute(Attribute attribute) {
 		return attributeAndTargetClassCounts.get(attribute);
 	}
@@ -127,56 +163,8 @@ public class FrequencyCounts {
 		Map<Value, Map<Value, Double>> valueAndTargetCounts = valueAndTargetClassCount.get(attributeIndex);
 		return valueAndTargetCounts.get(targetValue);
 	}
-	
-	public Map<Value, Double> getTargetCounts(Instances instances){
-		
-		Map<Value, Double> targetCounts = new HashMap<>();
-		
-		List<Instance> insts = instances.getInstances();
-		for(Instance instance : insts){
-			Value classValue = instance.getValue(instances.getClassIndex());
-			
-			Double countForValue = targetCounts.get(classValue);
-			if(countForValue == null){
-				countForValue = instance.getWeight();
-				targetCounts.put(classValue, countForValue);
-			}
-			else{
-				targetCounts.put(classValue, countForValue + instance.getWeight());
-			}
-		}
-		
-		return targetCounts;
-	}
-	
-	public Value getTargetClassWithMaxInstances(Instances instances){
-		Map<Value, Double> targetCounts = getTargetCounts(instances);		
-		return getTargetClassWithMaxInstances(targetCounts);
-	}
-	
-	public Value getTargetClassWithMaxInstances(Map<Value, Double> targetCounts){
-		
-		Double maxValue = 0.0;
-		Value valueWithMaxInstances = null;
-		Set<Entry<Value, Double>> entries = targetCounts.entrySet();
-		Iterator<Entry<Value, Double>> iterator = entries.iterator();
-		while(iterator.hasNext()){
-			Entry<Value, Double> entry = iterator.next();
-			Value value = entry.getKey();
-			Double numInstances = entry.getValue();
-			
-			if(Double.compare(numInstances, maxValue) > 0){
-				maxValue = numInstances;
-				valueWithMaxInstances = value;
-			}
-		}
 
-		return valueWithMaxInstances;
-	}
-	
-	public Double getNumInstancesInMaxClass(Instances instances) {
-		Map<Value, Double> targetCounts = getTargetCounts(instances);		
-		Value valueWithMaxInstances = getTargetClassWithMaxInstances(targetCounts);		
-		return targetCounts.get(valueWithMaxInstances);
+	public Double getErrorOnDistribution() {
+		return sumOfWeights - maxTargetValueCount;
 	}
 }

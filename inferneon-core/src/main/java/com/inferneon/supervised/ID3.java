@@ -41,7 +41,7 @@ public class ID3 {
 		if(targetClassCounts.size() == 1){
 			// All instances belong to the same class, entropy will be zero
 			Value targetValue = targetClassCounts.keySet().iterator().next();
-			createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, targetValue, instances.sumOfWeights(), targetClassCounts);
+			createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, targetValue, frequencyCounts, targetClassCounts);
 			return;
 		}
 		
@@ -50,7 +50,7 @@ public class ID3 {
 		Double entropyOfTrainingSample = computeEntropy(instances.sumOfWeights(), targetClassCounts);
 		Attribute attribute = searchForBestAttributeToSplitOn(instances, valueAndTargetClassCountList, entropyOfTrainingSample, frequencyCounts);
 
-		DecisionTreeNode decisionTreeNode = new DecisionTreeNode(attribute, instances.sumOfWeights(), targetClassCounts);
+		DecisionTreeNode decisionTreeNode = new DecisionTreeNode(frequencyCounts, attribute);
 		decisionTree.addVertex(decisionTreeNode);
 
 		if(parentDecisionTreeNode == null){
@@ -112,8 +112,8 @@ public class ID3 {
 	}
 
 	private void createLeavesForAttribute(DecisionTreeNode decisionTreeNode, DecisionTreeEdge edge,
-			Value targetValue, Double instanceSize, Map<Value, Double> targetClassCounts) throws CycleFoundException {
-		DecisionTreeNode leafNode = new DecisionTreeNode(targetValue, instanceSize, targetClassCounts);
+			Value targetValue, FrequencyCounts frequencyCounts, Map<Value, Double> targetClassCounts) throws CycleFoundException {
+		DecisionTreeNode leafNode = new DecisionTreeNode(frequencyCounts, targetValue);
 		decisionTree.addVertex(leafNode);
 		edge.setSource(decisionTreeNode); edge.setTarget(leafNode);
 		System.out.println("Adding edge " + edge + " between attributes " + decisionTreeNode + " and " + leafNode);		

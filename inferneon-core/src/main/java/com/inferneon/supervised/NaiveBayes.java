@@ -12,6 +12,7 @@ import com.inferneon.core.Attribute;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
+import com.inferneon.core.exceptions.InvalidDataException;
 import com.inferneon.core.utils.DataLoader;
 
 public class NaiveBayes extends Supervised{

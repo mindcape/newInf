@@ -1,33 +1,42 @@
 package com.inferneon.core.arffparser;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.apache.commons.io.IOUtils;
 
 import com.inferneon.core.Attribute;
 
 public class ParserUtils {
 
-	public static ArffElements getArffElements(String filePath){
+	public static ArffElements getArffElements(String rootPath, String LLVMFileName){
 
 		ArffElements arffElements = null;		
 
 		try {
-			ArffGrammarParser parser = parseArffFile(filePath);
+			
+	        String fullPath = rootPath + "/" + LLVMFileName;
+	        URL url = ParserUtils.class.getResource(fullPath);
+	        
+	        String  f = url.getFile();
+	        File file = new File(f);
+	        
+			//File file = new File(rootPath + File.separator + LLVMFileName);
+			ArffGrammarParser parser = parseArffFile(file);
 			parser.arff();
-			System.out.println("Arff file parsed sucessfully: " + filePath);
+			System.out.println("Arff file parsed sucessfully: " + file.getAbsolutePath());
 			List<Attribute> attributes = parser.getAttributes();				
 			String relationName = parser.getRelationshipName();			
 			int dataStartLine = parser.getDataStartLine();
 
-			String data = getData(filePath);
+			String data = getData(file, dataStartLine);
 
 			arffElements = new ArffElements(relationName, attributes, data, dataStartLine );
 		} 
@@ -38,57 +47,72 @@ public class ParserUtils {
 		return arffElements;
 	}
 
-	private static String getData(String filePath) {
-		String result = null;
-		try(InputStream is = ParserUtils.class.getResourceAsStream(filePath);) {
-			result = IOUtils.toString(is);
+	private static String getData(File file, int dataStartLine) {
+		
+		StringBuffer stringBuffer = new StringBuffer();
+		BufferedReader br = null;
+		try 
+		{
+			br = new BufferedReader(new FileReader(file));
+			String line;
+			int count = 0;
+			while ((line = br.readLine()) != null) {
+				if(count < dataStartLine){
+					count++;
+					continue;
+				}
+				
+				if(line.trim().isEmpty()){
+					count++;
+					continue;
+				}
+				
+				stringBuffer.append(line + System.getProperty("line.separator"));				
+				count++;
+			}
 		} 
 		catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-
-		return result;
-	}
-
-	public static List<Attribute> getAttributes(String filePath){
-
-		List<Attribute> attributes = null;
-		try {
-			ArffGrammarParser parser = parseArffFile(filePath);
-			parser.arff();
-			System.out.println("Arff file parsed sucessfully: " + filePath);
-			attributes = parser.getAttributes();				
-		} 
-		catch (RecognitionException re) {
-			re.printStackTrace();
+		finally{
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-
-		return attributes;
+		
+		return stringBuffer.toString();
 	}
 
-	public static String getRelationshipName(String filePath){
+	public static String getRelationshipName(File file, String LLVMFileName){
 
 		String relationshipName = null;
-		try(InputStream is = ParserUtils.class.getResourceAsStream(filePath);) {
-			ArffGrammarParser parser = parseArffFile(filePath);
+		try {
+			ArffGrammarParser parser = parseArffFile(file);
 			parser.arff();
-			System.out.println("Arff file parsed sucessfully: " + filePath);
+			System.out.println("Arff file parsed sucessfully: " + file.getAbsolutePath());
 			relationshipName = parser.getRelationshipName();	
 		} 
-		catch (RecognitionException | IOException re) {
+		catch (RecognitionException re) {
 			re.printStackTrace();
 		}
 
 		return relationshipName;
 	}
 
-	private static ArffGrammarParser parseArffFile(String filePath){
+	private static ArffGrammarParser parseArffFile(File file){
 		FileReader fr = null;
 		BufferedReader br = null;
 
 		ArffGrammarParser parser = null;
-		try(InputStream is = ParserUtils.class.getResourceAsStream(filePath);) {
-			String str = IOUtils.toString(is);
+		try {			
+			fr = new FileReader(file);
+			br = new BufferedReader(fr);
+			char[] chArr = new char[(int) file.length()];
+			br.read(chArr);
+			String str = new String(chArr);
+
 			if (str != null) {
 				ANTLRStringStream strStream = new ANTLRStringStream(str);
 				ArffGrammarLexer lexer = new ArffGrammarLexer(strStream);

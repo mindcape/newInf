@@ -3,6 +3,8 @@ package com.inferneon.supervised;
 import java.util.List;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.Instance;
+import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
 
 public class BestAttributeSearchResult {
@@ -10,8 +12,8 @@ public class BestAttributeSearchResult {
 	private Attribute attribute;
 	private int splittingPoint;
 	private Value threshold;
-	private List<Value> splitBeforeThreshold;
-	private List<Value> splitAfterThreshold;
+	private Instances splitBeforeThreshold;
+	private Instances splitAfterThreshold;
 	private Double infoGain;	
 
 	public Double getInfoGain() {
@@ -23,7 +25,7 @@ public class BestAttributeSearchResult {
 	}	
 
 	public BestAttributeSearchResult(Attribute attributeWithContinuousValues, Double infoGain, int splittingPoint,  Value threshold,
-									List<Value> splitBeforeThreshold,  List<Value> splitAfterThreshold){
+			Instances splitBeforeThreshold,  Instances splitAfterThreshold){
 		this.attribute = attributeWithContinuousValues;
 		this.infoGain = infoGain;
 		this.splittingPoint = splittingPoint;
@@ -40,19 +42,19 @@ public class BestAttributeSearchResult {
 		this.threshold = threshold;
 	}
 
-	public List<Value> getSplitBeforeThreshold() {
+	public Instances getSplitBeforeThreshold() {
 		return splitBeforeThreshold;
 	}
 
-	public void setSplitBeforeThreshold(List<Value> splitBeforeThreshold) {
+	public void setSplitBeforeThreshold(Instances splitBeforeThreshold) {
 		this.splitBeforeThreshold = splitBeforeThreshold;
 	}
 
-	public List<Value> getSplitAfterThreshold() {
+	public Instances getSplitAfterThreshold() {
 		return splitAfterThreshold;
 	}
 
-	public void setSplitAfterThreshold(List<Value> splitAfterThreshold) {
+	public void setSplitAfterThreshold(Instances splitAfterThreshold) {
 		this.splitAfterThreshold = splitAfterThreshold;
 	}
 	

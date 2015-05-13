@@ -17,7 +17,7 @@ public class ArffParserTests {
 	public void testNominalValuedAttributes(){
 		String fileName = "AllNominalValues.arff";
 		
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		List<String> attributeNames = new ArrayList<>();
@@ -51,7 +51,7 @@ public class ArffParserTests {
 	public void testNewLinesCommentsAndDataStartingLine(){
 		String fileName = "NewLinesCommentsAndDataStartingLine.arff";
 		
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		List<String> attributeNames = new ArrayList<>();
@@ -85,7 +85,7 @@ public class ArffParserTests {
 	@Test
 	public void testNominalValuedAttributesNamesInQuotes(){
 		String fileName = "AllNominalValuesNamesInQuotes.arff";
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		List<String> attributeNames = new ArrayList<>();
@@ -113,7 +113,7 @@ public class ArffParserTests {
 	@Test
 	public void testAllContinuousValuedAttributes(){
 		String fileName = "AllContinuousValuedAttributes.arff";
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		List<String> attributeNames = new ArrayList<>();
@@ -137,7 +137,7 @@ public class ArffParserTests {
 	@Test
 	public void testBothNominalAndContinuousAttrs(){
 		String fileName = "BothNominalAndContinuousAttrs.arff";
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		List<String> attributeNames = new ArrayList<>();
@@ -165,7 +165,7 @@ public class ArffParserTests {
 	@Test
 	public void testCaseSensitivityAndAttrNameInQuotes(){
 		String fileName = "CaseSensitivityAndAttrNameInQuotes.arff";
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		List<String> attributeNames = new ArrayList<>();
@@ -194,7 +194,7 @@ public class ArffParserTests {
 	@Test
 	public void testSpecialCharsInNominalVals(){	
 		String fileName = "SpecialCharsInNominalVals.arff";
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		List<String> attributeNames = new ArrayList<>();
@@ -237,7 +237,7 @@ public class ArffParserTests {
 	public void testInvalidAttributeName(){
 		String fileName = "InvalidAttributeName.arff";
 		
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		Assert.assertTrue(attributes.size() == 4);

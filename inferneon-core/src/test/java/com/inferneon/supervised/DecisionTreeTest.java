@@ -1,7 +1,6 @@
 package com.inferneon.supervised;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -10,9 +9,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Instance;
@@ -25,39 +23,83 @@ import com.inferneon.supervised.DecisionTreeBuilder.Method;
 
 public class DecisionTreeTest extends SupervisedLearningTest{
 
-	private static final String ROOT = "/TestResources/";
-	@Ignore
+	private static final String ROOT = "/TestResources";
+	
 	@Test
 	public void testID3Simple1() throws Exception {
-		String fileName = "PlayTennis.arff";
-		DecisionTreeBuilder dt = new DecisionTreeBuilder();
+		String fileName = "ID3Simple1.arff";
+		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder();
+
+		System.out.println("Current path = " + new File(".").getAbsolutePath());
 		
-		String filePath = ROOT + fileName;
-		ArffElements arffElements = ParserUtils.getArffElements(filePath);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 
 		String data = arffElements.getData();
-		System.out.println("Data : " + data);
-		Instances instances = DataLoader.loadData(attributes, data, filePath);
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
 
-		dt.train(instances);
+		dtBuilder.train(instances);
+		
+		DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree = dtBuilder.getDecisionTree();
+		DecisionTreeNode rootNode = dtBuilder.getRootNode();
+		Assert.assertTrue(rootNode.toString().equals("Outlook"));
 
-		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "Cool", "High", "Strong");
+//		@attribute Outlook 			{Sunny, Overcast, Rain}
+//		@attribute Temperature	{Hot, Mild, Cool}
+//		@attribute Humidity		{High, Normal}
+//		@attribute Wind	{Strong, Weak}
+//		@attribute PlayTennis	{Yes, No}
+//		
+//		Outlook:
+//			(Rain) -> Wind
+//			(Sunny) -> Humidity
+//			(Overcast) -> Yes(Yes: 4.0)
+//		Wind:
+//			(Strong) -> No(No: 2.0)
+//			(Weak) -> Yes(Yes: 3.0)
+//		Humidity:
+//			(Normal) -> Yes(Yes: 2.0)
+//			(High) -> No(No: 3.0)
+
+		checkClassification("No", attributes, dtBuilder, "Sunny", "Hot", "High", "Strong");
+		checkClassification("No", attributes, dtBuilder, "Sunny", "Cool", "High", "Strong");
+		checkClassification("No", attributes, dtBuilder, "Sunny", "Mild", "High", "Weak");
+		checkClassification("Yes", attributes, dtBuilder, "Sunny", "Mild", "Normal", "Weak");
+		checkClassification("Yes", attributes, dtBuilder, "Sunny", "Hot", "Normal", "Strong");
+		checkClassification("Yes", attributes, dtBuilder, "Sunny", "Cool", "Normal", "Weak");
+		
+		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Mild", "High", "Weak");
+		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Hot", "Normal", "Strong");
+		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Cool", "High", "Weak");
+		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Mild", "Normal", "Strong");
+		
+		checkClassification("Yes", attributes, dtBuilder, "Rain", "Mild", "High", "Weak");
+		checkClassification("Yes", attributes, dtBuilder, "Rain", "Cool", "Normal", "Weak");
+		checkClassification("Yes", attributes, dtBuilder, "Rain", "Hot", "High", "Weak");
+		checkClassification("No", attributes, dtBuilder, "Rain", "Hot", "Normal", "Strong");
+		checkClassification("No", attributes, dtBuilder, "Rain", "Cool", "High", "Strong");
+		checkClassification("No", attributes, dtBuilder, "Rain", "Mild", "Normal", "Strong");
+		
+		//List<DecisionTreeNode> leafNodes = getLeafNodes(decisionTree);		
+	}
+	
+	private void checkClassification(String target, List<Attribute> attributes, DecisionTreeBuilder dtBuilder,
+			String ... values) {
+		List<Value> newValues = getValueListForTestInstance(attributes, values);
 		Instance newInstance = new Instance(newValues);
 
-		Value targetClassValue = dt.classify(newInstance);
-
-		Assert.assertTrue(targetClassValue.getName().equals("No"));		
+		Value targetClassValue = dtBuilder.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equals(target));				
 	}
-	@Ignore
+
 	@Test
 	public void testID3Simple2() throws Exception {
 
-		String fileName = "RestaurantVisit.arff";
+		String fileName = "ID3Simple2.arff";
 
 		DecisionTreeBuilder dt = new DecisionTreeBuilder();
 
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT + fileName);		
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 		
 		String data = arffElements.getData();
@@ -71,183 +113,218 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		Assert.assertTrue(targetClassValue.getName().equals("N"));		
 	}	
+
 	@Test
-	public void testC45OnlyWithContinuousValuedAttrs() throws Exception {
-		String trainingSamples = "/TestResources/PlayTennisContinuousAttrs.csv";
+	public void testC45NoMissingValues() throws Exception {
+		String fileName = "C45NoMissingValues.arff";
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
 
-		List<String> nominalAttributeNames = new ArrayList<>();
-		nominalAttributeNames.add("Outlook"); nominalAttributeNames.add("Windy"); nominalAttributeNames.add("PlayTennis");
-
-		List<String> continuousValuedAttributeNames = new ArrayList<>();
-		continuousValuedAttributeNames.add("Temperature");continuousValuedAttributeNames.add("Humidity"); 
-
-		List<String> attrNominalValues = new ArrayList<>();
-		attrNominalValues.add("Sunny"); attrNominalValues.add("Overcast"); attrNominalValues.add("Rainy");
-		attrNominalValues.add("true"); attrNominalValues.add("false");
-		attrNominalValues.add("yes"); attrNominalValues.add("no");
-
-		int lengths[] = new int[3]; lengths[0] = 3; lengths[1] = 2; lengths[2] = 2;
-
-		List<Attribute> nominalAttributesList = createAttributesWithNominalValues(nominalAttributeNames, lengths, attrNominalValues); 
-
-		List<Attribute> continuousValuedAttributesList = createAttributesWithContinuousValues(Attribute.NumericType.INTEGER, continuousValuedAttributeNames);
-
-		List<Attribute> attributes = new ArrayList<>(5);
-		attributes.add(0, nominalAttributesList.get(0)); 
-		attributes.add(1, continuousValuedAttributesList.get(0)); 
-		attributes.add(2, continuousValuedAttributesList.get(1));
-		attributes.add(3, nominalAttributesList.get(1));
-		attributes.add(4, nominalAttributesList.get(2));
-
-		Instances instances = DataLoader.loadData(attributes, trainingSamples);
-
-		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45);
-		dtBuilder.train(instances);
-
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
 		Instance newInstance = new Instance(newValues);
 
-		Value targetClassValue = dtBuilder.classify(newInstance);
+		Value targetClassValue = dt.classify(newInstance);
 
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 
 	@Test
-	public void testC45WithContinuousValuedAttrsAndOneMissingDiscreteValue() throws Exception {
+	public void testC45OneMissingValue() throws Exception {
 
-		String trainingSamples = "/TestResources/PlayTennisContinuousAttrsAndOneMissingValue.csv";
+		String fileName = "C45OneMissingValue.arff";
 
-		List<String> nominalAttributeNames = new ArrayList<>();
-		nominalAttributeNames.add("Outlook"); nominalAttributeNames.add("Windy"); nominalAttributeNames.add("PlayTennis");
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
 
-		List<String> continuousValuedAttributeNames = new ArrayList<>();
-		continuousValuedAttributeNames.add("Temperature");continuousValuedAttributeNames.add("Humidity"); 
-
-		List<String> attrNominalValues = new ArrayList<>();
-		attrNominalValues.add("Sunny"); attrNominalValues.add("Overcast"); attrNominalValues.add("Rainy");
-		attrNominalValues.add("true"); attrNominalValues.add("false");
-		attrNominalValues.add("yes"); attrNominalValues.add("no");
-
-		int lengths[] = new int[3]; lengths[0] = 3; lengths[1] = 2; lengths[2] = 2;
-
-		List<Attribute> nominalAttributesList = createAttributesWithNominalValues(nominalAttributeNames, lengths, attrNominalValues); 
-
-		List<Attribute> continuousValuedAttributesList = createAttributesWithContinuousValues(Attribute.NumericType.INTEGER, continuousValuedAttributeNames);
-
-		List<Attribute> attributes = new ArrayList<>(5);
-		attributes.add(0, nominalAttributesList.get(0)); 
-		attributes.add(1, continuousValuedAttributesList.get(0)); 
-		attributes.add(2, continuousValuedAttributesList.get(1));
-		attributes.add(3, nominalAttributesList.get(1));
-		attributes.add(4, nominalAttributesList.get(2));
-
-		Instances instances = DataLoader.loadData(attributes, trainingSamples);
-
-		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45);
-		dtBuilder.train(instances);
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+		
+		DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>  decisionTree = dt.getDecisionTree();
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
 		Instance newInstance = new Instance(newValues);
 
-		Value targetClassValue = dtBuilder.classify(newInstance);
+		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 	
 	@Test
-	public void testC45TwoMissingDiscreteValuesOfDiffAttrsInDiffInstances() throws Exception {
+	public void testC45TwoMissingValuesOfDiffAttrsInDiffInstances() throws Exception {
 
-		String trainingSamples = "/TestResources/PlayTennisContinuousAttrsAndTwoMissingDiscreteValuesInDiffInstances.csv";
+		String fileName = "C45TwoMissingValuesOfDiffAttrsInDiffInstances.arff";
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
 
-		List<String> nominalAttributeNames = new ArrayList<>();
-		nominalAttributeNames.add("Outlook"); nominalAttributeNames.add("Windy"); nominalAttributeNames.add("PlayTennis");
-
-		List<String> continuousValuedAttributeNames = new ArrayList<>();
-		continuousValuedAttributeNames.add("Temperature");continuousValuedAttributeNames.add("Humidity"); 
-
-		List<String> attrNominalValues = new ArrayList<>();
-		attrNominalValues.add("Sunny"); attrNominalValues.add("Overcast"); attrNominalValues.add("Rainy");
-		attrNominalValues.add("true"); attrNominalValues.add("false");
-		attrNominalValues.add("yes"); attrNominalValues.add("no");
-
-		int lengths[] = new int[3]; lengths[0] = 3; lengths[1] = 2; lengths[2] = 2;
-
-		List<Attribute> nominalAttributesList = createAttributesWithNominalValues(nominalAttributeNames, lengths, attrNominalValues); 
-
-		List<Attribute> continuousValuedAttributesList = createAttributesWithContinuousValues(Attribute.NumericType.INTEGER, continuousValuedAttributeNames);
-
-		List<Attribute> attributes = new ArrayList<>(5);
-		attributes.add(0, nominalAttributesList.get(0)); 
-		attributes.add(1, continuousValuedAttributesList.get(0)); 
-		attributes.add(2, continuousValuedAttributesList.get(1));
-		attributes.add(3, nominalAttributesList.get(1));
-		attributes.add(4, nominalAttributesList.get(2));
-
-		Instances instances = DataLoader.loadData(attributes, trainingSamples);
-
-		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45);
-		dtBuilder.train(instances);
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
 		Instance newInstance = new Instance(newValues);
 
-		Value targetClassValue = dtBuilder.classify(newInstance);
+		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));
 	}
 
 	@Test
-	public void testC45TwoMissingDiscreteValuesOfSameAttrsInDiffInstances() throws Exception {
+	public void testC45ThreeMissingDiscreteValuesOfSameAttrsInDiffInstances() throws Exception {
 
-		String trainingSamples = "/TestResources/ThreeMissingDiscreteValuesOfSameAttrInDiffInstances .csv";
+		String fileName = "C45ThreeMissingDiscreteValuesOfSameAttrInDiffInstances.arff";
 
-		List<String> nominalAttributeNames = new ArrayList<>();
-		nominalAttributeNames.add("Outlook"); nominalAttributeNames.add("Windy"); nominalAttributeNames.add("PlayTennis");
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
 
-		List<String> continuousValuedAttributeNames = new ArrayList<>();
-		continuousValuedAttributeNames.add("Temperature");continuousValuedAttributeNames.add("Humidity"); 
-
-		List<String> attrNominalValues = new ArrayList<>();
-		attrNominalValues.add("Sunny"); attrNominalValues.add("Overcast"); attrNominalValues.add("Rainy");
-		attrNominalValues.add("true"); attrNominalValues.add("false");
-		attrNominalValues.add("yes"); attrNominalValues.add("no");
-
-		int lengths[] = new int[3]; lengths[0] = 3; lengths[1] = 2; lengths[2] = 2;
-
-		List<Attribute> nominalAttributesList = createAttributesWithNominalValues(nominalAttributeNames, lengths, attrNominalValues); 
-
-		List<Attribute> continuousValuedAttributesList = createAttributesWithContinuousValues(Attribute.NumericType.INTEGER, continuousValuedAttributeNames);
-
-		List<Attribute> attributes = new ArrayList<>(5);
-		attributes.add(0, nominalAttributesList.get(0)); 
-		attributes.add(1, continuousValuedAttributesList.get(0)); 
-		attributes.add(2, continuousValuedAttributesList.get(1));
-		attributes.add(3, nominalAttributesList.get(1));
-		attributes.add(4, nominalAttributesList.get(2));
-
-		Instances instances = DataLoader.loadData(attributes, trainingSamples);
-
-		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45);
-		dtBuilder.train(instances);
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
 		Instance newInstance = new Instance(newValues);
 
-		Value targetClassValue = dtBuilder.classify(newInstance);
+		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));
 		
-		
-//		String rootNodeName = "";
-//		Map<String, List<String>> parentAndOutgoingEdgeNames = new HashMap();
-//		List<String> outgoingEdgeNames1 = new ArrayList<>(); 
-//		outgoingEdgeNames1.add("Sunny"); outgoingEdgeNames1.add("Overcast"); outgoingEdgeNames1.add("Windy");
-//		parentAndOutgoingEdgeNames.put("Outlook", outgoingEdgeNames1);
-//		
-//		Map<String, String> edgeAndTargetNode = new HashMap<>();
-		
-		//verifyTree(dtBuilder.getDecisionTree(), dtBuilder.getRootNode());
-
 	}
 	
+	@Test
+	public void testC45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance() throws Exception {
 
+		String fileName = "C45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));
+		
+	}
+	
+	@Test
+	public void testC45OneMissingContinuousValue() throws Exception {
+
+		String fileName = "C45OneMissingContinuousValue.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
+	}
+	
+	@Test
+	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance() throws Exception {
+
+		String fileName = "C45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
+	}
+	
+	@Test
+	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances() throws Exception {
+
+		String fileName = "C45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
+	}
+	
+	@Test
+	public void testC45TwoMissingContinuousValuesInSameInstance() throws Exception {
+
+		String fileName = "C45TwoMissingContinuousValuesInSameInstance.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));		
+	}
+	
+	@Test
+	public void testC45TwoMissingContinuousValuesInDiffInstances() throws Exception {
+
+		String fileName = "C45TwoMissingContinuousValuesInDiffInstances.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
+	}
+	
 	private void verifyTree(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, DecisionTreeNode rootNode,
 			String rootNodeName, Map<String, List<String>> parentAndOutgoingEdgeNames, Map<String, String> edgeAndTargetNode){
 		
@@ -290,27 +367,27 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		return null;
 	}
 	
-//	private DecisionTreeEdge getEdgeByName(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, String name){
-//		Set<DecisionTreeEdge> edges = decisionTree.edgeSet();
-//		Iterator<DecisionTreeEdge> iterator = edges.iterator();
-//		while(iterator.hasNext()){
-//			DecisionTreeEdge edge = iterator.next();
-//			if(edge.toString().equals(name)){
-//				return edge;
-//			}
-//		}
-//		
-//		return null;
-//	}
-//	
-//	
-//	private Set<String> getEdgeNames(Set<DecisionTreeEdge>  edgesInTree){		
-//		Set<String> edgeNames = new HashSet<>();
-//		Iterator<DecisionTreeEdge> iterator = edgesInTree.iterator();
-//		while(iterator.hasNext()){
-//			DecisionTreeEdge edge = iterator.next();
-//			edgeNames.add(edge.toString());
-//		}
-//		return edgeNames;		
-//	}
+	private DecisionTreeEdge getEdgeByName(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, String name){
+		Set<DecisionTreeEdge> edges = decisionTree.edgeSet();
+		Iterator<DecisionTreeEdge> iterator = edges.iterator();
+		while(iterator.hasNext()){
+			DecisionTreeEdge edge = iterator.next();
+			if(edge.toString().equals(name)){
+				return edge;
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	private Set<String> getEdgeNames(Set<DecisionTreeEdge>  edgesInTree){		
+		Set<String> edgeNames = new HashSet<>();
+		Iterator<DecisionTreeEdge> iterator = edgesInTree.iterator();
+		while(iterator.hasNext()){
+			DecisionTreeEdge edge = iterator.next();
+			edgeNames.add(edge.toString());
+		}
+		return edgeNames;		
+	}
 }

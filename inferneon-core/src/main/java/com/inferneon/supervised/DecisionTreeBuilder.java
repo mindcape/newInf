@@ -82,7 +82,7 @@ public class DecisionTreeBuilder extends Supervised{
 	public DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> getDecisionTree(){
 		return decisionTree;
 	}
-	
+
 	public DecisionTreeNode getRootNode(){
 		return decisionTreeRootNode;
 	}
@@ -147,26 +147,18 @@ public class DecisionTreeBuilder extends Supervised{
 			DecisionTreeEdge edge = edgesIterator.next();
 			DecisionTreeNode target = (DecisionTreeNode)edge.getTarget();
 
-			Map<Value, Double> targetClassCounts = target.getTargetClassCounts();
-			Iterator<Entry<Value, Double>> iterator = targetClassCounts.entrySet().iterator();
-			int numEntries = targetClassCounts.size();
-			int count = 0;
-
 			String distDescription = "";
-			if(decisionTree.outgoingEdgesOf(target) != null && decisionTree.outgoingEdgesOf(target).size() == 0){
-				while(iterator.hasNext()){
-					Entry<Value, Double> entry = iterator.next();
-					Value value = entry.getKey(); 
-					Double total = entry.getValue();
-					distDescription += "(" + value.getName() + ": " + total + (count < numEntries -1 ? ", " : "");
-					count++;
-				}
-				
-				distDescription += ")";
-				
+			if(target.isLeaf()){
+				FrequencyCounts frequencyCounts = target.getFrequencyCounts();
+				Double sumOfWeights = frequencyCounts.getSumOfWeights();
+				Double numErrors = frequencyCounts.getErrorOnDistribution();
+				distDescription += "(" + roundDouble(sumOfWeights, 2)
+						+ (Double.compare(numErrors, 0.0) > 0 ? "/" + roundDouble(numErrors, 2) : "") 
+						+ ")";
 			}
 
-			System.out.println("	(" + edge + ") -> " + target  + distDescription);
+			String childDesc = "	(" + edge + ") -> " + target  +  " " + distDescription;
+			System.out.println(childDesc.trim());
 			children.add(target);
 		}
 
@@ -174,4 +166,10 @@ public class DecisionTreeBuilder extends Supervised{
 			emitTree(child);
 		}		
 	}	
+
+	public static double roundDouble(double value, int afterDecimalPoint) {
+		double mask = Math.pow(10.0, afterDecimalPoint);
+		return (Math.round(value * mask)) / mask;
+	}
+
 }

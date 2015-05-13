@@ -1,15 +1,21 @@
 package com.inferneon.core.utils;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.print.AttributeException;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -17,7 +23,7 @@ import com.inferneon.core.Attribute;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
-import com.inferneon.core.arffparser.ParserUtils;
+import com.inferneon.core.Value.ValueType;
 import com.inferneon.core.exceptions.InvalidDataException;
 import com.inferneon.supervised.FrequencyCounts;
 
@@ -26,14 +32,9 @@ public class DataLoader {
 	private static final Value UNKNOWN_VALUE = new Value();
 
 	public static final Instances loadData(List<Attribute> attributes, String filePath) throws IOException, InvalidDataException{
-		Instances instances = null;
-		try(InputStream is = ParserUtils.class.getResourceAsStream(filePath);) {
-			instances = loadData(attributes, is, true);
-		}
-		catch (IOException e) {
-			System.out.println("Error in reading the input file");
-		}
-		return instances;
+
+		InputStream inputStream = new FileInputStream(new File(filePath));
+		return loadData(attributes, inputStream, true);
 	}
 
 	public static Instances loadData(List<Attribute> attributes, String data,
@@ -130,14 +131,14 @@ public class DataLoader {
 		Map<Attribute, List<Instance>> attributeAndMissingValueInstances = new HashMap<>();
 
 		Set<Instance> instancesWithMissingvalues = new HashSet<>();
+		
+		Map<Value, Double> totalTargetCounts = new HashMap<>();
+		
+		Double sumOfWeights = 0.0;
 
 		List<Attribute> attributes = instances.getAttributes();
 		int numAttributes = attributes.size();
 		for(int attributeIndex = 0; attributeIndex < numAttributes -1; attributeIndex++){
-
-			if(attributeIndex == 3){
-				System.out.println("WAIT HERE");
-			}
 
 			Attribute currentAttribute = attributes.get(attributeIndex);
 			Map<Value, Map<Value, Double>>  valueAndTargetClassCount = new HashMap<>();
@@ -147,6 +148,18 @@ public class DataLoader {
 				Value value = instance.getValue(attributeIndex);
 				Value targetClassValue = instance.getValue(attributes.size() -1);
 
+				if(attributeIndex == 0){
+					Double instanceWeight = instance.getWeight();
+					sumOfWeights += instanceWeight;
+					Double targetValueCount = totalTargetCounts.get(targetClassValue);
+					if(targetValueCount == null){
+						totalTargetCounts.put(targetClassValue, instanceWeight);
+					}
+					else{
+						totalTargetCounts.put(targetClassValue, targetValueCount + instanceWeight);
+					}
+				}
+				
 				if(value == UNKNOWN_VALUE){					
 					List<Instance> missingValueInstances = attributeAndMissingValueInstances.get(currentAttribute);
 					if(missingValueInstances == null){
@@ -160,6 +173,7 @@ public class DataLoader {
 					continue;
 				}
 
+				
 				Map<Value, Double> targetClassCount = valueAndTargetClassCount.get(value);
 				if(targetClassCount == null){
 					targetClassCount = new HashMap<>();
@@ -221,6 +235,13 @@ public class DataLoader {
 			valueAndTargetClassCountList.add(valueAndTargetClassCount);
 		}
 
+		Value maxTargetValue = getMaxTargetValue(totalTargetCounts);
+		Double maxTargetValueCount = totalTargetCounts.get(maxTargetValue);
+		
+		frequencyCounts.setTotalTargetCounts(totalTargetCounts);
+		frequencyCounts.setSumOfWeights(sumOfWeights);
+		frequencyCounts.setMaxTargetValue(maxTargetValue);
+		frequencyCounts.setMaxTargetValueCount(maxTargetValueCount);
 		frequencyCounts.setAttributeAndTargetClassCounts(attributeAndTargetClassCounts);
 		frequencyCounts.setAttributeAndNonMissingValueCount(attributeAndNonMissingValueCount);
 		frequencyCounts.setValueAndTargetClassCount(valueAndTargetClassCountList);
@@ -232,11 +253,38 @@ public class DataLoader {
 		return frequencyCounts;
 	}
 
+	private static Value getMaxTargetValue( Map<Value, Double> totalTargetCounts) {
+
+		Double maxValue = 0.0;
+		Value valueWithMaxInstances = null;
+		Set<Entry<Value, Double>> entries = totalTargetCounts.entrySet();
+		Iterator<Entry<Value, Double>> iterator = entries.iterator();
+		while(iterator.hasNext()){
+			Entry<Value, Double> entry = iterator.next();
+			Value value = entry.getKey();
+			Double numInstances = entry.getValue();
+			
+			if(Double.compare(numInstances, maxValue) > 0){
+				maxValue = numInstances;
+				valueWithMaxInstances = value;
+			}
+		}
+
+		return valueWithMaxInstances;
+		
+	}
+
 	public static Double getMaxValueLesserThanOrEqualTo(double thresholdValue, Attribute attribute, Instances instances){
 		Double result = 0.0;
 		List<Instance> insts = instances.getInstances();
 		int attributeIndex = instances.attributeIndex(attribute);
 		for(Instance inst: insts){
+			
+			Value value = inst.getValue(attributeIndex);
+			if(value.getType() == ValueType.MISSING){
+				continue;
+			}
+			
 			double valInData = inst.getValue(attributeIndex).getNumericValueAsDouble();
 			if(Double.compare(thresholdValue, valInData) < 0){
 				continue;
