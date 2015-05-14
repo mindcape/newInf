@@ -693,16 +693,16 @@ public class C45 {
 
 		List<DecisionTreeNode> processedParentNodes = new ArrayList<>();
 
-		for(DecisionTreeNode leafNode : leafNodes){
-			DecisionTreeNode parent = (DecisionTreeNode)decisionTree.incomingEdgesOf(leafNode).iterator().next().getSource();
-			if(processedParentNodes.contains(parent)){
-				continue;
-			}
-
-			List<DecisionTreeNode> leafSiblings = getLeafSiblingsOfLeafNode(leafNode, parent);			
-			leafSiblings.add(leafNode);			
-			processedParentNodes.add(parent);			
-		}		
+//		for(DecisionTreeNode leafNode : leafNodes){
+//			DecisionTreeNode parent = (DecisionTreeNode)decisionTree.incomingEdgesOf(leafNode).iterator().next().getSource();
+//			if(processedParentNodes.contains(parent)){
+//				continue;
+//			}
+//
+//			List<DecisionTreeNode> leafSiblings = getLeafSiblingsOfLeafNode(leafNode, parent);			
+//			leafSiblings.add(leafNode);			
+//			processedParentNodes.add(parent);			
+//		}		
 	}
 
 	private List<DecisionTreeNode> getLeafSiblingsOfLeafNode(DecisionTreeNode leafNode, DecisionTreeNode parent){
