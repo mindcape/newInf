@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
@@ -17,7 +17,6 @@ import com.inferneon.core.Instance;
 import com.inferneon.core.InstanceComparator;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
-import com.inferneon.core.ValueComparator;
 import com.inferneon.core.Value.ValueType;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
@@ -27,10 +26,7 @@ public class C45 {
 
 	private DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree;
 	private DecisionTreeNode decisionTreeRootNode; 
-	private List<DecisionTreeNode> leafNodes;
 	private Instances allInstances;
-
-	private static final Double NUM_STANDARD_DEVIATIONS = 0.69;
 
 	// Minimum number of instances in a node
 	private int minNumInstancesInNode;
@@ -44,7 +40,6 @@ public class C45 {
 	public C45(Criterion criteria){
 		this.criteria = criteria;
 		decisionTree = new DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>(DecisionTreeEdge.class);
-		leafNodes = new ArrayList<>();
 		minNumInstancesInNode = 2;
 		minNumSplitsWithMinNumInstances = 2;
 	}
@@ -66,9 +61,8 @@ public class C45 {
 		if(bestAttributeSearchResult == null){
 			// Could not find a suitable attribute to split on. Create leaf and return			
 			Value mostFrequentlyOccuringTargetValue  = mostFrequentlyOccuringTargetValue(frequencyCounts.getTotalTargetCounts());			
-			DecisionTreeNode leafNode = createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, 
+			createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, 
 					mostFrequentlyOccuringTargetValue, frequencyCounts);
-			//leafNodes.add(leafNode);
 
 			return;
 		}		
@@ -79,8 +73,7 @@ public class C45 {
 		if(targetClassCounts.size() == 1){
 			// All instances belong to the same class, entropy will be zero
 			Value targetValue = targetClassCounts.keySet().iterator().next();
-			DecisionTreeNode leafNode = createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, targetValue, frequencyCounts);
-			//leafNodes.add(leafNode);
+			createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, targetValue, frequencyCounts);
 			return;
 		}
 
@@ -320,14 +313,13 @@ public class C45 {
 		return valueAndInstancesHavingValue;
 	}
 
-	private DecisionTreeNode createLeavesForAttribute(DecisionTreeNode parentNode, DecisionTreeEdge edge,
+	private void createLeavesForAttribute(DecisionTreeNode parentNode, DecisionTreeEdge edge,
 			Value targetValue, FrequencyCounts frequencyCounts) throws CycleFoundException {
 		DecisionTreeNode leafNode = new DecisionTreeNode(frequencyCounts, targetValue);
 		decisionTree.addVertex(leafNode);
 		edge.setSource(parentNode); edge.setTarget(leafNode);
 		System.out.println("Adding edge " + edge + " between attributes " + parentNode + " and leaf node " + leafNode);		
 		decisionTree.addDagEdge(parentNode, leafNode, edge);		
-		return leafNode;
 	}
 
 	private BestAttributeSearchResult searchForBestAttributeToSplitOn(Instances instances,  FrequencyCounts frequencyCounts) {
@@ -344,11 +336,6 @@ public class C45 {
 		int attributeCount = 0;
 		List<Attribute> attributes = instances.getAttributes();
 		for(Attribute attribute : attributes){
-
-			if(attribute.getName().equals("Windy")){
-				System.out.println("WAIT HERE");
-			}
-
 			if(attributeCount == instances.getClassIndex()){
 				attributeCount++;
 				continue;
@@ -493,13 +480,6 @@ public class C45 {
 			Double knownValueInstancesRatio =  ((double)instancesWithKnownValuesSize) /((double) instances.sumOfWeights());			
 			Double infoGainForSplit = knownValueInstancesRatio * (entropyOfTrainingSample - weightedEntropy);
 
-
-			//			if(attribute.getName().contains("Temperature")){
-			//				System.out.println("		Inferneon: Info gain for temperature at split point: " + 
-			//						splitPoint + " and split weights (" + sumOfWeightsBeforeThreshold + ", " + sumOfWeightsAfterThreshold + ")" + " = "
-			//						+ infoGainForSplit );
-			//			}
-
 			Instances instsBeforeThreshold = new Instances(splitBeforeThreshold, instances.getAttributes(), instances.getClassIndex());			
 			Instances instsAfterThreshold = new Instances(splitAfterThreshold, instances.getAttributes(), instances.getClassIndex());
 
@@ -554,14 +534,6 @@ public class C45 {
 		Double instancesSize = instances.sumOfWeights();
 		Double instsWithMissingValues = frequencyCounts.getNumMissingInstancesForAttribute(attribute);
 		Double instancesWithKnownValuesSize = instancesSize - instsWithMissingValues;
-
-		//		
-		//		
-		//		Map<Attribute, List<Instance>> attributeAndInstancesWithMissingValues = frequencyCounts.getAttributeAndMissingValueInstances();
-		//		List<Instance> instancesWithMissingValues = attributeAndInstancesWithMissingValues.get(attribute);
-		//		if(instancesWithMissingValues != null){
-		//			instancesWithKnownValuesSize = instances.sumOfWeights() - instancesWithMissingValues.size();
-		//		}
 
 		return instancesWithKnownValuesSize;
 	}
