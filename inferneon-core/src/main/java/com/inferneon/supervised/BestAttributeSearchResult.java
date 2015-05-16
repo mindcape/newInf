@@ -1,11 +1,13 @@
 package com.inferneon.supervised;
 
-import java.util.List;
-
 import com.inferneon.core.Attribute;
-import com.inferneon.core.Instance;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
+
+/**
+ * Represents the attribute that is "best" to split on. If the attribute is a continuous value,
+ * this class also has information of the splits before and after the splitting point.
+ */
 
 public class BestAttributeSearchResult {
 	
@@ -14,14 +16,12 @@ public class BestAttributeSearchResult {
 	private Value threshold;
 	private Instances splitBeforeThreshold;
 	private Instances splitAfterThreshold;
-	private Double infoGain;	
-
-	public Double getInfoGain() {
-		return infoGain;
-	}
+	private Double infoGain;
+	private Double gainRatio;	
 	
-	public BestAttributeSearchResult(Attribute attributeWithNominalValues){
+	public BestAttributeSearchResult(Attribute attributeWithNominalValues, Double infoGain){
 		this.attribute = attributeWithNominalValues;
+		this.infoGain = infoGain;
 	}	
 
 	public BestAttributeSearchResult(Attribute attributeWithContinuousValues, Double infoGain, int splittingPoint,  Value threshold,
@@ -73,4 +73,16 @@ public class BestAttributeSearchResult {
 	public void setSplittingPoint(int splittingPoint) {
 		this.splittingPoint = splittingPoint;
 	}	
+	
+	public double getInfoGain(){
+		return infoGain;		
+	}
+
+	public void setGainRatio(double gainRatio) {
+		this.gainRatio = gainRatio;
+	}
+	
+	public Double getGainRatio() {
+		return gainRatio;
+	}
 }

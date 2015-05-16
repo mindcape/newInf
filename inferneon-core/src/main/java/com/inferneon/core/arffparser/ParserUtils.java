@@ -16,19 +16,18 @@ import com.inferneon.core.Attribute;
 
 public class ParserUtils {
 
-	public static ArffElements getArffElements(String rootPath, String LLVMFileName){
+	public static ArffElements getArffElements(String rootPath, String arffFileName){
 
 		ArffElements arffElements = null;		
 
 		try {
 			
-	        String fullPath = rootPath + "/" + LLVMFileName;
+	        String fullPath = rootPath + "/" + arffFileName;
 	        URL url = ParserUtils.class.getResource(fullPath);
 	        
 	        String  f = url.getFile();
 	        File file = new File(f);
 	        
-			//File file = new File(rootPath + File.separator + LLVMFileName);
 			ArffGrammarParser parser = parseArffFile(file);
 			parser.arff();
 			System.out.println("Arff file parsed sucessfully: " + file.getAbsolutePath());
@@ -85,7 +84,7 @@ public class ParserUtils {
 		return stringBuffer.toString();
 	}
 
-	public static String getRelationshipName(File file, String LLVMFileName){
+	public static String getRelationshipName(File file, String arffFileName){
 
 		String relationshipName = null;
 		try {

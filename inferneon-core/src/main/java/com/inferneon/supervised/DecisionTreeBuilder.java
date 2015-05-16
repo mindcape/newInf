@@ -20,6 +20,7 @@ public class DecisionTreeBuilder extends Supervised{
 
 	public enum Criterion {
 		INFORMATION_GAIN,
+		GAIN_RATIO,
 		GINI
 	}
 
@@ -152,6 +153,7 @@ public class DecisionTreeBuilder extends Supervised{
 				FrequencyCounts frequencyCounts = target.getFrequencyCounts();
 				Double sumOfWeights = frequencyCounts.getSumOfWeights();
 				Double numErrors = frequencyCounts.getErrorOnDistribution();
+							
 				distDescription += "(" + roundDouble(sumOfWeights, 2)
 						+ (Double.compare(numErrors, 0.0) > 0 ? "/" + roundDouble(numErrors, 2) : "") 
 						+ ")";

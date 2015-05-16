@@ -3,6 +3,7 @@ package com.inferneon.supervised;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.Attribute.Type;
 import com.inferneon.core.Instance;
 import com.inferneon.core.InstanceComparator;
 import com.inferneon.core.Instances;
@@ -37,6 +39,9 @@ public class C45 {
 	// Collapse the sub-tree if the collapsing does not increase the error in training
 	private boolean collapseTree = false;
 
+	// Frequency counts of all instances (computed once)
+	private FrequencyCounts frequencyCountsOfAllInstances;
+	
 	public C45(Criterion criteria){
 		this.criteria = criteria;
 		decisionTree = new DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>(DecisionTreeEdge.class);
@@ -45,7 +50,8 @@ public class C45 {
 	}
 
 	public void train(Instances instances) throws CycleFoundException{		
-		this.allInstances = instances;		
+		this.allInstances = instances;	
+		frequencyCountsOfAllInstances = DataLoader.getFrequencyCounts(allInstances);
 		train(null, null, instances);
 		collapseTree();
 		pruneDecisionTree();
@@ -53,8 +59,15 @@ public class C45 {
 
 	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, Instances instances) throws CycleFoundException{
 
-		// Determine the distribution of these instances
-		FrequencyCounts frequencyCounts = DataLoader.getFrequencyCounts(instances);
+		// Determine the distribution of these instances. If the instances are the original one that is input
+		// the code, use the one thats already computed
+		FrequencyCounts frequencyCounts = null;
+		if(instances == allInstances){
+			frequencyCounts = frequencyCountsOfAllInstances;
+		}
+		else{
+			frequencyCounts = DataLoader.getFrequencyCounts(instances);
+		}
 
 		// Get the best attribute (the one with the most info gain)
 		BestAttributeSearchResult bestAttributeSearchResult = searchForBestAttributeToSplitOn(instances, frequencyCounts);
@@ -66,6 +79,8 @@ public class C45 {
 
 			return;
 		}		
+
+		// Found a suitable attribute to split on
 		Attribute attribute = bestAttributeSearchResult.getAttribute();
 
 		// If all the instances belong to the same target class, entropy will be zero. Create a leaf attribute and return
@@ -84,7 +99,7 @@ public class C45 {
 		// Split the instances based on values of this attribute
 		Map<DecisionTreeEdge, Instances>  instancesSplitForAttribute = split(bestAttributeSearchResult, instances, frequencyCounts);
 
-		// For each of the splits, recursively call this function.
+		// Train each of the splits recursively
 		if(instancesSplitForAttribute.size() <= 1){
 			return;
 		}
@@ -93,21 +108,11 @@ public class C45 {
 		Iterator<Entry<DecisionTreeEdge, Instances>> iterator = splits.iterator();
 		while(iterator.hasNext()){
 			Entry<DecisionTreeEdge, Instances> entry = iterator.next();
-			DecisionTreeEdge dtEdge = entry.getKey();
-			//			if(!dtEdge.toString().equals("Overcast")){
-			//				continue;
-			//			}			
-			//			else{
-			//				System.out.println("WAIT HERE");
-			//			}
-
-			if(dtEdge.toString().equals("Overcast")){
-				System.out.println("WAIT HERE");
-			}
+			DecisionTreeEdge dtEdge = entry.getKey();			
 			Instances splitInstances = entry.getValue();
 
 			if(dtEdge.toString().equals("Sunny") || dtEdge.toString().equals("Overcast") || dtEdge.toString().equals("Rainy")){
-				System.out.println("WAIT HERE");
+				//System.out.println("WAIT HERE");
 				//System.out.println("===================Instances for " + dtEdge + ": ");
 				//System.out.println(splitInstances);
 			}
@@ -123,6 +128,166 @@ public class C45 {
 		}
 	}
 
+	private BestAttributeSearchResult searchForBestAttributeToSplitOn(Instances instances,  FrequencyCounts frequencyCounts) {
+
+		if(!checkMinCriteriaBasedOnTargetValueCounts(frequencyCounts, instances)){
+			return null;
+		}
+
+		BestAttributeSearchResult bestAttributeSearchResultWithMaxInfoGain = null;
+		Attribute attrWithMaxInfoGain = null;
+		int attributeCount = 0;
+		Double maxInfoGain = 0.0;
+		List<Attribute> attributes = instances.getAttributes();
+		List<BestAttributeSearchResult> searchResults = new ArrayList<>(attributes.size());
+		int numValidAttributesForSplitting = 0;
+		double averageInfoGain = 0.0;
+		for(Attribute attribute : attributes){
+			if(attributeCount == instances.getClassIndex()){
+				searchResults.add(null);
+				attributeCount++;
+				continue;
+			}
+
+			if(! checkMinCriteria(instances, frequencyCounts, attribute)){
+				searchResults.add(null);
+				attributeCount++;
+				continue;
+			}
+
+			// Compute entropy of the whole sample
+			double instancesSize = instances.sumOfWeights();
+			double size = instancesSize - frequencyCounts.getNumMissingInstancesForAttribute(attribute);
+			Map<Value, Double> targetCounts = frequencyCounts.getTargetCountsForAttribute(attribute);
+			Double entropyOfTrainingSample = computeEntropy(size, targetCounts);
+
+			BestAttributeSearchResult bestAttributeSearchResult = null;
+
+			List<Map<Value, Map<Value, Double>>>  valueAndTargetClassCountList = frequencyCounts.getValueAndTargetClassCount();			
+			Map<Value, Map<Value, Double>> targetClassCount = valueAndTargetClassCountList.get(attributeCount);	
+			Double infoGainForAttribute = null;
+			if(attribute.getType() == Attribute.Type.NOMINAL){
+				infoGainForAttribute = getInfoGain(attribute, instances, targetClassCount, entropyOfTrainingSample, frequencyCounts);
+				bestAttributeSearchResult = new BestAttributeSearchResult(attribute, infoGainForAttribute);
+			}
+			else{
+				bestAttributeSearchResult = getInfoGainForContinuousValuedAttribute(attribute, instances, 
+						targetClassCount, entropyOfTrainingSample, frequencyCounts);
+				if(bestAttributeSearchResult == null){
+					// Cannot use this attribute to split on 
+					searchResults.add(null);
+					attributeCount++;
+					continue;
+				}
+				infoGainForAttribute = bestAttributeSearchResult.getInfoGain();
+			}
+			averageInfoGain += infoGainForAttribute;
+			numValidAttributesForSplitting++;
+
+			searchResults.add(bestAttributeSearchResult);
+
+			//System.out.println("Info gain for attr: " + attribute.getName() + " = " + infoGainForAttribute);
+			if(Double.compare(infoGainForAttribute, maxInfoGain) > 0){
+				maxInfoGain = infoGainForAttribute;
+				attrWithMaxInfoGain = attribute;
+				bestAttributeSearchResultWithMaxInfoGain = bestAttributeSearchResult;
+			}			
+
+			attributeCount++;
+		}
+
+		averageInfoGain /= numValidAttributesForSplitting;
+
+		BestAttributeSearchResult result = getBestAttributeToSplitOn(frequencyCounts, searchResults, 
+				bestAttributeSearchResultWithMaxInfoGain, averageInfoGain);		
+
+		if(attrWithMaxInfoGain != null){
+			System.out.println("**************************************************** Max info gain = " + result.getAttribute().getName());
+		}
+
+		return result;
+	}
+
+	private Double computeGainRatio(FrequencyCounts frequencyCounts, BestAttributeSearchResult searchResult) {
+		Attribute attribute = searchResult.getAttribute();
+		Double infoGainForAttribute = searchResult.getInfoGain();
+
+		double numInstances = frequencyCounts.getSumOfWeights();
+		double unknownWeights = frequencyCounts.getNumMissingInstancesForAttribute(attribute);
+
+		Map<Value, Double> valueCountsForAttribute = frequencyCounts.getAttributeValueCounts().get(attribute);
+
+		Double splitInfo = 0.0;
+
+		if(attribute.getType() == Type.NOMINAL){
+			Iterator<Entry<Value, Double>> iterator = valueCountsForAttribute.entrySet().iterator();
+			while(iterator.hasNext()){
+				Entry<Value, Double> entry = iterator.next();
+				Double count = entry.getValue();			
+				Double ratio = (double) count / (double) numInstances;			
+				splitInfo -= ratio * (Math.log(ratio) / Math.log(2));
+			}
+		}
+		else{
+			Instances splitBeforeThreshold = searchResult.getSplitBeforeThreshold();
+			Instances splitAfterThreshold = searchResult.getSplitAfterThreshold();
+
+			Double ratioOfInstsBeforeThreshold = splitBeforeThreshold.sumOfWeights() / (double) numInstances;
+			Double ratioOfInstsAfterThreshold = splitAfterThreshold.sumOfWeights() / (double) numInstances;
+
+			splitInfo -= ratioOfInstsBeforeThreshold * (Math.log(ratioOfInstsBeforeThreshold) / Math.log(2));
+			splitInfo -= ratioOfInstsAfterThreshold * (Math.log(ratioOfInstsAfterThreshold) / Math.log(2));
+		}
+
+		if(Double.compare(unknownWeights, 0.0) > 0){
+			Double ratioOfUnknownInsts = unknownWeights / (double) numInstances;
+			splitInfo -= ratioOfUnknownInsts * (Math.log(ratioOfUnknownInsts) / Math.log(2));
+		}
+
+		if(Double.compare(splitInfo, 0.0) <= 0){
+			return 0.0;
+		}
+
+		return infoGainForAttribute / splitInfo;		
+	}
+
+	private BestAttributeSearchResult getBestAttributeToSplitOn(
+			FrequencyCounts frequencyCounts,
+			List<BestAttributeSearchResult> searchResults, 
+			BestAttributeSearchResult bestAttributeSearchResultWithMaxInfoGain, double averageInfoGain) {
+
+		if(criteria == Criterion.INFORMATION_GAIN){
+			return bestAttributeSearchResultWithMaxInfoGain;			
+		}
+		else if(criteria == Criterion.GAIN_RATIO){
+			Double maxGainRatio = 0.0;
+			BestAttributeSearchResult bestAttributeSearchResultWithMaxGainRatio = null;
+			for(BestAttributeSearchResult result : searchResults){
+				if(result == null){
+					continue;
+				}
+
+				double infoGainForAttribute = result.getInfoGain();
+				double gainRatio = computeGainRatio(frequencyCounts, result);
+
+				System.out.println("Gain ratio for attribute " + result.getAttribute().getName() + " = " + gainRatio);
+				bestAttributeSearchResultWithMaxInfoGain.setGainRatio(gainRatio);
+
+				if(Double.compare(infoGainForAttribute, averageInfoGain) >= 0
+						&& Double.compare(gainRatio, maxGainRatio) >= 0){
+					bestAttributeSearchResultWithMaxGainRatio = result;
+					maxGainRatio = gainRatio;
+				}			
+			}
+
+			return bestAttributeSearchResultWithMaxGainRatio;
+		}
+
+		// TODO Implement other criteria (Gini impurity, etc.)
+		return null;
+
+	}
+
 	private boolean checkMinCriteriaBasedOnTargetValueCounts(FrequencyCounts frequencyCounts, Instances instances) {
 		Double total = instances.sumOfWeights();
 		if(Double.compare(total, minNumInstancesInNode * minNumSplitsWithMinNumInstances) < 0){
@@ -133,14 +298,12 @@ public class C45 {
 		if(Double.compare(numMaxClass, total) == 0){
 			return false;
 		}
-
 		return true;		
 	}
 
 	/**
-	 * Returns target class value with the highest number
-	 * @param instances
-	 * @return
+	 * Returns target class value with the highest number. If there are no instances, arbitrarily assign the
+	 * class value with the max occurrences.
 	 */
 	private Value mostFrequentlyOccuringTargetValue(Map<Value, Double> targetClassCounts) {
 
@@ -157,6 +320,10 @@ public class C45 {
 				max = numInstances;
 				mostFrequentlyOccuringTargetValue = value;
 			}
+		}
+		
+		if(mostFrequentlyOccuringTargetValue == null){
+			mostFrequentlyOccuringTargetValue = frequencyCountsOfAllInstances.getMaxTargetValue();
 		}
 
 		return mostFrequentlyOccuringTargetValue;
@@ -240,14 +407,14 @@ public class C45 {
 		while(iterator.hasNext()){
 			Entry<DecisionTreeEdge, Instances> entry = iterator.next();
 			Instances split = entry.getValue();
-			
+
 			Double ratio = (double) split.sumOfWeights() / instancesSize;
 			for(Instance instanceWithMissingValue : instancesWithMissingValue){				
 				Double weight = ratio * instanceWithMissingValue.getWeight();
 				Instance newInstance = new Instance(instanceWithMissingValue.getValues());
 				newInstance.setWeight(weight);
 				split.addInstance(newInstance);
-				
+
 			}						
 		}		
 	}
@@ -280,12 +447,15 @@ public class C45 {
 		Map<Value, DecisionTreeEdge> valueAndDecisionTreeEdge = new HashMap<>();
 		List<Instance> instancesWithMissingValue = frequencyCounts.getAttributeAndMissingValueInstances().get(attribute);
 
+		Set<Value> valuesInSplit = new HashSet<>();
+		
 		while(iterator.hasNext()){
 			Instance instance = iterator.next();
 			if(instancesWithMissingValue != null && instancesWithMissingValue.contains(instance)){
 				continue;
 			}
 			Value value = instance.attributeValue(attribute);
+			valuesInSplit.add(value);
 
 			DecisionTreeEdge decisionTreeEdge = valueAndDecisionTreeEdge.get(value);
 			if(decisionTreeEdge == null){
@@ -306,8 +476,14 @@ public class C45 {
 		// Adjust against missing values in these instances.
 		adjustForMissingValues(attribute, valueAndInstancesHavingValue, frequencyCounts,  instances.sumOfWeights());
 
-		if(attribute.getName().equals("Windy")){
-			System.out.println("WAIT HERE");
+		// If there is any value that has no instances, add that as a split with an empty set of instances
+		List<Value> allValuesOfAttribute = attribute.getAllValues();
+		for(Value value : allValuesOfAttribute){			
+			if(!valuesInSplit.contains(value)){
+				Instances emptyInstances = new Instances();
+				emptyInstances.setAttributes(instances.getAttributes());
+				valueAndInstancesHavingValue.put(new DecisionTreeEdge(value), emptyInstances);
+			}
 		}
 
 		return valueAndInstancesHavingValue;
@@ -322,71 +498,6 @@ public class C45 {
 		decisionTree.addDagEdge(parentNode, leafNode, edge);		
 	}
 
-	private BestAttributeSearchResult searchForBestAttributeToSplitOn(Instances instances,  FrequencyCounts frequencyCounts) {
-
-		if(!checkMinCriteriaBasedOnTargetValueCounts(frequencyCounts, instances)){
-			return null;
-		}
-
-		Double maxInfoGain = 0.0;
-		Attribute attrWithMaxInfoGain = null;
-
-		BestAttributeSearchResult bestAttributeSearchResultWithMaxInfoGain = null;
-
-		int attributeCount = 0;
-		List<Attribute> attributes = instances.getAttributes();
-		for(Attribute attribute : attributes){
-			if(attributeCount == instances.getClassIndex()){
-				attributeCount++;
-				continue;
-			}
-
-			if(! checkMinCriteria(instances, frequencyCounts, attribute)){
-				attributeCount++;
-				continue;
-			}
-
-			// Compute entropy of the whole sample
-			double instancesSize = instances.sumOfWeights();
-			double size = instancesSize - frequencyCounts.getNumMissingInstancesForAttribute(attribute);
-			Map<Value, Double> targetCounts = frequencyCounts.getTargetCountsForAttribute(attribute);
-			Double entropyOfTrainingSample = computeEntropy(size, targetCounts);
-
-			BestAttributeSearchResult bestAttributeSearchResult = null;
-
-			List<Map<Value, Map<Value, Double>>>  valueAndTargetClassCountList = frequencyCounts.getValueAndTargetClassCount();			
-			Map<Value, Map<Value, Double>> targetClassCount = valueAndTargetClassCountList.get(attributeCount);	
-			Double infoGainForAttribute = null;
-			if(attribute.getType() == Attribute.Type.NOMINAL){
-				infoGainForAttribute = getInfoGain(attribute, instances, targetClassCount, entropyOfTrainingSample, frequencyCounts);
-				bestAttributeSearchResult = new BestAttributeSearchResult(attribute);
-			}
-			else{
-				bestAttributeSearchResult = getInfoGainForContinuousValuedAttribute(attribute, instances, 
-						targetClassCount, entropyOfTrainingSample, frequencyCounts);
-				if(bestAttributeSearchResult == null){
-					// Did not find anything to split further on. 
-					return null;
-				}
-				infoGainForAttribute = bestAttributeSearchResult.getInfoGain();
-			}
-
-			System.out.println("Info gain for attr: " + attribute.getName() + " = " + infoGainForAttribute);
-
-			if(Double.compare(infoGainForAttribute, maxInfoGain) > 0){
-				maxInfoGain = infoGainForAttribute;
-				attrWithMaxInfoGain = attribute;
-				bestAttributeSearchResultWithMaxInfoGain = bestAttributeSearchResult;
-			}			
-			attributeCount++;
-		}
-
-		if(attrWithMaxInfoGain != null){
-			System.out.println("**************************************************** Max = " + attrWithMaxInfoGain.getName());
-		}
-
-		return bestAttributeSearchResultWithMaxInfoGain;
-	}
 
 	private Double getInfoGain(Attribute attribute, Instances instances, Map<Value, Map<Value, Double>> targetClassCount,
 			Double entropyOfTrainingSample, FrequencyCounts frequencyCounts) {
@@ -440,7 +551,6 @@ public class C45 {
 
 		int minSplit = getMinSplit(instancesList.size(), instances.numClasses());
 
-		//while(splitPoint < instancesList.size() -1){
 		while(splitPoint < firstInstanceWithMissingValueForAttribute -1){			
 			List<Instance> splitBeforeThreshold = new ArrayList<>(instancesList.subList(0, splitPoint + 1));
 			thresholdValue = splitBeforeThreshold.get(splitBeforeThreshold.size() -1).getValue(attributeIndex);			
@@ -606,38 +716,38 @@ public class C45 {
 		// Need to collapse the tree
 		List<DecisionTreeNode> nodesToBeRemoved = new ArrayList<>();
 		collapseTree(decisionTreeRootNode, nodesToBeRemoved);
-		
+
 		for(DecisionTreeNode node : nodesToBeRemoved){
 			DecisionTreeNode parentNode = getParentOfNode(node);
 			if(parentNode == null){
 				// Node to be removed has no parent; this must be the parent node, nothing to do
 				break;
 			}
-			
+
 			FrequencyCounts frequencyCountsOfNode = node.getFrequencyCounts();
 			DecisionTreeEdge currentEdge = incomingEdgeOfNode(node);
 			Value targetValue = frequencyCountsOfNode.getMaxTargetValue();			
 			decisionTree.removeVertex(node);
-			
+
 			createLeavesForAttribute(parentNode, currentEdge, targetValue,  frequencyCountsOfNode);			
 		}		
 	}
-	
+
 	private DecisionTreeNode getParentOfNode(DecisionTreeNode node){		
 		DecisionTreeEdge incomingEdge = incomingEdgeOfNode(node);
 		if(incomingEdge == null){
 			return null;
 		}
-		
+
 		return (DecisionTreeNode)incomingEdge.getSource();		
 	}
-	
+
 	private DecisionTreeEdge incomingEdgeOfNode(DecisionTreeNode node){
 		Set<DecisionTreeEdge> incomingEdges = decisionTree.incomingEdgesOf(node);
 		if(incomingEdges == null || incomingEdges.size() == 0){
 			return null;
 		}
-		
+
 		DecisionTreeEdge incomingEdge = (DecisionTreeEdge)incomingEdges.iterator().next();		
 		return incomingEdge;
 	}
@@ -670,7 +780,7 @@ public class C45 {
 		if(node.isLeaf()){
 			FrequencyCounts frequencyCounts = node.getFrequencyCounts();
 			Map<Value, Double> targetClassCounts = frequencyCounts.getTotalTargetCounts();
-			
+
 			//Map<Value, Double> targetClassCounts = node.getTargetClassCounts();
 			Double numCorrect = targetClassCounts.get(node.getValue());
 			Double numIncorrect = node.getNumInstances() - numCorrect;
@@ -693,16 +803,16 @@ public class C45 {
 
 		List<DecisionTreeNode> processedParentNodes = new ArrayList<>();
 
-//		for(DecisionTreeNode leafNode : leafNodes){
-//			DecisionTreeNode parent = (DecisionTreeNode)decisionTree.incomingEdgesOf(leafNode).iterator().next().getSource();
-//			if(processedParentNodes.contains(parent)){
-//				continue;
-//			}
-//
-//			List<DecisionTreeNode> leafSiblings = getLeafSiblingsOfLeafNode(leafNode, parent);			
-//			leafSiblings.add(leafNode);			
-//			processedParentNodes.add(parent);			
-//		}		
+		//		for(DecisionTreeNode leafNode : leafNodes){
+		//			DecisionTreeNode parent = (DecisionTreeNode)decisionTree.incomingEdgesOf(leafNode).iterator().next().getSource();
+		//			if(processedParentNodes.contains(parent)){
+		//				continue;
+		//			}
+		//
+		//			List<DecisionTreeNode> leafSiblings = getLeafSiblingsOfLeafNode(leafNode, parent);			
+		//			leafSiblings.add(leafNode);			
+		//			processedParentNodes.add(parent);			
+		//		}		
 	}
 
 	private List<DecisionTreeNode> getLeafSiblingsOfLeafNode(DecisionTreeNode leafNode, DecisionTreeNode parent){

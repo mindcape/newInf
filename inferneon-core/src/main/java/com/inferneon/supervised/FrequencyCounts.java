@@ -24,7 +24,7 @@ public class FrequencyCounts {
 	
 	private Long numInstances;
 	private Double sumOfWeights;
-	private Long totalInstancesWithMissingValues;
+	private Double totalInstancesWithMissingValues;
 	private Map<Value, Double> totalTargetCounts;
 	private Value maxTargetValue;
 	private Double maxTargetValueCount;
@@ -120,11 +120,11 @@ public class FrequencyCounts {
 	}
 
 	public void setTotalInstancesWithMissingValues(
-			Long totalInstancesWithMissingValues) {
+			Double totalInstancesWithMissingValues) {
 		this.totalInstancesWithMissingValues =totalInstancesWithMissingValues;		
 	}
 	
-	public Long getTotalInstancesWithMissingValues(){
+	public Double getTotalInstancesWithMissingValues(){
 		return totalInstancesWithMissingValues;
 	}
 	

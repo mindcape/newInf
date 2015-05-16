@@ -236,7 +236,10 @@ public class DataLoader {
 		}
 
 		Value maxTargetValue = getMaxTargetValue(totalTargetCounts);
-		Double maxTargetValueCount = totalTargetCounts.get(maxTargetValue);
+		Double maxTargetValueCount = 0.0;
+		if(maxTargetValue != null){
+			maxTargetValueCount = totalTargetCounts.get(maxTargetValue);
+		}
 		
 		frequencyCounts.setTotalTargetCounts(totalTargetCounts);
 		frequencyCounts.setSumOfWeights(sumOfWeights);
@@ -248,12 +251,21 @@ public class DataLoader {
 		frequencyCounts.setNumInstances(instances.size());
 		frequencyCounts.setAttributeValueCounts(attributeValueCounts);
 		frequencyCounts.setAttributeAndMissingValueInstances(attributeAndMissingValueInstances);
-		frequencyCounts.setTotalInstancesWithMissingValues((long)instancesWithMissingvalues.size());
+		frequencyCounts.setTotalInstancesWithMissingValues(getSumOfWeights(instancesWithMissingvalues));
 
 		return frequencyCounts;
 	}
 
 	public static Double getSumOfWeights(List<Instance> instances){
+		double sum = 0L;
+		for(Instance inst: instances){
+			sum += inst.getWeight();
+		}
+		
+		return sum;
+	}
+	
+	public static Double getSumOfWeights(Set<Instance> instances){
 		double sum = 0L;
 		for(Instance inst: instances){
 			sum += inst.getWeight();

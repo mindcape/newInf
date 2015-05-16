@@ -19,6 +19,7 @@ import com.inferneon.core.Value;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.core.utils.DataLoader;
+import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 import com.inferneon.supervised.DecisionTreeBuilder.Method;
 
 public class DecisionTreeTest extends SupervisedLearningTest{
@@ -343,7 +344,35 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Instance newInstance = new Instance(newValues);
 
 		Value targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("NO"));		
+	}
+	
+	@Test
+	public void testC45GainRatioManyMissingValuesAtRandom() throws Exception {
+
+		String fileName = "C45ManyMissingValuesAtRandom.arff";
+
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
+
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
+		List<Attribute> attributes = arffElements.getAttributes();
+		
+		String data = arffElements.getData();
+		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		dt.train(instances);
+
+		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
+		Instance newInstance = new Instance(newValues);
+
+		Value targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
+		
+		newValues = getValueListForTestInstance(attributes, "Overcast", "65", "95", "true");
+		newInstance = new Instance(newValues);
+
+		targetClassValue = dt.classify(newInstance);
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
+		
 	}
 	
 	private void verifyTree(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, DecisionTreeNode rootNode,
