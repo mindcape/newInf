@@ -32,26 +32,26 @@ public class DecisionTreeBuilder extends Supervised{
 	private Criterion criteria;
 	private Method method;
 
-	private DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree;
+	private DecisionTree decisionTree;
 	private DecisionTreeNode decisionTreeRootNode; 
 	private List<Attribute> attributes;
 
 	public DecisionTreeBuilder(){
 		method = Method.ID3;
 		criteria = Criterion.INFORMATION_GAIN;
-		decisionTree = new DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>(DecisionTreeEdge.class);
+		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
 
 	public DecisionTreeBuilder(Method method){
 		this.method = method;
 		criteria = Criterion.INFORMATION_GAIN;
-		decisionTree = new DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>(DecisionTreeEdge.class);
+		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
 
 	public DecisionTreeBuilder(Method method, Criterion criteria){
 		this.method = method;
 		this.criteria = criteria;
-		decisionTree = new DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>(DecisionTreeEdge.class);
+		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
 
 	@Override
@@ -62,13 +62,13 @@ public class DecisionTreeBuilder extends Supervised{
 				ID3 id3 = new ID3(criteria);
 				id3.train(instances);
 				decisionTree = id3.getDecisionTree();
-				decisionTreeRootNode = id3.getDecisionTreeRootNode();
+				decisionTreeRootNode = decisionTree.getDecisionTreeRootNode();
 			}
 			else if(method == Method.C45){
 				C45 c45 = new C45(criteria);
 				c45.train(instances);
 				decisionTree = c45.getDecisionTree();
-				decisionTreeRootNode = c45.getDecisionTreeRootNode();
+				decisionTreeRootNode = decisionTree.getDecisionTreeRootNode();
 			}
 		}
 		catch (CycleFoundException e) {
@@ -77,7 +77,7 @@ public class DecisionTreeBuilder extends Supervised{
 			e.printStackTrace();
 		}
 
-		emitTree(null);		
+		decisionTree.emitTree(null);		
 	}
 
 	public DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> getDecisionTree(){
@@ -129,49 +129,4 @@ public class DecisionTreeBuilder extends Supervised{
 
 		return null;
 	}
-
-	private void emitTree(DecisionTreeNode node) {
-		if(node == null){
-			node = decisionTreeRootNode;
-		}		
-
-		Set<DecisionTreeEdge> outgoingEdges = decisionTree.outgoingEdgesOf(node);
-		if(outgoingEdges.size() == 0){
-			return;
-		}
-
-		System.out.println(node + ":");
-
-		Iterator<DecisionTreeEdge> edgesIterator = outgoingEdges.iterator();		
-		List<DecisionTreeNode> children = new ArrayList<>();		
-		while(edgesIterator.hasNext()){
-			DecisionTreeEdge edge = edgesIterator.next();
-			DecisionTreeNode target = (DecisionTreeNode)edge.getTarget();
-
-			String distDescription = "";
-			if(target.isLeaf()){
-				FrequencyCounts frequencyCounts = target.getFrequencyCounts();
-				Double sumOfWeights = frequencyCounts.getSumOfWeights();
-				Double numErrors = frequencyCounts.getErrorOnDistribution();
-							
-				distDescription += "(" + roundDouble(sumOfWeights, 2)
-						+ (Double.compare(numErrors, 0.0) > 0 ? "/" + roundDouble(numErrors, 2) : "") 
-						+ ")";
-			}
-
-			String childDesc = "	(" + edge + ") -> " + target  +  " " + distDescription;
-			System.out.println(childDesc.trim());
-			children.add(target);
-		}
-
-		for(DecisionTreeNode child : children){
-			emitTree(child);
-		}		
-	}	
-
-	public static double roundDouble(double value, int afterDecimalPoint) {
-		double mask = Math.pow(10.0, afterDecimalPoint);
-		return (Math.round(value * mask)) / mask;
-	}
-
 }

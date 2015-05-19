@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
 
 import com.inferneon.core.Attribute;
@@ -22,12 +21,11 @@ public class ID3 {
 	
 	private Criterion criteria;
 	
-	private DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree;
-	private DecisionTreeNode decisionTreeRootNode; 
+	private DecisionTree decisionTree;
 
 	public ID3(Criterion criteria){
 		this.criteria = criteria;
-		decisionTree = new DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>(DecisionTreeEdge.class);
+		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
 	
 	public void train(Instances instances) throws CycleFoundException, InvalidDataException{
@@ -54,7 +52,7 @@ public class ID3 {
 		decisionTree.addVertex(decisionTreeNode);
 
 		if(parentDecisionTreeNode == null){
-			decisionTreeRootNode = decisionTreeNode;
+			decisionTree.setDecisionTreeRootNode(decisionTreeNode);
 			parentDecisionTreeNode = decisionTreeNode;
 		}
 
@@ -190,12 +188,7 @@ public class ID3 {
 		return entropy;
 	}
 	
-	public DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> getDecisionTree(){
+	public DecisionTree getDecisionTree(){
 		return decisionTree;
-	}
-	
-	
-	public DecisionTreeNode getDecisionTreeRootNode() {
-		return decisionTreeRootNode;
 	}
 }

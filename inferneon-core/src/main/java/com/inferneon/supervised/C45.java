@@ -10,9 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
-
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Attribute.Type;
 import com.inferneon.core.Instance;
@@ -21,13 +19,13 @@ import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
 import com.inferneon.core.Value.ValueType;
 import com.inferneon.core.utils.DataLoader;
+import com.inferneon.core.utils.StatisticsUtils;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 
 public class C45 {
 	private Criterion criteria;
 
-	private DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree;
-	private DecisionTreeNode decisionTreeRootNode; 
+	private DecisionTree decisionTree;
 	private Instances allInstances;
 
 	// Minimum number of instances in a node
@@ -41,10 +39,13 @@ public class C45 {
 
 	// Frequency counts of all instances (computed once)
 	private FrequencyCounts frequencyCountsOfAllInstances;
-	
+
+	//Confidence level 
+	private float confidenceLevel = 0.25f;
+
 	public C45(Criterion criteria){
 		this.criteria = criteria;
-		decisionTree = new DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>(DecisionTreeEdge.class);
+		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 		minNumInstancesInNode = 2;
 		minNumSplitsWithMinNumInstances = 2;
 	}
@@ -54,7 +55,10 @@ public class C45 {
 		frequencyCountsOfAllInstances = DataLoader.getFrequencyCounts(allInstances);
 		train(null, null, instances);
 		collapseTree();
-		pruneDecisionTree();
+
+		System.out.println("######################## STARTED PRUNING DECISION TREE NOW WITH ########################");
+
+		pruneDecisionTree(decisionTree.getDecisionTreeRootNode());
 	}
 
 	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, Instances instances) throws CycleFoundException{
@@ -69,6 +73,9 @@ public class C45 {
 			frequencyCounts = DataLoader.getFrequencyCounts(instances);
 		}
 
+		//		System.out.println("Parent node sum of wts: " + frequencyCounts.getSumOfWeights()
+		//				 + ", num Errors = " + frequencyCounts.getErrorOnDistribution());
+		//		
 		// Get the best attribute (the one with the most info gain)
 		BestAttributeSearchResult bestAttributeSearchResult = searchForBestAttributeToSplitOn(instances, frequencyCounts);
 		if(bestAttributeSearchResult == null){
@@ -321,7 +328,7 @@ public class C45 {
 				mostFrequentlyOccuringTargetValue = value;
 			}
 		}
-		
+
 		if(mostFrequentlyOccuringTargetValue == null){
 			mostFrequentlyOccuringTargetValue = frequencyCountsOfAllInstances.getMaxTargetValue();
 		}
@@ -379,7 +386,7 @@ public class C45 {
 
 		decisionTree.addVertex(decisionTreeNode);
 		if(parent == null){
-			decisionTreeRootNode = decisionTreeNode;
+			decisionTree.setDecisionTreeRootNode(decisionTreeNode);
 		}
 
 		if(decisionTreeEdge != null){
@@ -448,7 +455,7 @@ public class C45 {
 		List<Instance> instancesWithMissingValue = frequencyCounts.getAttributeAndMissingValueInstances().get(attribute);
 
 		Set<Value> valuesInSplit = new HashSet<>();
-		
+
 		while(iterator.hasNext()){
 			Instance instance = iterator.next();
 			if(instancesWithMissingValue != null && instancesWithMissingValue.contains(instance)){
@@ -715,47 +722,31 @@ public class C45 {
 
 		// Need to collapse the tree
 		List<DecisionTreeNode> nodesToBeRemoved = new ArrayList<>();
-		collapseTree(decisionTreeRootNode, nodesToBeRemoved);
+		collapseTree(decisionTree.getDecisionTreeRootNode(), nodesToBeRemoved);
 
 		for(DecisionTreeNode node : nodesToBeRemoved){
-			DecisionTreeNode parentNode = getParentOfNode(node);
+			DecisionTreeNode parentNode = decisionTree.getParentOfNode(node);
 			if(parentNode == null){
-				// Node to be removed has no parent; this must be the parent node, nothing to do
+				// Node to be removed has no parent; this must be the root node, nothing to do
 				break;
 			}
 
-			FrequencyCounts frequencyCountsOfNode = node.getFrequencyCounts();
-			DecisionTreeEdge currentEdge = incomingEdgeOfNode(node);
-			Value targetValue = frequencyCountsOfNode.getMaxTargetValue();			
-			decisionTree.removeVertex(node);
-
-			createLeavesForAttribute(parentNode, currentEdge, targetValue,  frequencyCountsOfNode);			
+			makeLeaf(node, parentNode);						
 		}		
 	}
 
-	private DecisionTreeNode getParentOfNode(DecisionTreeNode node){		
-		DecisionTreeEdge incomingEdge = incomingEdgeOfNode(node);
-		if(incomingEdge == null){
-			return null;
-		}
+	private void makeLeaf(DecisionTreeNode node, DecisionTreeNode parentNode) throws CycleFoundException{
+		FrequencyCounts frequencyCountsOfNode = node.getFrequencyCounts();
+		DecisionTreeEdge currentEdge = decisionTree.incomingEdgeOfNode(node);
+		Value targetValue = frequencyCountsOfNode.getMaxTargetValue();			
+		decisionTree.removeVertex(node);
 
-		return (DecisionTreeNode)incomingEdge.getSource();		
-	}
-
-	private DecisionTreeEdge incomingEdgeOfNode(DecisionTreeNode node){
-		Set<DecisionTreeEdge> incomingEdges = decisionTree.incomingEdgesOf(node);
-		if(incomingEdges == null || incomingEdges.size() == 0){
-			return null;
-		}
-
-		DecisionTreeEdge incomingEdge = (DecisionTreeEdge)incomingEdges.iterator().next();		
-		return incomingEdge;
+		createLeavesForAttribute(parentNode, currentEdge, targetValue, frequencyCountsOfNode);
 	}
 
 	private void collapseTree(DecisionTreeNode decisionTreeNode, List<DecisionTreeNode> nodesToBeRemoved) {
 
 		FrequencyCounts frequencyCounts = decisionTreeNode.getFrequencyCounts();
-
 
 		Double errorOnDistribution = frequencyCounts.getErrorOnDistribution();
 		Double trainingErrorOnTree = getTrainingErrorOnTree(decisionTreeNode);
@@ -764,11 +755,10 @@ public class C45 {
 			nodesToBeRemoved.add(decisionTreeNode);
 		}
 		else{
-			Set<DecisionTreeEdge> outgoingEdges = decisionTree.outgoingEdgesOf(decisionTreeNode);
-			Iterator<DecisionTreeEdge> iterator = outgoingEdges.iterator();
+			Set<DecisionTreeNode> childNodes = decisionTree.getChildNodes(decisionTreeNode);
+			Iterator<DecisionTreeNode> iterator = childNodes.iterator();
 			while(iterator.hasNext()){
-				DecisionTreeEdge edge = iterator.next();
-				DecisionTreeNode childNode = (DecisionTreeNode)edge.getTarget();
+				DecisionTreeNode childNode = iterator.next();
 				if(!childNode.isLeaf()){
 					collapseTree(childNode, nodesToBeRemoved);
 				}
@@ -788,55 +778,157 @@ public class C45 {
 		}
 
 		double errors = 0.0;
-		Set<DecisionTreeEdge> outgoingEdges = decisionTree.outgoingEdgesOf(node);
-		Iterator<DecisionTreeEdge> iterator = outgoingEdges.iterator();
+		Set<DecisionTreeNode> childNodes = decisionTree.getChildNodes(node);
+		Iterator<DecisionTreeNode> iterator = childNodes.iterator();
 		while(iterator.hasNext()){
-			DecisionTreeEdge edge = iterator.next();
-			DecisionTreeNode childNode = (DecisionTreeNode)edge.getTarget();
+			DecisionTreeNode childNode = iterator.next();
 			errors += getTrainingErrorOnTree(childNode);
 		}
 
 		return errors;
 	}
 
-	private void pruneDecisionTree() {
+	private void pruneDecisionTree(DecisionTreeNode node) throws CycleFoundException {
+		System.out.println("CURRENT TREE: ");
+		decisionTree.emitTree(null);
 
-		List<DecisionTreeNode> processedParentNodes = new ArrayList<>();
-
-		//		for(DecisionTreeNode leafNode : leafNodes){
-		//			DecisionTreeNode parent = (DecisionTreeNode)decisionTree.incomingEdgesOf(leafNode).iterator().next().getSource();
-		//			if(processedParentNodes.contains(parent)){
-		//				continue;
-		//			}
+		if(! node.isLeaf()){
+			Set<DecisionTreeNode> childNodes = decisionTree.getChildNodes(node);
+			FrequencyCounts frequencyCounts = node.getFrequencyCounts();			
+			double estimatedErrorAtNode = getEstimatedError(node);
+			double totalInstancesAtNode = frequencyCounts.getSumOfWeights();			
+			double estimatedErrorOfSubTree = getEstimatedError(childNodes, totalInstancesAtNode);
+			
+			if(Double.compare(estimatedErrorOfSubTree, estimatedErrorAtNode) >= 0){
+				DecisionTreeNode parentNode = decisionTree.getParentOfNode(node);
+				if(parentNode == null){
+					// Must be the root node
+					return;
+				}
+				makeLeaf(node, parentNode);			
+			}
+						
+			Iterator<DecisionTreeNode> iterator = childNodes.iterator();
+			while(iterator.hasNext()){
+				DecisionTreeNode childNode = iterator.next();
+				pruneDecisionTree(childNode);					
+			}	
+		}
+		
+		//		Map<DecisionTreeNode, Set<DecisionTreeNode>> parentAndLeafChildNodes = new HashMap<>();
+		//		populateParentAndLeafNodes(parentAndLeafChildNodes, decisionTree.getDecisionTreeRootNode());
 		//
-		//			List<DecisionTreeNode> leafSiblings = getLeafSiblingsOfLeafNode(leafNode, parent);			
-		//			leafSiblings.add(leafNode);			
-		//			processedParentNodes.add(parent);			
-		//		}		
+		//		Set<DecisionTreeNode> parentNodesToFold = identifyParentNodesToFold(parentAndLeafChildNodes);
+		//		if(parentNodesToFold != null && parentNodesToFold.size() > 0){			
+		//			foldParents(parentNodesToFold);
+		//			pruneDecisionTree();
+		//		}
 	}
 
-	private List<DecisionTreeNode> getLeafSiblingsOfLeafNode(DecisionTreeNode leafNode, DecisionTreeNode parent){
+	/**
+	 * Returns the estimated error the set of nodes that is passed
+	 * @param parentNode
+	 * @return
+	 */
+	private double getEstimatedError(Set<DecisionTreeNode> childNodes, double totalInstancesAtParentNode) {
+		double estimatedError = 0.0;
+		Iterator<DecisionTreeNode> iterator = childNodes.iterator();
 
-		Set<DecisionTreeEdge> outGoingEdgesOfParent = decisionTree.outgoingEdgesOf(parent);
-		Iterator<DecisionTreeEdge> iterator = outGoingEdgesOfParent.iterator();
-		List<DecisionTreeNode> siblings = new ArrayList<>();
 		while(iterator.hasNext()){
-			DecisionTreeNode child = (DecisionTreeNode)iterator.next().getTarget();
-			if(child == leafNode){
+			DecisionTreeNode node = iterator.next();
+			double totalInstances = node.getFrequencyCounts().getSumOfWeights(); 
+			if(Double.compare(totalInstances, 0.0) == 0){
 				continue;
 			}
 
-			siblings.add(child);
+			double estimatedErrorAtNode = getEstimatedError(node);
+			estimatedError += estimatedErrorAtNode;
+		}
 
-		}		
-		return siblings;
+		return estimatedError;
 	}
 
-	public DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> getDecisionTree(){
+	/**
+	 * Returns the estimated error if this node is a leaf node
+	 * @param node
+	 * @return
+	 */
+	private double getEstimatedError(DecisionTreeNode node) {
+
+		FrequencyCounts frequencyCounts = node.getFrequencyCounts();
+
+		double totalInstances = frequencyCounts.getSumOfWeights();		
+		double errorOnDistribution = frequencyCounts.getErrorOnDistribution();		
+		double extraError = extraError(totalInstances, errorOnDistribution); 		
+		double totalError = errorOnDistribution + extraError;
+
+		return totalError;
+	}
+
+	/**
+	 * Computes estimated extra error for given total number of instances
+	 * and error using normal approximation to binomial distribution
+	 * (and continuity correction).
+	 *
+	 */
+	public double extraError(double totalInstances, double errorOnDistribution){
+
+		// Ignore stupid values for CF
+		if (confidenceLevel > 0.5) {
+			System.err.println("WARNING: confidence value for pruning " +
+					" too high. Error estimate not modified.");
+			return 0;
+		}
+
+		// Check for extreme cases at the low end because the
+		// normal approximation won't work
+		if (errorOnDistribution < 1) {
+
+			// Base case (i.e. e == 0) from documenta Geigy Scientific
+			// Tables, 6th edition, page 185
+			double base = totalInstances * (1 - Math.pow(confidenceLevel, 1 / totalInstances)); 
+			if (errorOnDistribution == 0) {
+				return base; 
+			}
+
+			// Use linear interpolation between 0 and 1 like C4.5 does
+			return base + errorOnDistribution * (extraError(totalInstances, 1) - base);
+		}
+
+		// Use linear interpolation at the high end (i.e. between N - 0.5
+		// and N) because of the continuity correction
+		if (errorOnDistribution + 0.5 >= totalInstances) {
+
+			// Make sure that we never return anything smaller than zero
+			return Math.max(totalInstances - errorOnDistribution, 0);
+		}
+
+		// Get z-score corresponding to CF
+		double numStandardDeviations = StatisticsUtils.normalInverse(1 - confidenceLevel);
+
+		// Compute upper limit of confidence interval
+		double observedError = (errorOnDistribution + 0.5) / totalInstances;
+		if(Double.compare(totalInstances, 4.666666666666667) == 0 
+				&& Double.compare(errorOnDistribution, 1.666666666666667) == 0 ){
+			System.out.println("WAIT HERE");
+		}
+
+		double numeratorTerm1 = observedError;		
+		double numeratorTerm2 =  Math.pow(numStandardDeviations, 2.0) / (2.0 * totalInstances);		
+		double numeratorTerm3 = (observedError / totalInstances) 
+				- (Math.pow(observedError, 2.0) / totalInstances)
+				+ (Math.pow(numStandardDeviations, 2.0) / (4.0 * Math.pow(totalInstances, 2.0)));
+		numeratorTerm3 = numStandardDeviations * Math.sqrt(numeratorTerm3);		
+		double numerator = numeratorTerm1 + numeratorTerm2 + numeratorTerm3;		
+		double denominator = Math.pow(numStandardDeviations, 2.0) / totalInstances;
+		denominator += 1.0;
+
+		double errorRate = numerator / denominator;
+		double extraError = (errorRate * totalInstances) - errorOnDistribution;
+		return extraError;
+	}
+
+	public DecisionTree getDecisionTree(){
 		return decisionTree;
-	}
-
-	public DecisionTreeNode getDecisionTreeRootNode() {
-		return decisionTreeRootNode;
 	}
 }
