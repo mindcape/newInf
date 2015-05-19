@@ -371,7 +371,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		newInstance = new Instance(newValues);
 
 		targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));	
 		
 	}
 	
