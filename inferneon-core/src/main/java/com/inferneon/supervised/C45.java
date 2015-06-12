@@ -28,9 +28,6 @@ import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 
 public class C45 {
 
-	// Context in which this program is running. Default is stand alone mode.
-	private Context context = Context.STAND_ALONE;
-
 	private Criterion criteria;
 
 	private DecisionTree decisionTree;
@@ -392,13 +389,13 @@ public class C45 {
 
 		// Treat nominal and continuous valued attributes differently
 		if(attribute.getType() == Attribute.Type.NOMINAL){
-			instancesSplitForAttribute = splitOn(attribute, instances, frequencyCounts);
+			instancesSplitForAttribute = splitOnNominalValuedAttribute(attribute, instances, frequencyCounts);
 		}
 		else{
 			instancesSplitForAttribute = getSplitForContinuousValuedAttributeBasedOnThreshold(bestAttributeSearchResult, instances, frequencyCounts);
 		}
 
-		return instancesSplitForAttribute;
+		return instancesSplitForAttribute;	
 	}
 
 	private void addAttributeToTree(DecisionTreeNode parent, DecisionTreeNode decisionTreeNode, DecisionTreeEdge decisionTreeEdge)
@@ -462,7 +459,7 @@ public class C45 {
 		return result;
 	}
 
-	private Map<DecisionTreeEdge, IInstances> splitOn(Attribute attribute, IInstances instances, FrequencyCounts frequencyCounts)
+	private Map<DecisionTreeEdge, IInstances> splitOnNominalValuedAttribute(Attribute attribute, IInstances instances, FrequencyCounts frequencyCounts)
 			throws Exception{
 
 		if(attribute.getName().equals("Outlook")){
@@ -646,7 +643,7 @@ public class C45 {
 			Map<Value, Map<Value, Double>> targetClassCount) {
 
 		double totalOccurencesOfValue = split.sumOfWeights();
-		Map<Value, Double> cummulativeTargetCounts = split.getWeightedEntropyForValuesSubset(attributeIndex, targetClassCount);
+		Map<Value, Double> cummulativeTargetCounts = split.cummulativeTargetClassCountForContinuousValuedAttribute(attributeIndex, targetClassCount);
 		Double entropyForVals = computeEntropy(totalOccurencesOfValue, cummulativeTargetCounts);
 		Double weightRatio = ((double)totalOccurencesOfValue) /((double) instancesSize);
 		//		

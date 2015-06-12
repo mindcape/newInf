@@ -71,7 +71,11 @@ public abstract class IInstances {
 	
 	public abstract Value valueOfAttributeAtInstance(long index, int attributeIndex);
 	
-	public abstract Map<Value, Double> getWeightedEntropyForValuesSubset(int attributeIndex, Map<Value, Map<Value, Double>> targetClassCount);
+	/**
+	 * For a continuous-valued attribute, computes the total counts for each target value.
+	 * 
+	 */
+	public abstract Map<Value, Double> cummulativeTargetClassCountForContinuousValuedAttribute(int attributeIndex, Map<Value, Map<Value, Double>> targetClassCount);
 	
 	public abstract void appendAll(IInstances other, double weightFactor);
 

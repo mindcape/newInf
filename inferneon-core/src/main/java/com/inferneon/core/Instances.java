@@ -457,7 +457,7 @@ public class Instances extends IInstances {
 	}
 
 	@Override
-	public Map<Value, Double>  getWeightedEntropyForValuesSubset(int attributeIndex, 
+	public Map<Value, Double>  cummulativeTargetClassCountForContinuousValuedAttribute(int attributeIndex, 
 			Map<Value, Map<Value, Double>> targetClassCount){
 
 		Map<Value, Double> cummulativeTargetCounts = new HashMap<Value, Double>();
