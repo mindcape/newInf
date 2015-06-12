@@ -37,7 +37,11 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.ext.JGraphModelAdapter;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.IInstances;
 import com.inferneon.core.Instances;
+import com.inferneon.core.InstancesFactory;
+import com.inferneon.core.arffparser.ArffElements;
+import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.core.exceptions.InvalidDataException;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.DecisionTreeBuilder;
@@ -53,6 +57,8 @@ public class DecisionTreeVisualizer {
 	private JSplitPane jPanelMain; 
 	private JScrollPane area;
 	private JComboBox<String> optList;
+	
+	private static final String ROOT = "/TestResources";
 
 	public DecisionTreeVisualizer() {
 		final JFrame frame = new JFrame("JTextArea Test");
@@ -102,11 +108,10 @@ public class DecisionTreeVisualizer {
 		jPanelSecond.setBackground(Color.GRAY);
 	}
 
-
-	public static void main(String [] args) throws IOException, InvalidDataException{
+	public static void main(String [] args) throws Exception{
 		DecisionTreeVisualizer dtVisualizer = new DecisionTreeVisualizer();
 		
-		String trainingSamples = "TestResources/PlayTennis.csv";
+		String trainingSamples = "PlayTennis.csv";
 		DecisionTreeBuilder dt = new DecisionTreeBuilder();
 
 		List<String> attrNames = new ArrayList<>();
@@ -121,8 +126,11 @@ public class DecisionTreeVisualizer {
 
 		int lengths[] = new int[5]; lengths[0] = 3; lengths[1] = 3; lengths[2] = 2; lengths[3] = 2; lengths[4] = 2;
 
-		List<Attribute> attributes = dtVisualizer.createAttributesWithNominalValues(attrNames, lengths, attrNominalValues); 
-		Instances instances = DataLoader.loadData(attributes, trainingSamples);
+		ArffElements arffElements = ParserUtils.getArffElements(ROOT, trainingSamples);		
+		List<Attribute> attributes = arffElements.getAttributes();
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, trainingSamples);
 
 		dt.train(instances);
 	}

@@ -1,6 +1,7 @@
 package com.inferneon.supervised;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.IInstances;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
 
@@ -12,10 +13,10 @@ import com.inferneon.core.Value;
 public class BestAttributeSearchResult {
 	
 	private Attribute attribute;
-	private int splittingPoint;
+	private long splittingPoint;
 	private Value threshold;
-	private Instances splitBeforeThreshold;
-	private Instances splitAfterThreshold;
+	private IInstances splitBeforeThreshold;
+	private IInstances splitAfterThreshold;
 	private Double infoGain;
 	private Double gainRatio;	
 	
@@ -24,8 +25,8 @@ public class BestAttributeSearchResult {
 		this.infoGain = infoGain;
 	}	
 
-	public BestAttributeSearchResult(Attribute attributeWithContinuousValues, Double infoGain, int splittingPoint,  Value threshold,
-			Instances splitBeforeThreshold,  Instances splitAfterThreshold){
+	public BestAttributeSearchResult(Attribute attributeWithContinuousValues, Double infoGain, long splittingPoint,  Value threshold,
+			IInstances splitBeforeThreshold,  IInstances splitAfterThreshold){
 		this.attribute = attributeWithContinuousValues;
 		this.infoGain = infoGain;
 		this.splittingPoint = splittingPoint;
@@ -42,7 +43,7 @@ public class BestAttributeSearchResult {
 		this.threshold = threshold;
 	}
 
-	public Instances getSplitBeforeThreshold() {
+	public IInstances getSplitBeforeThreshold() {
 		return splitBeforeThreshold;
 	}
 
@@ -50,7 +51,7 @@ public class BestAttributeSearchResult {
 		this.splitBeforeThreshold = splitBeforeThreshold;
 	}
 
-	public Instances getSplitAfterThreshold() {
+	public IInstances getSplitAfterThreshold() {
 		return splitAfterThreshold;
 	}
 
@@ -66,7 +67,7 @@ public class BestAttributeSearchResult {
 		this.attribute = attribute;
 	}
 	
-	public int getSplittingPoint() {
+	public long getSplittingPoint() {
 		return splittingPoint;
 	}
 	

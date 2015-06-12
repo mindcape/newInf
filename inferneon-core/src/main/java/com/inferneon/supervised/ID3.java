@@ -1,6 +1,5 @@
 package com.inferneon.supervised;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,31 +9,33 @@ import java.util.Set;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
 
 import com.inferneon.core.Attribute;
-import com.inferneon.core.Instance;
-import com.inferneon.core.Instances;
+import com.inferneon.core.IInstances;
+import com.inferneon.core.IInstances.Context;
 import com.inferneon.core.Value;
 import com.inferneon.core.exceptions.InvalidDataException;
-import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 
 public class ID3 {
+
+	// Context in which this program is running. Default is stand alone mode.
+	private Context context = Context.STAND_ALONE;
 	
 	private Criterion criteria;
-	
+
 	private DecisionTree decisionTree;
 
 	public ID3(Criterion criteria){
 		this.criteria = criteria;
 		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
-	
-	public void train(Instances instances) throws CycleFoundException, InvalidDataException{
+
+	public void train(IInstances instances) throws CycleFoundException, InvalidDataException{
 		train(null, null, instances);
 	}
-	
-	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, Instances instances)
+
+	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, IInstances instances)
 			throws CycleFoundException, InvalidDataException{
-		FrequencyCounts frequencyCounts = DataLoader.getFrequencyCounts(instances);
+		FrequencyCounts frequencyCounts = instances.getFrequencyCounts();
 		Map<Value, Double> targetClassCounts = frequencyCounts.getTargetCounts();		
 		if(targetClassCounts.size() == 1){
 			// All instances belong to the same class, entropy will be zero
@@ -42,11 +43,12 @@ public class ID3 {
 			createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, targetValue, frequencyCounts, targetClassCounts);
 			return;
 		}
-		
+
 		List<Map<Value, Map<Value, Double>>>  valueAndTargetClassCountList = frequencyCounts.getValueAndTargetClassCount();
 
 		Double entropyOfTrainingSample = computeEntropy(instances.sumOfWeights(), targetClassCounts);
-		Attribute attribute = searchForBestAttributeToSplitOn(instances, valueAndTargetClassCountList, entropyOfTrainingSample, frequencyCounts);
+		Attribute attribute = searchForBestAttributeToSplitOn(instances, valueAndTargetClassCountList, entropyOfTrainingSample,
+							frequencyCounts);
 
 		DecisionTreeNode decisionTreeNode = new DecisionTreeNode(frequencyCounts, attribute);
 		decisionTree.addVertex(decisionTreeNode);
@@ -58,57 +60,27 @@ public class ID3 {
 
 		if(decisionTreeEdge != null){
 			System.out.println("Adding edge " + decisionTreeEdge + " between attributes " + parentDecisionTreeNode + " and " + decisionTreeNode);
-			
+
 			decisionTreeEdge.setSource(parentDecisionTreeNode); decisionTreeEdge.setTarget(decisionTreeNode);
 			decisionTree.addDagEdge(parentDecisionTreeNode, decisionTreeNode, decisionTreeEdge);
 		}
 
-		Map<DecisionTreeEdge, Instances>  instancesSplitForAttribute = splitOn(attribute, instances);
+		Map<Value, IInstances>  instancesSplitForAttribute = instances.splitOnAttribute(attribute);
 
 		if(instancesSplitForAttribute.size() > 1){
 
-			Set<Entry<DecisionTreeEdge, Instances>> splits = instancesSplitForAttribute.entrySet();
-			Iterator<Entry<DecisionTreeEdge, Instances>> iterator = splits.iterator();
+			Set<Entry<Value, IInstances>> splits = instancesSplitForAttribute.entrySet();
+			Iterator<Entry<Value, IInstances>> iterator = splits.iterator();
 			while(iterator.hasNext()){
-				Entry<DecisionTreeEdge, Instances> entry = iterator.next();
-				DecisionTreeEdge dtEdge = entry.getKey();
-				Instances splitInstances = entry.getValue();			
-				Instances newInstances = splitInstances.removeAtribute(attribute);			
+				Entry<Value, IInstances> entry = iterator.next();
+				DecisionTreeEdge dtEdge = new DecisionTreeEdge(entry.getKey());
+				IInstances splitInstances = entry.getValue();			
+				IInstances newInstances = splitInstances.removeAttribute(attribute);			
 				train(decisionTreeNode, dtEdge, newInstances);
 			}
 		}
 	}
 	
-	private Map<DecisionTreeEdge, Instances> splitOn(Attribute attribute, Instances instances){
-
-		Map<DecisionTreeEdge, Instances> valueAndInstancesHavingValue = new HashMap<DecisionTreeEdge, Instances>();
-		List<Attribute> attributes = instances.getAttributes();
-		Iterator<Instance> iterator = instances.iterator();		
-		Map<Value, DecisionTreeEdge> valueAndDecisionTreeEdge = new HashMap<>();
-				
-		while(iterator.hasNext()){
-			Instance instance = iterator.next();
-			Value value = instance.attributeValue(attribute);
-			
-			DecisionTreeEdge decisionTreeEdge = valueAndDecisionTreeEdge.get(value);
-			if(decisionTreeEdge == null){
-				decisionTreeEdge = new DecisionTreeEdge(value);
-				valueAndDecisionTreeEdge.put(value, decisionTreeEdge);
-			}
-			
-			Instances instancesHavingValue = valueAndInstancesHavingValue.get(decisionTreeEdge);
-			if(instancesHavingValue == null){
-				instancesHavingValue = new Instances();
-				instancesHavingValue.setAttributes(attributes);
-			}
-			instancesHavingValue.addInstance(instance);
-			
-			valueAndInstancesHavingValue.put(decisionTreeEdge,  instancesHavingValue);			
-		}
-
-		return valueAndInstancesHavingValue;
-	}
-
 	private void createLeavesForAttribute(DecisionTreeNode decisionTreeNode, DecisionTreeEdge edge,
 			Value targetValue, FrequencyCounts frequencyCounts, Map<Value, Double> targetClassCounts) throws CycleFoundException {
 		DecisionTreeNode leafNode = new DecisionTreeNode(frequencyCounts, targetValue);
@@ -118,7 +90,7 @@ public class ID3 {
 		decisionTree.addDagEdge(decisionTreeNode, leafNode, edge);		
 	}
 
-	private Attribute searchForBestAttributeToSplitOn(Instances instances,
+	private Attribute searchForBestAttributeToSplitOn(IInstances instances,
 			List<Map<Value, Map<Value, Double>>> valueAndTargetClassCountList,
 			Double entropyOfTrainingSample, FrequencyCounts frequencyCounts) {
 
@@ -151,7 +123,7 @@ public class ID3 {
 		return attrWithMaxInfoGain;
 	}
 
-	private Double getInfoGain(Attribute attribute, Instances instances, Map<Value, Map<Value, Double>> targetClassCount,
+	private Double getInfoGain(Attribute attribute, IInstances instances, Map<Value, Map<Value, Double>> targetClassCount,
 			Double entropyOfTrainingSample, FrequencyCounts frequencyCounts) {
 		Double weightedEntropy = 0.0;
 
@@ -187,7 +159,7 @@ public class ID3 {
 
 		return entropy;
 	}
-	
+
 	public DecisionTree getDecisionTree(){
 		return decisionTree;
 	}

@@ -9,15 +9,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
-import com.inferneon.core.exceptions.InvalidDataException;
-import com.inferneon.core.utils.DataLoader;
 
 public class NaiveBayes extends Supervised{
 
-	private Instances instances;
+	private IInstances instances;
 	private List<Attribute> attributes;
 
 	private Map<Value, Double> classProbablities;
@@ -30,12 +29,12 @@ public class NaiveBayes extends Supervised{
 	}
 
 	@Override
-	public void train(Instances instances){
+	public void train(IInstances instances){
 		try{
 			this.instances = instances;
 			this.attributes = instances.getAttributes();
 
-			FrequencyCounts frequencyCounts = DataLoader.getFrequencyCounts(instances);
+			FrequencyCounts frequencyCounts = instances.getFrequencyCounts();
 
 			Map<Value, Double> targetClassCounts = frequencyCounts.getTargetCounts();
 

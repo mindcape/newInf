@@ -1,18 +1,15 @@
 package com.inferneon.supervised;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
-import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
 import com.inferneon.core.exceptions.InvalidDataException;
 
@@ -45,6 +42,7 @@ public class DecisionTreeBuilder extends Supervised{
 	public DecisionTreeBuilder(Method method){
 		this.method = method;
 		criteria = Criterion.INFORMATION_GAIN;
+		//criteria = Criterion.GAIN_RATIO;
 		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
 
@@ -55,7 +53,7 @@ public class DecisionTreeBuilder extends Supervised{
 	}
 
 	@Override
-	public void train(Instances instances) {
+	public void train(IInstances instances) throws Exception {
 		this.attributes = instances.getAttributes();
 		try {
 			if(method == Method.ID3){

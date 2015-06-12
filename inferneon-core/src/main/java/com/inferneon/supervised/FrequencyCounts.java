@@ -1,15 +1,12 @@
 package com.inferneon.supervised;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
-import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
 import com.inferneon.core.exceptions.InvalidDataException;
 
@@ -33,7 +30,7 @@ public class FrequencyCounts {
 
 	private List<Map<Value, Map<Value, Double>>>  valueAndTargetClassCount;
 	private Map<Attribute, Map<Value, Double>> attributeValueCounts;
-	private Map<Attribute, List<Instance>> attributeAndMissingValueInstances;
+	private Map<Attribute, IInstances> attributeAndMissingValueInstances;
 	
 	public Long getNumInstances() {
 		return numInstances;
@@ -111,11 +108,11 @@ public class FrequencyCounts {
 	}
 
 	public void setAttributeAndMissingValueInstances(
-			Map<Attribute, List<Instance>> attributeAndMissingValueInstances) {
+			Map<Attribute, IInstances> attributeAndMissingValueInstances) {
 		this.attributeAndMissingValueInstances = attributeAndMissingValueInstances;		
 	}	
 	
-	public Map<Attribute, List<Instance>> getAttributeAndMissingValueInstances() {
+	public Map<Attribute, IInstances> getAttributeAndMissingValueInstances() {
 		return attributeAndMissingValueInstances;
 	}
 
@@ -129,16 +126,12 @@ public class FrequencyCounts {
 	}
 	
 	public Double getNumMissingInstancesForAttribute(Attribute attribute){
-		 List<Instance> missingValueInstancesForAttr =  attributeAndMissingValueInstances.get(attribute);
+		IInstances missingValueInstancesForAttr =  attributeAndMissingValueInstances.get(attribute);
 		 if(missingValueInstancesForAttr == null || missingValueInstancesForAttr.size() == 0){
 			 return 0.0;
 		 }
 		 
-		 Double totalWeightOfInstancesWithMissingVals = 0.0;
-		 
-		 for(Instance ins : missingValueInstancesForAttr){
-			 totalWeightOfInstancesWithMissingVals += ins.getWeight();
-		 }
+		 Double totalWeightOfInstancesWithMissingVals = missingValueInstancesForAttr.sumOfWeights();
 		 
 		 return totalWeightOfInstancesWithMissingVals;
 		 

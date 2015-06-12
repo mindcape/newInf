@@ -13,10 +13,6 @@
 	<name>inferneon-gui</name>
 	<packaging>jar</packaging>
 
-	<properties>
-		<spark.version>1.3.1</spark.version>
-	</properties>
-
 	<build>
 		<finalName>inferneon-core</finalName>
 		<plugins>
@@ -87,18 +83,6 @@
 			<artifactId>inferneon-core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.10</artifactId>
-			<version>${spark.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_2.10</artifactId>
-			<version>${spark.version}</version>
-		</dependency>
-
-
 	</dependencies>
 
 </project>

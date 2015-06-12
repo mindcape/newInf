@@ -1,6 +1,9 @@
 package com.inferneon.supervised;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -13,18 +16,31 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
-import com.inferneon.core.Instances;
+import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.Value;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
-import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 import com.inferneon.supervised.DecisionTreeBuilder.Method;
 
 public class DecisionTreeTest extends SupervisedLearningTest{
 
 	private static final String ROOT = "/TestResources";
+	
+	static {
+		try {
+			Class.forName("com.inferneon.core.Instances");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private InputStream getDataInputStream(String data){
+		return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+	}
 	
 	@Test
 	public void testID3Simple1() throws Exception {
@@ -35,32 +51,16 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
 
 		dtBuilder.train(instances);
 		
 		DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree = dtBuilder.getDecisionTree();
 		DecisionTreeNode rootNode = dtBuilder.getRootNode();
 		Assert.assertTrue(rootNode.toString().equals("Outlook"));
-
-//		@attribute Outlook 			{Sunny, Overcast, Rain}
-//		@attribute Temperature	{Hot, Mild, Cool}
-//		@attribute Humidity		{High, Normal}
-//		@attribute Wind	{Strong, Weak}
-//		@attribute PlayTennis	{Yes, No}
-//		
-//		Outlook:
-//			(Rain) -> Wind
-//			(Sunny) -> Humidity
-//			(Overcast) -> Yes(Yes: 4.0)
-//		Wind:
-//			(Strong) -> No(No: 2.0)
-//			(Weak) -> Yes(Yes: 3.0)
-//		Humidity:
-//			(Normal) -> Yes(Yes: 2.0)
-//			(High) -> No(No: 3.0)
 
 		checkClassification("No", attributes, dtBuilder, "Sunny", "Hot", "High", "Strong");
 		checkClassification("No", attributes, dtBuilder, "Sunny", "Cool", "High", "Strong");
@@ -102,9 +102,9 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		InputStream data = getDataInputStream(arffElements.getData());
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Y", "N", "Y", "N", "None", "Mod", "N", "Y", "Thai", "0-10");
@@ -122,9 +122,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
 		Instance newInstance = new Instance(newValues);
@@ -143,9 +145,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 		
 		DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>  decisionTree = dt.getDecisionTree();
@@ -165,9 +169,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -186,9 +192,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -208,9 +216,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -230,9 +240,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -251,9 +263,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+		
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -272,9 +286,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -293,9 +309,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -314,9 +332,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -335,9 +354,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
+		InputStream data = getDataInputStream(arffElements.getData());
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
 		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -355,10 +376,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
-		List<Attribute> attributes = arffElements.getAttributes();
-		
-		String data = arffElements.getData();
-		Instances instances = DataLoader.loadData(attributes, data, fileName);
+		List<Attribute> attributes = arffElements.getAttributes();		
+		InputStream data = getDataInputStream(arffElements.getData());
+		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
+				attributes, attributes.size() -1);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
