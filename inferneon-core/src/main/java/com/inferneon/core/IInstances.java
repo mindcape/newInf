@@ -1,12 +1,16 @@
 package com.inferneon.core;
 
 import java.io.InputStream;
+import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import com.inferneon.supervised.FrequencyCounts;
 
-public abstract class IInstances {
+public abstract class IInstances implements Serializable{
 
 	public enum Context{
 		STAND_ALONE,
@@ -15,8 +19,8 @@ public abstract class IInstances {
 	}
 
 	public Context context;
-	private List<Attribute> attributes;
-	private int classIndex;
+	protected List<Attribute> attributes;
+	protected int classIndex;
 
 	public IInstances(Context context){
 		this.context = context;
@@ -25,10 +29,6 @@ public abstract class IInstances {
 	public void setAttributes(List<Attribute> attributes){
 		this.attributes = attributes;
 		classIndex = attributes.size() -1;   // Default
-	}
-
-	public List<Attribute> getAttributes(){
-		return attributes;
 	}
 
 	public int getClassIndex() {
@@ -44,10 +44,30 @@ public abstract class IInstances {
 		return classAttribute.getNumValues();
 	}
 
-	public abstract IInstances createInstances(List<Attribute> attributes, int classIndex, String sourceURI) throws Exception;	
-	public abstract IInstances createInstances(InputStream inputStream, List<Attribute> attributes, int classIndex) throws Exception;
+	protected Value getMaxTargetValue(Map<Value, Double> totalTargetCounts) {
+
+		Double maxValue = 0.0;
+		Value valueWithMaxInstances = null;
+		Set<Entry<Value, Double>> entries = totalTargetCounts.entrySet();
+		Iterator<Entry<Value, Double>> iterator = entries.iterator();
+		while(iterator.hasNext()){
+			Entry<Value, Double> entry = iterator.next();
+			Value value = entry.getKey();
+			Double numInstances = entry.getValue();
+
+			if(Double.compare(numInstances, maxValue) > 0){
+				maxValue = numInstances;
+				valueWithMaxInstances = value;
+			}
+		}
+
+		return valueWithMaxInstances;		
+	}
 	
+	public abstract IInstances createInstances(List<Attribute> attributes, int classIndex, String sourceURI) throws Exception;	
+	public abstract String getContextId();
 	public abstract long size();
+	public abstract List<Attribute> getAttributes();
 	public abstract void addInstance(Instance instance);
 	public abstract Double sumOfWeights();
 	public abstract Double sumOfWeights(long startIndex, long endIndex);

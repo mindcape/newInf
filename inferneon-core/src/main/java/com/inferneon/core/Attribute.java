@@ -1,11 +1,12 @@
 package com.inferneon.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Attribute {
+public class Attribute implements Serializable{
 	
 	public enum Type {
 		NOMINAL,
@@ -104,5 +105,34 @@ public class Attribute {
 			description += " numeric";
 		}
 		return description;		
-	}	
+	}
+	
+	@Override
+	public boolean equals(Object otherObj){
+		if(this == otherObj){
+			return true;
+		}
+		
+		if(!(otherObj instanceof Attribute)){
+			return false;
+		}
+		
+		Attribute otherAttr = (Attribute) otherObj;
+		if(otherAttr.getType() != this.type){
+			return false;
+		}
+		
+		if(!(otherAttr.getName().equalsIgnoreCase(name))){
+			return false;
+		}
+		
+		return true;		
+	}
+	
+	@Override
+	public int hashCode() {
+		int hash = 3;
+		hash = 7 * hash + name.hashCode();
+		return hash;
+	}
 }

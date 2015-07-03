@@ -52,6 +52,7 @@ public class Instances extends IInstances {
 		return instances;
 	}
 
+	@Override
 	public List<Attribute> getAttributes(){
 		return attributes;
 	}
@@ -320,28 +321,9 @@ public class Instances extends IInstances {
 			return instances;
 		}
 		
-		// Load from source URI
-		
-        URL url = ParserUtils.class.getResource(sourceURI);
-        
-        String  f = url.getFile();
-        File file = new File(f);
-		
-		InputStream inputStream = new FileInputStream(file);
+		InputStream inputStream = new FileInputStream(sourceURI);
 		return loadData(attributes, inputStream, false);
 	}
-	
-	@Override
-	public IInstances createInstances( InputStream inputStream, List<Attribute> attributes, int classIndex) throws IOException, InvalidDataException{		
-		if(inputStream == null){
-			IInstances instances =  new Instances(Context.STAND_ALONE, new ArrayList<Instance>(), attributes, classIndex);
-			return instances;
-		}
-		
-		// Load from input stream	
-		return loadData(attributes, inputStream, false);
-	}
-	
 	
 	@Override
 	public Long indexOfFirstInstanceWithMissingValueForAttribute(
@@ -382,26 +364,6 @@ public class Instances extends IInstances {
 		}
 
 		return valueAndInstancesHavingValue;
-	}
-
-	private static Value getMaxTargetValue( Map<Value, Double> totalTargetCounts) {
-
-		Double maxValue = 0.0;
-		Value valueWithMaxInstances = null;
-		Set<Entry<Value, Double>> entries = totalTargetCounts.entrySet();
-		Iterator<Entry<Value, Double>> iterator = entries.iterator();
-		while(iterator.hasNext()){
-			Entry<Value, Double> entry = iterator.next();
-			Value value = entry.getKey();
-			Double numInstances = entry.getValue();
-
-			if(Double.compare(numInstances, maxValue) > 0){
-				maxValue = numInstances;
-				valueWithMaxInstances = value;
-			}
-		}
-
-		return valueWithMaxInstances;		
 	}
 
 	public Double getSumOfWeights(Set<Instance> instances){
@@ -461,8 +423,15 @@ public class Instances extends IInstances {
 			Map<Value, Map<Value, Double>> targetClassCount){
 
 		Map<Value, Double> cummulativeTargetCounts = new HashMap<Value, Double>();
+		
+		Set<Value> valuesChecked = new HashSet<>(); 
+		
 		for(Instance inst : instances){
 			Value val = inst.getValue(attributeIndex);
+			if(valuesChecked.contains(val)){
+				continue;
+			}
+			valuesChecked.add(val);
 			Map<Value, Double> counts = targetClassCount.get(val);	
 			if(cummulativeTargetCounts.size() == 0){
 				cummulativeTargetCounts.putAll(counts);
@@ -576,5 +545,10 @@ public class Instances extends IInstances {
 		instances.setAttributes(attributes);
 
 		return instances;		
-	}	
+	}
+
+	@Override
+	public String getContextId() {
+		return "STAND_ALONE";
+	}
 }

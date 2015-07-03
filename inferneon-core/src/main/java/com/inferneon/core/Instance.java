@@ -1,8 +1,9 @@
 package com.inferneon.core;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Instance {
+public class Instance implements Serializable{
 
 	// Values for this instance. Matches with corresponding attributes
 	private List<Value> values;
@@ -58,5 +59,14 @@ public class Instance {
 		}
 
 		return description.trim();
+	}
+
+	public boolean hasMissingValues() {
+		for(Value value : values){
+			if(value.getType() == Value.ValueType.MISSING){
+				return true;
+			}
+		}
+		return false;
 	}	
 }

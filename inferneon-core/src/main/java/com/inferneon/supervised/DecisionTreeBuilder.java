@@ -75,7 +75,7 @@ public class DecisionTreeBuilder extends Supervised{
 			e.printStackTrace();
 		}
 
-		decisionTree.emitTree(null);		
+		decisionTree.emitTree();		
 	}
 
 	public DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> getDecisionTree(){

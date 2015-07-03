@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 
@@ -56,7 +57,14 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 		this.decisionTreeRootNode = decisionTreeRootNode;
 	}	
 	
-	public void emitTree(DecisionTreeNode node) {
+	public void emitTree(){
+		Stack<Integer> depthStack = new Stack<>();
+		depthStack.push(0);
+		
+		emitTree(decisionTreeRootNode, depthStack);
+	}
+	
+	private void emitTree(DecisionTreeNode node, Stack<Integer> depthStack) {
 		if(node == null){
 			node = decisionTreeRootNode;
 		}		
@@ -91,7 +99,7 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 		}
 
 		for(DecisionTreeNode child : children){
-			emitTree(child);
+			emitTree(child, depthStack);
 		}		
 	}	
 }

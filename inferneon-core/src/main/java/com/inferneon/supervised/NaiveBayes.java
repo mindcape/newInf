@@ -132,8 +132,7 @@ public class NaiveBayes extends Supervised{
 		return targetByNaiveBayesComputation(targetClassValuesAndProbablities);		
 	}
 
-	private Value targetByNaiveBayesComputation(
-			Map<Value, List<Double>> targetClassValuesAndProbablities) {
+	private Value targetByNaiveBayesComputation(Map<Value, List<Double>> targetClassValuesAndProbablities) {
 
 		Value targetValueWithMaxPr = null;
 		Double maxPr = null;
@@ -161,7 +160,6 @@ public class NaiveBayes extends Supervised{
 					targetValueWithMaxPr = targetClassValue;
 				}
 			}
-
 		}
 
 		return targetValueWithMaxPr;		

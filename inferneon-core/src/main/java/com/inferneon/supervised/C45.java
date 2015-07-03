@@ -2,6 +2,7 @@ package com.inferneon.supervised;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import com.inferneon.core.Instances;
 import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.Value;
 import com.inferneon.core.Value.ValueType;
+import com.inferneon.core.exceptions.InvalidDataException;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.core.utils.StatisticsUtils;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
@@ -58,10 +60,11 @@ public class C45 {
 	public void train(IInstances instances) throws Exception{		
 		this.allInstances = instances;	
 		frequencyCountsOfAllInstances = allInstances.getFrequencyCounts();
+		long before = new Date().getTime();
 		train(null, null, instances);
 
 		System.out.println("TREE BEFORE COLLAPSING: ");
-		decisionTree.emitTree(null);
+		decisionTree.emitTree();
 		System.out.println("TREE AFTER COLLAPSING: ");
 
 		collapseTree();
@@ -69,10 +72,15 @@ public class C45 {
 		System.out.println("######################## STARTED PRUNING DECISION TREE NOW WITH ########################");
 
 		pruneDecisionTree(decisionTree.getDecisionTreeRootNode());
+
+		long after = new Date().getTime();
+
+		double timeElapsedDbl = ((double)(after - before)) / 1000.0;
+		System.out.println("Decision tree computed in: " + (long)timeElapsedDbl + " seconds");
 	}
 
 	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, IInstances instances) 
-					throws Exception{
+			throws Exception{
 
 		if(decisionTreeEdge != null && decisionTreeEdge.toString().equalsIgnoreCase("Sunny")){
 			//System.out.println("WAIT HERE");
@@ -488,8 +496,10 @@ public class C45 {
 		// If there is any value that has no instances, add that as a split with an empty set of instances
 
 		for(Value value : missingValuesList){			
-			IInstances emptyInstances = InstancesFactory.getInstance().createInstances(null, "STAND_ALONE", 
-					instances.getAttributes(), instances.getClassIndex());
+			//IInstances emptyInstances = InstancesFactory.getInstance().createInstances(null, "STAND_ALONE", 
+			//		instances.getAttributes(), instances.getClassIndex());
+			IInstances emptyInstances = InstancesFactory.getInstance().createInstances(instances.getContextId(), 
+					instances.getAttributes(), instances.getClassIndex(), null);
 			emptyInstances.setAttributes(instances.getAttributes());
 			decisionTreeEdgeAndInstances.put(new DecisionTreeEdge(value), emptyInstances);
 		}
@@ -557,7 +567,8 @@ public class C45 {
 			long maxIndexWithSameValue = 1;
 			Value nextValue = instances.valueOfAttributeAtInstance(splitPoint + maxIndexWithSameValue, attributeIndex);
 
-			while(Value.valuesAreIdentical(thresholdValue, nextValue)){
+			//while(Value.valuesAreIdentical(thresholdValue, nextValue)){
+			while(thresholdValue.equals(nextValue)){
 				maxIndexWithSameValue++;				
 				if(splitPoint + maxIndexWithSameValue >=  instances.size()){
 					break;
@@ -598,6 +609,11 @@ public class C45 {
 			weightedEntropy += getWeightedEntropyForValuesSubset(attributeIndex, splitAfterThreshold,
 					instancesWithKnownValuesSize,  targetClassCount);
 			Double infoGainForSplit = knownValueInstancesRatio * (entropyOfTrainingSample - weightedEntropy);
+			if(attribute.getName().equalsIgnoreCase("Temperature")){
+				System.out.println("Inferneon: Ratio of instances with known values at split point: " + splitPoint +  
+						" and split weights (" + sumOfWeightsBeforeThreshold + ", " +  sumOfWeightsAfterThreshold + ") ="
+						+  infoGainForSplit);
+			}
 
 			BestAttributeSearchResult attributeSearchResultWithMaxInfoGain = new BestAttributeSearchResult(attribute, infoGainForSplit, 
 					splitPoint,  thresholdValue, splitBeforeThreshold, splitAfterThreshold);
@@ -640,10 +656,20 @@ public class C45 {
 	}
 
 	private Double getWeightedEntropyForValuesSubset(int attributeIndex, IInstances split, Double instancesSize,
-			Map<Value, Map<Value, Double>> targetClassCount) {
+			Map<Value, Map<Value, Double>> targetClassCount)  {
 
 		double totalOccurencesOfValue = split.sumOfWeights();
-		Map<Value, Double> cummulativeTargetCounts = split.cummulativeTargetClassCountForContinuousValuedAttribute(attributeIndex, targetClassCount);
+
+		Map<Value, Double> cummulativeTargetCounts = null;
+		try{
+			cummulativeTargetCounts = split.getFrequencyCounts().getTotalTargetCounts();
+		}
+		catch(Exception e){
+			// Should not happen
+			e.printStackTrace();
+		}
+
+		//Map<Value, Double> cummulativeTargetCounts = split.cummulativeTargetClassCountForContinuousValuedAttribute(attributeIndex, targetClassCount);
 		Double entropyForVals = computeEntropy(totalOccurencesOfValue, cummulativeTargetCounts);
 		Double weightRatio = ((double)totalOccurencesOfValue) /((double) instancesSize);
 		//		
@@ -760,7 +786,7 @@ public class C45 {
 			if(Double.compare(totalNumInsts, 0.0) == 0){
 				return 0.0;
 			}
-			
+
 			Double numCorrect = targetClassCounts.get(node.getValue());
 			Double numIncorrect = totalNumInsts - numCorrect;
 			return numIncorrect;
@@ -779,7 +805,7 @@ public class C45 {
 
 	private void pruneDecisionTree(DecisionTreeNode node) throws CycleFoundException {
 		System.out.println("CURRENT TREE: ");
-		decisionTree.emitTree(null);
+		decisionTree.emitTree();
 		System.out.println("END CURRENT TREE ");
 
 		if(! node.isLeaf()){

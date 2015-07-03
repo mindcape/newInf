@@ -1,12 +1,13 @@
 package com.inferneon.supervised;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
-import com.inferneon.core.Instance;
 import com.inferneon.core.Value;
 import com.inferneon.core.exceptions.InvalidDataException;
 
@@ -16,9 +17,9 @@ import com.inferneon.core.exceptions.InvalidDataException;
  */
 
 public class FrequencyCounts {
-	
+
 	private static final String NON_UNIFORM_TARGET_COUNTS = "Target value counts will be not be uniform across attributes for data with missing values.";
-	
+
 	private Long numInstances;
 	private Double sumOfWeights;
 	private Double totalInstancesWithMissingValues;
@@ -31,7 +32,7 @@ public class FrequencyCounts {
 	private List<Map<Value, Map<Value, Double>>>  valueAndTargetClassCount;
 	private Map<Attribute, Map<Value, Double>> attributeValueCounts;
 	private Map<Attribute, IInstances> attributeAndMissingValueInstances;
-	
+
 	public Long getNumInstances() {
 		return numInstances;
 	}
@@ -47,7 +48,7 @@ public class FrequencyCounts {
 	public void setSumOfWeights(Double sumOfWeights) {
 		this.sumOfWeights = sumOfWeights;
 	}
-	
+
 	public Map<Value, Double> getTotalTargetCounts() {
 		return totalTargetCounts;
 	}
@@ -67,23 +68,23 @@ public class FrequencyCounts {
 	public void setMaxTargetValueCount(Double maxTargetValueCount) {
 		this.maxTargetValueCount = maxTargetValueCount;
 	}
-	
+
 	public void setTotalTargetCounts(Map<Value, Double> totalTargetCounts) {
 		this.totalTargetCounts = totalTargetCounts;
 	}
-	
+
 	public Map<Value, Double> getTargetCountsForAttribute(Attribute attribute) {
 		return attributeAndTargetClassCounts.get(attribute);
 	}
-	
+
 	public void setAttributeAndTargetClassCounts(Map<Attribute, Map<Value, Double>> attributeAndTargetClassCounts) {
 		this.attributeAndTargetClassCounts = attributeAndTargetClassCounts;
 	}
-	
+
 	public List<Map<Value, Map<Value, Double>>> getValueAndTargetClassCount() {
 		return valueAndTargetClassCount;
 	}
-	
+
 	public Map<Attribute, Long> getAttributeAndNonMissingValueCount() {
 		return attributeAndNonMissingValueCount;
 	}
@@ -92,7 +93,7 @@ public class FrequencyCounts {
 			Map<Attribute, Long> attributeAndNonMissingValueCount) {
 		this.attributeAndNonMissingValueCount = attributeAndNonMissingValueCount;
 	}
-	
+
 	public void setValueAndTargetClassCount(
 			List<Map<Value, Map<Value, Double>>> valueAndTargetClassCount) {
 		this.valueAndTargetClassCount = valueAndTargetClassCount;
@@ -102,7 +103,7 @@ public class FrequencyCounts {
 			Map<Attribute, Map<Value, Double>> attributeValueCounts) {
 		this.attributeValueCounts = attributeValueCounts;		
 	}
-	
+
 	public Map<Attribute, Map<Value, Double>> getAttributeValueCounts() {
 		return attributeValueCounts;
 	}
@@ -111,7 +112,7 @@ public class FrequencyCounts {
 			Map<Attribute, IInstances> attributeAndMissingValueInstances) {
 		this.attributeAndMissingValueInstances = attributeAndMissingValueInstances;		
 	}	
-	
+
 	public Map<Attribute, IInstances> getAttributeAndMissingValueInstances() {
 		return attributeAndMissingValueInstances;
 	}
@@ -120,33 +121,33 @@ public class FrequencyCounts {
 			Double totalInstancesWithMissingValues) {
 		this.totalInstancesWithMissingValues =totalInstancesWithMissingValues;		
 	}
-	
+
 	public Double getTotalInstancesWithMissingValues(){
 		return totalInstancesWithMissingValues;
 	}
-	
+
 	public Double getNumMissingInstancesForAttribute(Attribute attribute){
 		IInstances missingValueInstancesForAttr =  attributeAndMissingValueInstances.get(attribute);
-		 if(missingValueInstancesForAttr == null || missingValueInstancesForAttr.size() == 0){
-			 return 0.0;
-		 }
-		 
-		 Double totalWeightOfInstancesWithMissingVals = missingValueInstancesForAttr.sumOfWeights();
-		 
-		 return totalWeightOfInstancesWithMissingVals;
-		 
+		if(missingValueInstancesForAttr == null || missingValueInstancesForAttr.size() == 0){
+			return 0.0;
+		}
+
+		Double totalWeightOfInstancesWithMissingVals = missingValueInstancesForAttr.sumOfWeights();
+
+		return totalWeightOfInstancesWithMissingVals;
+
 	}
-	
+
 	public Map<Value, Double> getTargetCounts() throws InvalidDataException{
-		
+
 		if(attributeAndMissingValueInstances != null && attributeAndMissingValueInstances.size() > 0){
 			throw new InvalidDataException(NON_UNIFORM_TARGET_COUNTS);
 		}
-		
+
 		if(attributeAndTargetClassCounts.size() == 0){
 			return new HashMap<Value, Double>();
 		}
-		
+
 		// Target class counts for any attribute will do.
 		return attributeAndTargetClassCounts.entrySet().iterator().next().getValue();
 	}
@@ -158,6 +159,84 @@ public class FrequencyCounts {
 	}
 
 	public Double getErrorOnDistribution() {
+		if(sumOfWeights == null || maxTargetValueCount == null){
+			System.out.println("WAIT HERE");
+		}
 		return sumOfWeights - maxTargetValueCount;
 	}
+
+	@Override
+	public String toString(){
+		String newLine = "\n";
+		String description = "";
+		description += "===========Total number of instances = " + numInstances + newLine;
+		description += "===========Sum of weights = " + sumOfWeights + newLine;
+		description += "===========Total number of instances with missing values = " + totalInstancesWithMissingValues + newLine;
+		description += "===========Target value with max instances: " + maxTargetValue +  newLine;
+		description += "===========Count of target value with max instances: " + maxTargetValueCount +  newLine;
+		description += "===========Target counts: " + newLine;
+		description += valueAndDoublePairDescription(totalTargetCounts.entrySet().iterator(), newLine, 1);
+		description += "===========Target counts for each attribute: " + newLine;
+		description += attributeAndValueDoublePairDescription(attributeAndTargetClassCounts.entrySet().iterator(), newLine);
+		description += "===========Counts for each attribute value: " + newLine;
+		description += attributeAndValueDoublePairDescription(attributeValueCounts.entrySet().iterator(), newLine);
+		description += "===========Non-missing instance count for each atribute: " + newLine;
+		Iterator<Entry<Attribute, Long>> iterator = attributeAndNonMissingValueCount.entrySet().iterator();
+		while(iterator.hasNext()){
+			Entry<Attribute, Long> entry = iterator.next();
+			description += "	" + entry.getKey().getName() + ": ";
+			description += entry.getValue() + newLine;						
+		}
+		description += "===========Value and target class count for each attribute by index: " + newLine;
+		int attributeIndex = 0;
+		for(Map<Value, Map<Value, Double>> valAndTargetClassCount : valueAndTargetClassCount){
+			if(valAndTargetClassCount == null){
+				continue;
+			}
+			description += "Attribute index " + (attributeIndex +1) + ": " + newLine;
+			Iterator<Entry<Value, Map<Value, Double>>> iterator1 = valAndTargetClassCount.entrySet().iterator();
+			while(iterator1.hasNext()){
+				Entry<Value, Map<Value, Double>> entry1 = iterator1.next();
+				String valName = entry1.getKey().getName();
+				if(valName == null){
+					continue;
+				}
+				description += "	Value: " + valName + ": " + newLine;
+				Map<Value, Double> targetClassCounts = entry1.getValue();
+				description += valueAndDoublePairDescription(targetClassCounts.entrySet().iterator(), newLine, 3);						
+			}			
+			attributeIndex++;
+		}
+
+		return description;
+	}
+
+	private String valueAndDoublePairDescription(Iterator<Entry<Value, Double>> iterator, String newLine, int numIndents){
+		String description = "";
+		String indents = "";
+		for(int i = 0; i < numIndents; i++){
+			indents += "	";
+		}
+		while(iterator.hasNext()){
+			Entry<Value, Double> entry = iterator.next();
+			String valName = entry.getKey().getName();
+			if(valName != null){
+				description += indents + valName + ": ";
+				description += entry.getValue() + newLine;
+			}
+		}
+		description += newLine;
+		return description;
+	}
+
+	private String attributeAndValueDoublePairDescription(Iterator<Entry<Attribute, Map<Value, Double>>> iterator, String newLine){
+		String description = "";
+		while(iterator.hasNext()){
+			Entry<Attribute, Map<Value, Double>> entry = iterator.next();
+			description += "	Attribute: " + entry.getKey().getName() + newLine;
+			description += valueAndDoublePairDescription(entry.getValue().entrySet().iterator(), newLine, 2);
+		}
+		description += newLine;
+		return description;
+	}	
 }

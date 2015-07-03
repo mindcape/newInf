@@ -27,13 +27,17 @@ public class InstancesFactory {
 		registeredInstanceTypes.put(instancesID, instances);
 	}
 	
-	public IInstances createInstances(String instancesID, List<Attribute> attributes, int classIndex, String sourceURI) throws Exception{
-		return registeredInstanceTypes.get(instancesID).createInstances(attributes, classIndex, sourceURI);
-	}
-	
-
-	public IInstances createInstances(InputStream inputStream, String instancesID, List<Attribute> attributes, int classIndex) throws Exception{
-		return registeredInstanceTypes.get(instancesID).createInstances(inputStream, attributes, classIndex);
-	}
-	
+	/**
+	 * Used to create instances when attributes and the class index are known. The sourceURI points to a
+	 * location of the CSV file.
+	 * @param instancesID
+	 * @param attributes
+	 * @param classIndex
+	 * @param sourceURI
+	 * @return
+	 * @throws Exception
+	 */
+	public IInstances createInstances(String instancesID, List<Attribute> attributes, int classIndex, String csvSourceURI) throws Exception{
+		return registeredInstanceTypes.get(instancesID).createInstances(attributes, classIndex, csvSourceURI);
+	}	
 }

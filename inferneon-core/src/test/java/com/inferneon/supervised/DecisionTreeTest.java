@@ -1,9 +1,8 @@
 package com.inferneon.supervised;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -11,7 +10,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,7 +29,8 @@ import com.inferneon.supervised.DecisionTreeBuilder.Method;
 public class DecisionTreeTest extends SupervisedLearningTest{
 
 	private static final String ROOT = "/TestResources";
-	
+	private static final String APP_TEMP_FOLDER = "Inferneon";
+
 	static {
 		try {
 			Class.forName("com.inferneon.core.Instances");
@@ -37,9 +39,47 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 			e.printStackTrace();
 		}
 	}
+
+	private String getAppTempDir(){
+		
+		String sysTempFolder = System.getProperty("java.io.tmpdir");
+		String tempPath = sysTempFolder + (sysTempFolder.endsWith(File.separator)? "": File.separator) + APP_TEMP_FOLDER + File.separator;
+		File tempDir = new File(tempPath);
+		tempDir.mkdir();
+		
+		return tempPath;
+	}
 	
-	private InputStream getDataInputStream(String data){
-		return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+	private String getCreatedCSVFilePath(String arffFileName, String data){
+		PrintWriter out = null;
+		String csvFileName = null;
+		String tempPath = getAppTempDir();
+		try{
+			String fileNameWithouExt = arffFileName.substring(0, arffFileName.lastIndexOf(".arff"));
+			csvFileName = tempPath + fileNameWithouExt + ".csv";			
+			out = new PrintWriter(csvFileName);
+			out.print(data);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return csvFileName;
+		}
+		finally{
+			out.close();
+		}
+
+		return csvFileName;
+	}
+
+	@After
+	public void tearDown(){
+		File tempPath = new File(getAppTempDir());
+		try {
+			FileUtils.cleanDirectory(tempPath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Test
@@ -48,16 +88,16 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder();
 
 		System.out.println("Current path = " + new File(".").getAbsolutePath());
-		
+
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
 
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dtBuilder.train(instances);
-		
+
 		DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree = dtBuilder.getDecisionTree();
 		DecisionTreeNode rootNode = dtBuilder.getRootNode();
 		Assert.assertTrue(rootNode.toString().equals("Outlook"));
@@ -68,22 +108,22 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		checkClassification("Yes", attributes, dtBuilder, "Sunny", "Mild", "Normal", "Weak");
 		checkClassification("Yes", attributes, dtBuilder, "Sunny", "Hot", "Normal", "Strong");
 		checkClassification("Yes", attributes, dtBuilder, "Sunny", "Cool", "Normal", "Weak");
-		
+
 		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Mild", "High", "Weak");
 		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Hot", "Normal", "Strong");
 		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Cool", "High", "Weak");
 		checkClassification("Yes", attributes, dtBuilder, "Overcast", "Mild", "Normal", "Strong");
-		
+
 		checkClassification("Yes", attributes, dtBuilder, "Rain", "Mild", "High", "Weak");
 		checkClassification("Yes", attributes, dtBuilder, "Rain", "Cool", "Normal", "Weak");
 		checkClassification("Yes", attributes, dtBuilder, "Rain", "Hot", "High", "Weak");
 		checkClassification("No", attributes, dtBuilder, "Rain", "Hot", "Normal", "Strong");
 		checkClassification("No", attributes, dtBuilder, "Rain", "Cool", "High", "Strong");
 		checkClassification("No", attributes, dtBuilder, "Rain", "Mild", "Normal", "Strong");
-		
+
 		//List<DecisionTreeNode> leafNodes = getLeafNodes(decisionTree);		
 	}
-	
+
 	private void checkClassification(String target, List<Attribute> attributes, DecisionTreeBuilder dtBuilder,
 			String ... values) {
 		List<Value> newValues = getValueListForTestInstance(attributes, values);
@@ -102,9 +142,9 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Y", "N", "Y", "N", "None", "Mod", "N", "Y", "Thai", "0-10");
@@ -122,10 +162,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -145,13 +185,13 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
-		
+
 		DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>  decisionTree = dt.getDecisionTree();
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -160,7 +200,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
-	
+
 	@Test
 	public void testC45TwoMissingValuesOfDiffAttrsInDiffInstances() throws Exception {
 
@@ -169,10 +209,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 
@@ -192,10 +232,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 
@@ -204,9 +244,9 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));
-		
+
 	}
-	
+
 	@Test
 	public void testC45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance() throws Exception {
 
@@ -216,10 +256,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 
@@ -228,9 +268,9 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));
-		
+
 	}
-	
+
 	@Test
 	public void testC45OneMissingContinuousValue() throws Exception {
 
@@ -240,10 +280,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 
@@ -253,7 +293,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
-	
+
 	@Test
 	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance() throws Exception {
 
@@ -263,11 +303,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
-		
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
+
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -276,7 +316,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
-	
+
 	@Test
 	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances() throws Exception {
 
@@ -286,10 +326,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 
@@ -299,7 +339,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
-	
+
 	@Test
 	public void testC45TwoMissingContinuousValuesInSameInstance() throws Exception {
 
@@ -309,10 +349,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 
@@ -322,7 +362,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));		
 	}
-	
+
 	@Test
 	public void testC45TwoMissingContinuousValuesInDiffInstances() throws Exception {
 
@@ -332,10 +372,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 		dt.train(instances);
 
 		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
@@ -344,7 +384,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
-	
+
 	@Test
 	public void testC45ManyMissingValuesAtRandom() throws Exception {
 
@@ -354,10 +394,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
-		InputStream data = getDataInputStream(arffElements.getData());
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
-		
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
+
 
 		dt.train(instances);
 
@@ -367,7 +407,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("NO"));		
 	}
-	
+
 	@Test
 	public void testC45GainRatioManyMissingValuesAtRandom() throws Exception {
 
@@ -377,9 +417,9 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();		
-		InputStream data = getDataInputStream(arffElements.getData());
-		IInstances instances = InstancesFactory.getInstance().createInstances(data, "STAND_ALONE", 
-				attributes, attributes.size() -1);
+		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
+		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
+				attributes, attributes.size() -1, csvFilePath);
 
 		dt.train(instances);
 
@@ -387,45 +427,45 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Instance newInstance = new Instance(newValues);
 
 		Value targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
-		
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));	
+
 		newValues = getValueListForTestInstance(attributes, "Overcast", "65", "95", "true");
 		newInstance = new Instance(newValues);
 
 		targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));	
-		
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
+
 	}
 	
 	private void verifyTree(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, DecisionTreeNode rootNode,
 			String rootNodeName, Map<String, List<String>> parentAndOutgoingEdgeNames, Map<String, String> edgeAndTargetNode){
-		
+
 		Assert.assertTrue(rootNodeName.equals(rootNode.getAttribute().getName()));
-		
+
 		Set<Entry<String, List<String>>> entries = parentAndOutgoingEdgeNames.entrySet();
 		Iterator<Entry<String, List<String> >> iterator = entries.iterator();
 		while(iterator.hasNext()){
 			Entry<String, List<String> > entry = iterator.next();
 			String attrName = entry.getKey();
 			List<String> outgoingEdgeNames = entry.getValue();
-			
+
 			DecisionTreeNode nodeInTree = getNodeByName(decisionTree, attrName);
 			Set<DecisionTreeEdge>  outgoingEdgesOfNodeInTree = decisionTree.outgoingEdgesOf(nodeInTree);
-			
+
 			Assert.assertTrue(outgoingEdgesOfNodeInTree.size() == outgoingEdgeNames.size());
-			
+
 			Iterator<DecisionTreeEdge> edgesIterator = outgoingEdgesOfNodeInTree.iterator();
 			while(edgesIterator.hasNext()){
 				DecisionTreeEdge edge = edgesIterator.next();
 				String edgeName = edge.toString();
 				Assert.assertTrue(outgoingEdgeNames.contains(edgeName));
-				
+
 				String targetNodeName = decisionTree.getEdgeTarget(edge).getAttribute().getName();
 				Assert.assertTrue(targetNodeName.equals(edgeAndTargetNode.get(edgeName)));				
 			}
 		}		
 	}
-	
+
 	private DecisionTreeNode getNodeByName(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, String name){
 		Set<DecisionTreeNode> nodes = decisionTree.vertexSet();
 		Iterator<DecisionTreeNode> iterator = nodes.iterator();
@@ -435,10 +475,10 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 				return node;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private DecisionTreeEdge getEdgeByName(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, String name){
 		Set<DecisionTreeEdge> edges = decisionTree.edgeSet();
 		Iterator<DecisionTreeEdge> iterator = edges.iterator();
@@ -448,11 +488,11 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 				return edge;
 			}
 		}
-		
+
 		return null;
 	}
-	
-	
+
+
 	private Set<String> getEdgeNames(Set<DecisionTreeEdge>  edgesInTree){		
 		Set<String> edgeNames = new HashSet<>();
 		Iterator<DecisionTreeEdge> iterator = edgesInTree.iterator();

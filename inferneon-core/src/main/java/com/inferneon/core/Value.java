@@ -1,6 +1,8 @@
 package com.inferneon.core;
 
-public class Value{
+import java.io.Serializable;
+
+public class Value implements Serializable{
 	
 	private String name;
 	private Double real;
@@ -66,34 +68,59 @@ public class Value{
 		}
 	}
 	
-	public static boolean valuesAreIdentical(Value value1, Value value2){
+	@Override
+	public  boolean equals(Object otherObject){
 		
-		if(value1 == value2){
+		if(!(otherObject instanceof Value)){
+			return false;
+		}
+		
+		Value value2 = (Value) otherObject;
+		
+		if(this == value2){
 			return true;
 		}
 		
-		ValueType type = value1.getType();
 		if(type != value2.getType()){
 			return false;
 		}
 		
 		if(type == ValueType.NOMINAL){
-			if(!value1.getName().equals(value2.getName())){
+			if(!name.equals(value2.getName())){
 				return false;
 			}
 		}
 		else if(type == ValueType.NUMERIC){
-			if(value1.getNumber() != value2.getNumber()){
+			if(getNumber().longValue() != value2.getNumber().longValue()){
 				return false;
 			}
 		}
 		else if(type == ValueType.REAL){
-			if(Double.compare(value1.getReal(), value2.getReal()) != 0){
+			if(Double.compare(getReal(), value2.getReal()) != 0){
 				return false;
 			}
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public int hashCode(){
+		int hash = 3;
+		
+		String valRepresentation = "";
+		if(type == ValueType.NOMINAL){
+			valRepresentation = name;
+		}
+		else if(type == ValueType.NUMERIC){
+			valRepresentation = "" + getNumber();
+		}
+		else if(type == ValueType.REAL){
+			valRepresentation = "" + getReal();
+		}
+		
+		hash = 7 * hash + valRepresentation.hashCode();
+		return hash;
 	}
 	
 	public Double getNumericValueAsDouble(){

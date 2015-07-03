@@ -35,11 +35,11 @@ public class DataLoader {
 //	}
 
 	
-	public static Double getSumOfWeights(List<Instance> instances){
-		double sum = 0L;
-		for(Instance inst: instances){
-			sum += inst.getWeight();
-		}		
-		return sum;
-	}
+//	public static Double getSumOfWeights(List<Instance> instances){
+//		double sum = 0L;
+//		for(Instance inst: instances){
+//			sum += inst.getWeight();
+//		}		
+//		return sum;
+//	}
 }
