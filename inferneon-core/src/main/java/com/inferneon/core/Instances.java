@@ -419,31 +419,6 @@ public class Instances extends IInstances {
 	}
 
 	@Override
-	public Map<Value, Double>  cummulativeTargetClassCountForContinuousValuedAttribute(int attributeIndex, 
-			Map<Value, Map<Value, Double>> targetClassCount){
-
-		Map<Value, Double> cummulativeTargetCounts = new HashMap<Value, Double>();
-		
-		Set<Value> valuesChecked = new HashSet<>(); 
-		
-		for(Instance inst : instances){
-			Value val = inst.getValue(attributeIndex);
-			if(valuesChecked.contains(val)){
-				continue;
-			}
-			valuesChecked.add(val);
-			Map<Value, Double> counts = targetClassCount.get(val);	
-			if(cummulativeTargetCounts.size() == 0){
-				cummulativeTargetCounts.putAll(counts);
-			}
-			else{
-				mergeCounts(cummulativeTargetCounts, counts);
-			}
-		}
-		return cummulativeTargetCounts;
-	}
-
-	@Override
 	public void appendAll(IInstances other, double weightFactor){
 		Instances otherInsts = (Instances) other;
 		List<Instance> otherInstList = otherInsts.getInstances();
@@ -453,25 +428,6 @@ public class Instances extends IInstances {
 			newInstance.setWeight(weight);
 			addInstance(newInstance);
 		}
-	}
-
-	private void mergeCounts(Map<Value, Double> cummulativeCounts,
-			Map<Value, Double> newCounts) {
-		Set<Entry<Value, Double>> entries = newCounts.entrySet();
-		Iterator<Entry<Value, Double>> iterator = entries.iterator();
-		while(iterator.hasNext()){
-			Entry<Value, Double> entry = iterator.next();
-			Value value = entry.getKey();
-			Double newCount = entry.getValue();
-
-			Double existingCount = cummulativeCounts.get(value);
-			if(existingCount != null){			
-				cummulativeCounts.put(value, existingCount + newCount);
-			}
-			else{
-				cummulativeCounts.put(value, newCount);
-			}
-		}		
 	}
 
 	private IInstances loadData(List<Attribute> attributes, InputStream inputStream, boolean removeFirstRow) throws IOException, InvalidDataException{

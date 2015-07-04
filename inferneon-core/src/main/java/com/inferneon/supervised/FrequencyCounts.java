@@ -1,5 +1,6 @@
 package com.inferneon.supervised;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,8 +18,6 @@ import com.inferneon.core.exceptions.InvalidDataException;
  */
 
 public class FrequencyCounts {
-
-	private static final String NON_UNIFORM_TARGET_COUNTS = "Target value counts will be not be uniform across attributes for data with missing values.";
 
 	private Long numInstances;
 	private Double sumOfWeights;
@@ -137,21 +136,7 @@ public class FrequencyCounts {
 		return totalWeightOfInstancesWithMissingVals;
 
 	}
-
-	public Map<Value, Double> getTargetCounts() throws InvalidDataException{
-
-		if(attributeAndMissingValueInstances != null && attributeAndMissingValueInstances.size() > 0){
-			throw new InvalidDataException(NON_UNIFORM_TARGET_COUNTS);
-		}
-
-		if(attributeAndTargetClassCounts.size() == 0){
-			return new HashMap<Value, Double>();
-		}
-
-		// Target class counts for any attribute will do.
-		return attributeAndTargetClassCounts.entrySet().iterator().next().getValue();
-	}
-
+	
 	public Map<Value, Double> getTargetCounts(int attributeIndex,
 			Value targetValue) {
 		Map<Value, Map<Value, Double>> valueAndTargetCounts = valueAndTargetClassCount.get(attributeIndex);

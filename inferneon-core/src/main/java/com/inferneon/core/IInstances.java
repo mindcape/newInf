@@ -91,12 +91,6 @@ public abstract class IInstances implements Serializable{
 	
 	public abstract Value valueOfAttributeAtInstance(long index, int attributeIndex);
 	
-	/**
-	 * For a continuous-valued attribute, computes the total counts for each target value.
-	 * 
-	 */
-	public abstract Map<Value, Double> cummulativeTargetClassCountForContinuousValuedAttribute(int attributeIndex, Map<Value, Map<Value, Double>> targetClassCount);
-	
 	public abstract void appendAll(IInstances other, double weightFactor);
 
 }

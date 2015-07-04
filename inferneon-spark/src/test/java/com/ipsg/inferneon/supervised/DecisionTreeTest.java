@@ -30,7 +30,6 @@ public class DecisionTreeTest {
 		try {
 			Class.forName("com.ipsg.inferneon.spark.SparkInstances");
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -109,8 +108,7 @@ public class DecisionTreeTest {
 		IInstances instances = InstancesFactory.getInstance().createInstances("SPARK", 
 				attributes, attributes.size() -1, csvFilePath);
 
-		dt.train(instances);
-		
+		dt.train(instances);		
 	}
 		
 	@After

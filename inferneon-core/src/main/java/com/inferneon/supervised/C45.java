@@ -672,17 +672,6 @@ public class C45 {
 		//Map<Value, Double> cummulativeTargetCounts = split.cummulativeTargetClassCountForContinuousValuedAttribute(attributeIndex, targetClassCount);
 		Double entropyForVals = computeEntropy(totalOccurencesOfValue, cummulativeTargetCounts);
 		Double weightRatio = ((double)totalOccurencesOfValue) /((double) instancesSize);
-		//		
-		//		if(attributeIndex == 1){
-		//			System.out.println("	Inferneon: totalOccurencesOfValue: " + totalOccurencesOfValue);
-		//		}
-		//		if(attributeIndex == 1){
-		//			System.out.println("	Inferneon: Raw entropy: " + entropyForVals);
-		//		}
-		//		if(attributeIndex == 1){
-		//			System.out.println("	Inferneon: Weight ratio: " + weightRatio);
-		//		}
-		//		
 
 		return weightRatio * entropyForVals;
 	}

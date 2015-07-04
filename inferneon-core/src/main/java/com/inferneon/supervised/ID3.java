@@ -36,7 +36,7 @@ public class ID3 {
 	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, IInstances instances)
 			throws CycleFoundException, InvalidDataException{
 		FrequencyCounts frequencyCounts = instances.getFrequencyCounts();
-		Map<Value, Double> targetClassCounts = frequencyCounts.getTargetCounts();		
+		Map<Value, Double> targetClassCounts = frequencyCounts.getTotalTargetCounts();
 		if(targetClassCounts.size() == 1){
 			// All instances belong to the same class, entropy will be zero
 			Value targetValue = targetClassCounts.keySet().iterator().next();

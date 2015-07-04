@@ -23,7 +23,6 @@ import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.storage.StorageLevel;
 
 import scala.Tuple2;
-import akka.japi.Function2;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
@@ -393,6 +392,7 @@ public class SparkInstances extends IInstances implements Serializable{
 	private JavaRDD<Instance> instances;
 	private Long size;
 	private Double sumOfWeights;
+	private FrequencyCounts frequencyCounts;
 
 	static
 	{
@@ -468,6 +468,10 @@ public class SparkInstances extends IInstances implements Serializable{
 
 	@Override
 	public FrequencyCounts getFrequencyCounts() {
+		if(frequencyCounts != null){
+			return frequencyCounts;
+		}
+		
 		JavaSparkContext javaSparkContext = JavaSparkContextSingleton.getInstance();
 		final Accumulator<Double> sumOfWeightsAccumulator = javaSparkContext.accumulator(0.0);
 
@@ -584,14 +588,8 @@ public class SparkInstances extends IInstances implements Serializable{
 				}
 			});	
 
-			
-			
 			missingInstsForAttribute.persist(StorageLevel.MEMORY_ONLY());			
 			long sizeOfMissingInstsForAttr = missingInstsForAttribute.count();
-			
-//			after = new Date().getTime();		
-//			double timeElapsedDblSecondIter = ((double)(after - before)) / 1000.0;
-//			System.out.println("Second iteration computed in: " + timeElapsedDblSecondIter + " seconds");
 			
 			double sumOfWeightsOfInstsForAttr = sumOfWeightsOfInstsForAttrAccumulator.value();
 			attributeAndMissingInstances.put(attribute, new SparkInstances(attributes, classIndex, missingInstsForAttribute, 
@@ -624,6 +622,7 @@ public class SparkInstances extends IInstances implements Serializable{
 		AttributeValueDistribution attributeValDistributionResult = avAccumulator.value();
 		frequencyCounts.setValueAndTargetClassCount(attributeValDistributionResult.getValueAndTargetCountList());
 		frequencyCounts.setAttributeAndMissingValueInstances(attributeAndMissingInstances);
+		//this.frequencyCounts = frequencyCounts;
 		return frequencyCounts;
 	}
 
@@ -658,6 +657,8 @@ public class SparkInstances extends IInstances implements Serializable{
 		
 		final int attributeIndex = attributes.indexOf(attribute);
 		
+		Long count = instances.count();
+		
 		JavaPairRDD<Value, Instance> pair = instances.mapToPair(new PairFunction<Instance, Value, Instance>() {
 
 			public Tuple2<Value, Instance> call(Instance instance) throws Exception {
@@ -669,8 +670,7 @@ public class SparkInstances extends IInstances implements Serializable{
 		JavaPairRDD<Value, Instance> orderedInstances = pair.sortByKey(new ValueComparator(), true);
 		instances = orderedInstances.values();
 		
-		instances.cache();
-		
+		instances.cache();		
 	}
 
 	@Override
@@ -837,30 +837,6 @@ public class SparkInstances extends IInstances implements Serializable{
 		Instance instance = tupleList.get(0)._1();
 
 		return instance.getValue(attributeIndex);
-	}
-
-	@Override
-	public Map<Value, Double> cummulativeTargetClassCountForContinuousValuedAttribute(final int attributeIndex,
-			final Map<Value, Map<Value, Double>> targetClassCount) {
-		JavaSparkContext javaSparkContext = JavaSparkContextSingleton.getInstance();
-		TargetDistribution zeroOfTargetDistribution = new TargetDistribution();
-		final Accumulator<TargetDistribution> tdAccumulator = javaSparkContext.accumulator(
-				zeroOfTargetDistribution, "Target counts", TargetDistribution.ACCUMULATOR_SINGLETON);
-
-		instances.foreach(new VoidFunction<Instance>(){
-
-			public void call(Instance instance) throws Exception {
-				Value val = instance.getValue(attributeIndex);				
-				Map<Value, Double> counts = targetClassCount.get(val);					
-				TargetDistribution td = new TargetDistribution(counts);
-				tdAccumulator.add(td);
-			}
-		});
-
-		TargetDistribution targetDistribution = tdAccumulator.value();		
-		Map<Value, Double> totalTargetCounts = targetDistribution.getTotalTargetCounts();
-
-		return totalTargetCounts;		
 	}
 
 	@Override

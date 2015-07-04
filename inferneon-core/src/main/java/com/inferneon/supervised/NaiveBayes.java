@@ -13,6 +13,7 @@ import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
+import com.inferneon.core.utils.MathUtils;
 
 public class NaiveBayes extends Supervised{
 
@@ -36,7 +37,7 @@ public class NaiveBayes extends Supervised{
 
 			FrequencyCounts frequencyCounts = instances.getFrequencyCounts();
 
-			Map<Value, Double> targetClassCounts = frequencyCounts.getTargetCounts();
+			Map<Value, Double> targetClassCounts = frequencyCounts.getTotalTargetCounts();
 
 			setClassProbablities(targetClassCounts);
 
@@ -163,5 +164,43 @@ public class NaiveBayes extends Supervised{
 		}
 
 		return targetValueWithMaxPr;		
+	}
+	
+	public String getProbablityTable(){
+		String description = "";
+		
+		int attributeCount = 0;
+		for(Map<Value, Map<Value, Double>> probablitiesForAttribute : attributeClassConditionalProbablities){
+			
+			String attributeName = attributes.get(attributeCount).getName(); 
+			
+			Iterator<Entry<Value, Map<Value, Double>>> iterator = probablitiesForAttribute.entrySet().iterator();
+			while(iterator.hasNext()){
+				Entry<Value, Map<Value, Double>> entry = iterator.next();
+				Value value = entry.getKey();
+				
+				Map<Value, Double> targetProbablities = entry.getValue();
+				Iterator<Entry<Value, Double>> targetsIterator = targetProbablities.entrySet().iterator();
+				int numTargets = targetProbablities.size();
+				int targetCount = 0;
+				while(targetsIterator.hasNext()){
+					Entry<Value, Double> entry2 = targetsIterator.next();
+					Value targetValue = entry2.getKey();
+					Double prob = entry2.getValue();
+					
+					description += "P(" + attributeName + " = " + value + " | " + "Target = " + targetValue + ") = " +
+							MathUtils.roundDouble(prob, 2) 
+							+ (targetCount < numTargets -1 ? "," : "");
+					
+					targetCount++;
+				}
+				
+				description += System.getProperty("line.separator");				
+			}			
+			attributeCount++;
+		}
+		
+			
+		return description;
 	}
 }

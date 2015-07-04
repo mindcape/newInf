@@ -85,20 +85,16 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 	@Test
 	public void testID3Simple1() throws Exception {
 		String fileName = "ID3Simple1.arff";
-		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder();
 
-		System.out.println("Current path = " + new File(".").getAbsolutePath());
+		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder();
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
-
 		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
 				attributes, attributes.size() -1, csvFilePath);
-
 		dtBuilder.train(instances);
 
-		DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree = dtBuilder.getDecisionTree();
 		DecisionTreeNode rootNode = dtBuilder.getRootNode();
 		Assert.assertTrue(rootNode.toString().equals("Outlook"));
 
@@ -427,13 +423,13 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Instance newInstance = new Instance(newValues);
 
 		Value targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));	
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
 
 		newValues = getValueListForTestInstance(attributes, "Overcast", "65", "95", "true");
 		newInstance = new Instance(newValues);
 
 		targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
+		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));	
 
 	}
 	
