@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -42,4 +46,45 @@ public class DataLoader {
 //		}		
 //		return sum;
 //	}
+	
+
+	public static Value getMaxTargetValue(Map<Value, Double> totalTargetCounts) {
+
+		Double maxValue = 0.0;
+		Value valueWithMaxInstances = null;
+		Set<Entry<Value, Double>> entries = totalTargetCounts.entrySet();
+		Iterator<Entry<Value, Double>> iterator = entries.iterator();
+		while(iterator.hasNext()){
+			Entry<Value, Double> entry = iterator.next();
+			Value value = entry.getKey();
+			Double numInstances = entry.getValue();
+
+			if(Double.compare(numInstances, maxValue) > 0){
+				maxValue = numInstances;
+				valueWithMaxInstances = value;
+			}
+		}
+
+		return valueWithMaxInstances;		
+	}
+	
+	public static void mergeValueCounts(Map<Value, Double> counts, Map<Value, Double> otherCounts){
+		Iterator<Entry<Value, Double>> iterator = otherCounts.entrySet().iterator();
+		while(iterator.hasNext()){
+			Entry<Value, Double> entry = iterator.next();
+			Value value = entry.getKey();
+			Double numOccurences = entry.getValue();
+			if(numOccurences == null){
+				continue;
+			}
+			
+			Double currNumOccurrences = counts.get(value);
+			if(currNumOccurrences == null){
+				counts.put(value, numOccurences);
+			}
+			else{
+				counts.put(value, numOccurences + currNumOccurrences);
+			}			
+		}		
+	}	
 }

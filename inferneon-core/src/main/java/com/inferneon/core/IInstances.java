@@ -43,26 +43,6 @@ public abstract class IInstances implements Serializable{
 		Attribute classAttribute = attributes.get(classIndex);
 		return classAttribute.getNumValues();
 	}
-
-	protected Value getMaxTargetValue(Map<Value, Double> totalTargetCounts) {
-
-		Double maxValue = 0.0;
-		Value valueWithMaxInstances = null;
-		Set<Entry<Value, Double>> entries = totalTargetCounts.entrySet();
-		Iterator<Entry<Value, Double>> iterator = entries.iterator();
-		while(iterator.hasNext()){
-			Entry<Value, Double> entry = iterator.next();
-			Value value = entry.getKey();
-			Double numInstances = entry.getValue();
-
-			if(Double.compare(numInstances, maxValue) > 0){
-				maxValue = numInstances;
-				valueWithMaxInstances = value;
-			}
-		}
-
-		return valueWithMaxInstances;		
-	}
 	
 	public abstract IInstances createInstances(List<Attribute> attributes, int classIndex, String sourceURI) throws Exception;	
 	public abstract String getContextId();
@@ -92,5 +72,9 @@ public abstract class IInstances implements Serializable{
 	public abstract Value valueOfAttributeAtInstance(long index, int attributeIndex);
 	
 	public abstract void appendAll(IInstances other, double weightFactor);
+	
+	public abstract void appendAllInstancesWithMissingAttributeValues(IInstances other, Attribute attribute, double weightFactor);
+
+	public abstract void union(IInstances missingValueInstsForAttribute);
 
 }

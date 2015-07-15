@@ -1,11 +1,9 @@
 package com.inferneon.core;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,14 +11,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 import com.inferneon.core.Value.ValueType;
-import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.core.exceptions.InvalidDataException;
+import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
 
 public class Instances extends IInstances {
@@ -191,6 +188,8 @@ public class Instances extends IInstances {
 		Map<Attribute, Map<Value, Double>> attributeValueCounts = new HashMap<>();
 
 		Map<Attribute, IInstances> attributeAndMissingValueInstances = new HashMap<>();
+		
+		Map<Attribute, Double> attributeAndMissingValueInstancesSumOfWts = new HashMap<>();
 
 		Set<Instance> instancesWithMissingvalues = new HashSet<>();
 
@@ -222,12 +221,18 @@ public class Instances extends IInstances {
 
 				if(value.getType() == ValueType.MISSING){					
 					IInstances missingValueInstances = attributeAndMissingValueInstances.get(currentAttribute);
+					Double currentSumOfWtsOfMissingValuInstancesForAttr = attributeAndMissingValueInstancesSumOfWts.get(currentAttribute);
+					if(currentSumOfWtsOfMissingValuInstancesForAttr == null){
+						currentSumOfWtsOfMissingValuInstancesForAttr = 0.0;
+					}
 					if(missingValueInstances == null){
 						missingValueInstances = new Instances(context, new ArrayList<Instance>(), attributes, classIndex);
 					}
 
 					missingValueInstances.addInstance(instance);
 					attributeAndMissingValueInstances.put(currentAttribute, missingValueInstances);
+					attributeAndMissingValueInstancesSumOfWts.put(currentAttribute, currentSumOfWtsOfMissingValuInstancesForAttr 
+										+ instance.getWeight());
 					instancesWithMissingvalues.add(instance);
 					continue;
 				}
@@ -293,7 +298,7 @@ public class Instances extends IInstances {
 			valueAndTargetClassCountList.add(valueAndTargetClassCount);
 		}
 
-		Value maxTargetValue = getMaxTargetValue(totalTargetCounts);
+		Value maxTargetValue = DataLoader.getMaxTargetValue(totalTargetCounts);
 		Double maxTargetValueCount = 0.0;
 		if(maxTargetValue != null){
 			maxTargetValueCount = totalTargetCounts.get(maxTargetValue);
@@ -309,6 +314,8 @@ public class Instances extends IInstances {
 		frequencyCounts.setNumInstances((long)instances.size());
 		frequencyCounts.setAttributeValueCounts(attributeValueCounts);
 		frequencyCounts.setAttributeAndMissingValueInstances(attributeAndMissingValueInstances);
+		frequencyCounts.setAttributeAndMissingValueInstanceSumOfWeights(attributeAndMissingValueInstancesSumOfWts);
+		
 		frequencyCounts.setTotalInstancesWithMissingValues(getSumOfWeights(instancesWithMissingvalues));
 
 		return frequencyCounts;
@@ -506,5 +513,18 @@ public class Instances extends IInstances {
 	@Override
 	public String getContextId() {
 		return "STAND_ALONE";
+	}
+
+	@Override
+	public void appendAllInstancesWithMissingAttributeValues(IInstances other,
+			Attribute attribute, double weightFactor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void union(IInstances missingValueInstsForAttribute) {
+		// TODO Auto-generated method stub
+		
 	}
 }

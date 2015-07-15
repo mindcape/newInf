@@ -153,7 +153,11 @@ public class C45 {
 			}
 
 			System.out.println("Training on subset based on attribute = " + attribute.getName() + " with value = " + dtEdge);
-
+			
+			if(dtEdge.toString().contains("> 90")){
+				System.out.println("WAIT HERE");
+			}
+			
 			train(decisionTreeNode, dtEdge, newInstances);
 		}
 	}
@@ -444,6 +448,7 @@ public class C45 {
 
 			Double ratio = (double) split.sumOfWeights() / instancesSize;
 			split.appendAll(instancesWithMissingValue, ratio);				
+			//split.appendAllInstancesWithMissingAttributeValues(instancesWithMissingValue, attribute, ratio);
 		}		
 	}
 
@@ -469,10 +474,6 @@ public class C45 {
 
 	private Map<DecisionTreeEdge, IInstances> splitOnNominalValuedAttribute(Attribute attribute, IInstances instances, FrequencyCounts frequencyCounts)
 			throws Exception{
-
-		if(attribute.getName().equals("Outlook")){
-			System.out.println("WAIT HERE");
-		}
 
 		Map<DecisionTreeEdge, IInstances> decisionTreeEdgeAndInstances = new HashMap<>();
 
@@ -585,7 +586,8 @@ public class C45 {
 			IInstances splitAfterThreshold = instances.getSubList(splitPoint + 1, firstInstanceWithMissingValueForAttribute);
 
 			Double sumOfWeightsBeforeThreshold = instances.sumOfWeights(0, splitPoint + 1);
-			Double sumOfWeightsAfterThreshold = instances.sumOfWeights(splitPoint + 1, firstInstanceWithMissingValueForAttribute);
+			//Double sumOfWeightsAfterThreshold = instances.sumOfWeights(splitPoint + 1, firstInstanceWithMissingValueForAttribute);
+			Double sumOfWeightsAfterThreshold = splitAfterThreshold.sumOfWeights();
 
 			if (!(sumOfWeightsBeforeThreshold >=  minSplit && sumOfWeightsAfterThreshold >=  minSplit)) {
 				splitPoint++;
