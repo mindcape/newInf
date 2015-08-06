@@ -2,6 +2,8 @@ package com.inferneon.core;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.inferneon.core.Value.ValueType;
 
@@ -35,12 +37,14 @@ public class ValueComparator  implements Comparator<Value>, Serializable{
 		if(valueType1== Value.ValueType.REAL){
 			Double val1 = value1.getReal();
 			Double val2 = value2.getReal();
-			return val1.compareTo(val2);
+			int compareResult = val1.compareTo(val2);			
+			return compareResult;
 		}
 		else {
 			Long val1 = value1.getNumber();
 			Long val2 = value2.getNumber();
-			return val1.compareTo(val2);
+			int compareResult = val1.compareTo(val2);
+			return compareResult;
 		}		
 	}
 }

@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.spark.Accumulator;
 import org.apache.spark.AccumulatorParam;
@@ -23,6 +24,7 @@ import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.storage.StorageLevel;
 
 import scala.Tuple2;
+import akka.util.Collections;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
@@ -33,7 +35,7 @@ import com.inferneon.core.Value.ValueType;
 import com.inferneon.core.ValueComparator;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
-import com.ipsg.inferneon.spark.commonfunctions.SplitMissingOrCompleteValuesInInstances;
+import com.ipsg.inferneon.spark.SequenceCounter.SequenceCounterAccumulator;
 import com.ipsg.inferneon.spark.commonfunctions.TransformStringToRDD;
 import com.ipsg.inferneon.spark.utils.JavaSparkContextSingleton;
 import com.ipsg.inferneon.spark.utils.SparkUtils;
@@ -51,15 +53,15 @@ class TargetDistribution implements Serializable {
 		this.totalTargetCounts = totalTargetCounts;
 	}
 
-	public void setCount(Value value, Double count){
-		Double currentCount = totalTargetCounts.get(value);
-		if(currentCount == null){
-			totalTargetCounts.put(value, count);
-		}
-		else{
-			totalTargetCounts.put(value, count + currentCount);
-		}
-	}
+	//	public void setCount(Value value, Double count){
+	//		Double currentCount = totalTargetCounts.get(value);
+	//		if(currentCount == null){
+	//			totalTargetCounts.put(value, count);
+	//		}
+	//		else{
+	//			totalTargetCounts.put(value, count + currentCount);
+	//		}
+	//	}
 
 	public void merge(TargetDistribution otherDist){
 		Iterator<Entry<Value, Double>> iterator = otherDist.getTotalTargetCounts().entrySet().iterator();
@@ -85,6 +87,7 @@ class TargetDistribution implements Serializable {
 	public static class TargetDistributionAccumulator implements AccumulatorParam<TargetDistribution>, Serializable{
 
 		public TargetDistribution addInPlace(TargetDistribution td1, TargetDistribution td2) {
+			System.out.println("Inside addInPlace");
 			td1.merge(td2);
 			return td1;
 		}
@@ -94,8 +97,83 @@ class TargetDistribution implements Serializable {
 		}
 
 		public TargetDistribution addAccumulator(TargetDistribution td1, TargetDistribution td2) {
+			System.out.println("Inside addAccumulator");
 			td1.merge(td2);
 			return td1;
+		}		
+	}	
+}
+
+class SequenceCounter implements Serializable {
+	private Map<Value, Long> valueCounts;
+	private Value runningValue;
+
+	public static final SequenceCounterAccumulator ACCUMULATOR_SINGLETON = new SequenceCounterAccumulator();
+
+	//	public SequenceCounter(){
+	//		valueCounts = new HashMap<Value, Long>();
+	//	}
+
+	public SequenceCounter(Value value){
+		//this();
+		if(runningValue == null){
+			runningValue = value;
+			return;
+		}
+
+		if(runningValue.equals(value)){
+			Long currentCount = valueCounts.get(value);
+			if(currentCount == null){
+				valueCounts.put(value, 2L);
+			}
+			else{
+				valueCounts.put(value, currentCount + 1);
+			}
+		}
+
+		runningValue = value;
+	}
+
+	public void merge(SequenceCounter otherSequence){
+		Map<Value, Long> otherValueCounts = otherSequence.getValueCounts();
+		if(otherValueCounts == null){
+			return;
+		}
+
+		Iterator<Entry<Value, Long>> iterator = otherValueCounts.entrySet().iterator();
+		while(iterator.hasNext()){
+			Entry<Value, Long> entry = iterator.next();
+			Value key = entry.getKey();
+			Long count = entry.getValue();
+
+			Long currentCount = valueCounts.get(key);
+			if(currentCount == null){
+				valueCounts.put(key, count);
+			}
+			else{
+				valueCounts.put(key, count + currentCount);
+			}			
+		}			
+	}
+
+	public Map<Value, Long> getValueCounts() {
+		return valueCounts;
+	}
+
+	public static class SequenceCounterAccumulator implements AccumulatorParam<SequenceCounter>, Serializable{
+
+		public SequenceCounter addInPlace(SequenceCounter sc1, SequenceCounter sc2) {
+			sc1.merge(sc2);
+			return sc1;
+		}
+
+		public SequenceCounter zero(SequenceCounter arg0) {
+			return new SequenceCounter(null);
+		}
+
+		public SequenceCounter addAccumulator(SequenceCounter sc1, SequenceCounter sc2) {
+			sc1.merge(sc2);
+			return sc1;
 		}		
 	}	
 }
@@ -353,29 +431,29 @@ class AttributeMissingValuesDistribution implements Serializable {
 	public List<Integer> getMissingValueInstSizes(){
 		return missingValueSize;
 	}
-	
+
 	public void merge(AttributeMissingValuesDistribution otherAmvd){
 		List<Double> otherList = otherAmvd.getMissingValueSumOfWeights();
 		List<Integer> otherSizeList = otherAmvd.getMissingValueInstSizes();
 		for(int i = 0; i < otherList.size(); i++){
 			Double otherSumForAttribute = otherList.get(i);		
 			Integer otherSizeForAttribute = otherSizeList.get(i);
-			
-			 Double currentSum = missingValueSumOfWeights.get(i);
-			 if(currentSum == null){
-				 missingValueSumOfWeights.set(i, otherSumForAttribute);
-			 }
-			 else{
-				 missingValueSumOfWeights.set(i, currentSum + otherSumForAttribute);
-			 }
-			 
-			 Integer currentNum = missingValueSize.get(i);
-			 if(currentNum == null){
-				 missingValueSize.set(i, otherSizeForAttribute);
-			 }
-			 else{
-				 missingValueSize.set(i, currentNum + otherSizeForAttribute);
-			 }			 
+
+			Double currentSum = missingValueSumOfWeights.get(i);
+			if(currentSum == null){
+				missingValueSumOfWeights.set(i, otherSumForAttribute);
+			}
+			else{
+				missingValueSumOfWeights.set(i, currentSum + otherSumForAttribute);
+			}
+
+			Integer currentNum = missingValueSize.get(i);
+			if(currentNum == null){
+				missingValueSize.set(i, otherSizeForAttribute);
+			}
+			else{
+				missingValueSize.set(i, currentNum + otherSizeForAttribute);
+			}			 
 		}
 	}
 
@@ -391,7 +469,7 @@ class AttributeMissingValuesDistribution implements Serializable {
 		}
 
 		public AttributeMissingValuesDistribution addAccumulator(AttributeMissingValuesDistribution avd1, 
-						AttributeMissingValuesDistribution avd2) {
+				AttributeMissingValuesDistribution avd2) {
 			avd1.merge(avd2);
 			return avd1;
 		}		
@@ -416,6 +494,10 @@ public class SparkInstances extends IInstances implements Serializable{
 	private Long size;
 	private Double sumOfWeights;
 	private FrequencyCounts frequencyCounts;
+	private Map<Value, Double> targetClassCounts;
+	private Map<Value, Double> sequenceCounts;
+
+	private int attributeIndex;
 
 	static
 	{
@@ -445,14 +527,21 @@ public class SparkInstances extends IInstances implements Serializable{
 		instances = rawInput.map(new TransformStringToRDD(this.attributes, false));
 	}
 
-	public SparkInstances(List<Attribute> attributes, int classIndex, JavaRDD<Instance> rddInstances, long size, double sumOfWts) {
+	public SparkInstances(List<Attribute> attributes, int classIndex, JavaRDD<Instance> rddInstances, 
+			long size, double sumOfWts, Map<Value, Double> targetClassCounts) {
 		super(Context.SPARK);
 		this.classIndex = classIndex;
 		this.attributes = attributes;
 		this.instances = rddInstances;
 		this.size = size;
 		this.sumOfWeights = sumOfWts;
+		this.targetClassCounts = targetClassCounts;
 	}
+
+	public void setSequenceCounts(Map<Value, Double> sequenceCounts){
+		this.sequenceCounts = sequenceCounts;
+	}
+
 
 	public JavaRDD<Instance> getInstances(){
 		return instances;
@@ -494,7 +583,7 @@ public class SparkInstances extends IInstances implements Serializable{
 		if(frequencyCounts != null){
 			return frequencyCounts;
 		}
-		
+
 		JavaSparkContext javaSparkContext = JavaSparkContextSingleton.getInstance();
 		final Accumulator<Double> sumOfWeightsAccumulator = javaSparkContext.accumulator(0.0);
 
@@ -511,11 +600,11 @@ public class SparkInstances extends IInstances implements Serializable{
 		AttributeValueDistribution zeroOfAttrValueDistribution = new AttributeValueDistribution(attributes.size());
 		final Accumulator<AttributeValueDistribution> avAccumulator = javaSparkContext.accumulator(zeroOfAttrValueDistribution, "Attribute Value Target Counts",
 				AttributeValueDistribution.ACCUMULATOR_SINGLETON);
-		
+
 		instances.cache();
-		
+
 		long before = new Date().getTime();
-		
+
 		// Attribute related distributions
 		JavaRDD<Instance> missingValueInstsRDD = instances.filter(new Function<Instance, Boolean>(){
 
@@ -577,12 +666,12 @@ public class SparkInstances extends IInstances implements Serializable{
 
 				AttributeValueDistribution avd = new AttributeValueDistribution(attributes.size(), valueAndTargetCountList);						
 				avAccumulator.add(avd);
-				
+
 
 				if(alreadyNotedMissingValue){
 					return true;
 				}
-				
+
 				return false;
 			}
 		}
@@ -592,23 +681,23 @@ public class SparkInstances extends IInstances implements Serializable{
 		long after = new Date().getTime();		
 		double timeElapsedDblFirstIter = ((double)(after - before)) / 1000.0;
 		System.out.println("First iteration computed in: " + timeElapsedDblFirstIter + " seconds");
-		
+
 		// Get a mapping of attributes that are missing with corresponding instances, size and sum of weights
 		Map<Attribute, IInstances> attributeAndMissingInstances = new HashMap<Attribute, IInstances>();
 		Map<Attribute, Double> attributeAndMissingInstanceSumOfWts = new HashMap<Attribute, Double>();
 		Map<Attribute, Integer> attributeAndMissingInstanceSizes = new HashMap<Attribute, Integer>();
 		//JavaRDD<Instance> missingInstsRDD = instances.filter(new SplitMissingOrCompleteValuesInInstances(attributes, true));
 		missingValueInstsRDD.cache();
-				
+
 		//before = new Date().getTime();	
-		
+
 		for(int attrIndex = 0; attrIndex < attributes.size(); attrIndex++){
 			final Attribute attribute = attributes.get(attrIndex);	
 			final int currIndex = attrIndex;
-			
+
 			final Accumulator<Double> sumOfWeightsOfInstsForAttrAccumulator = javaSparkContext.accumulator(0.0);
 			final Accumulator<Integer> sizeOfMissingValueInstsForAttribute = javaSparkContext.accumulator(0);
-			
+
 			JavaRDD<Instance> missingInstsForAttribute = missingValueInstsRDD.filter(new Function<Instance, Boolean>() {
 
 				public Boolean call(Instance instance) throws Exception {
@@ -624,21 +713,21 @@ public class SparkInstances extends IInstances implements Serializable{
 
 			missingInstsForAttribute.persist(StorageLevel.MEMORY_ONLY());			
 			long sizeOfMissingInstsForAttr = missingInstsForAttribute.count();
-			
+
 			double sumOfWeightsOfInstsForAttr = sumOfWeightsOfInstsForAttrAccumulator.value();
 			attributeAndMissingInstances.put(attribute, new SparkInstances(attributes, classIndex, missingInstsForAttribute, 
-					sizeOfMissingInstsForAttr, sumOfWeightsOfInstsForAttr));
+					sizeOfMissingInstsForAttr, sumOfWeightsOfInstsForAttr, null));
 			Integer sizeOfMissingValueInsts = sizeOfMissingValueInstsForAttribute.value();
 			attributeAndMissingInstanceSumOfWts.put(attribute, sumOfWeightsOfInstsForAttr);
 			attributeAndMissingInstanceSizes.put(attribute, sizeOfMissingValueInsts);
 		}
 
 		double sumOfWeightsOfMissingValueInsts = totalMissingInstancesCountAccumulator.value();
-		
+
 		FrequencyCounts frequencyCounts = new FrequencyCounts();
 		frequencyCounts.setNumInstances(numInstances);
 		frequencyCounts.setSumOfWeights(sumOfWeightsAccumulator.value());
-		
+
 		frequencyCounts.setTotalInstancesWithMissingValues(sumOfWeightsOfMissingValueInsts);
 
 		TargetDistribution targetDistribution = tdAccumulator.value();		
@@ -686,7 +775,7 @@ public class SparkInstances extends IInstances implements Serializable{
 			});
 
 			instancesWithValue.persist(StorageLevel.MEMORY_ONLY());
-			
+
 			result.put(value, new SparkInstances(attributes, classIndex, instancesWithValue));
 		}
 		return result;
@@ -694,11 +783,11 @@ public class SparkInstances extends IInstances implements Serializable{
 
 	@Override
 	public void sort(final Attribute attribute) {
-		
+
 		final int attributeIndex = attributes.indexOf(attribute);
-		
-		Long count = instances.count();
-		
+		this.attributeIndex = attributeIndex;
+		//Long count = instances.count();
+
 		JavaPairRDD<Value, Instance> pair = instances.mapToPair(new PairFunction<Instance, Value, Instance>() {
 
 			public Tuple2<Value, Instance> call(Instance instance) throws Exception {
@@ -707,10 +796,13 @@ public class SparkInstances extends IInstances implements Serializable{
 			}			
 		});
 
-		JavaPairRDD<Value, Instance> orderedInstances = pair.sortByKey(new ValueComparator(), true);
+		ValueComparator valueComparator = new ValueComparator();
+		JavaPairRDD<Value, Instance> orderedInstances = pair.sortByKey(valueComparator, true);
 		instances = orderedInstances.values();
-		
 		instances.cache();		
+		
+		sequenceCounts = null; // Reset so we get the correct values for a range
+		
 	}
 
 	@Override
@@ -821,42 +913,68 @@ public class SparkInstances extends IInstances implements Serializable{
 	@Override
 	public IInstances getSubList(final long startIndex, final long endIndex) {
 		JavaSparkContext javaSparkContext = JavaSparkContextSingleton.getInstance();	
+		TargetDistribution zeroOfTargetDistribution = new TargetDistribution();
+		TargetDistribution zeroOfAttrValueDistribution = new TargetDistribution();
+		final Accumulator<TargetDistribution> attrValueCountAccumulator = javaSparkContext.accumulator(
+				zeroOfAttrValueDistribution, "Attribute value counts", TargetDistribution.ACCUMULATOR_SINGLETON);
+
+		final Accumulator<TargetDistribution> tdAccumulator = javaSparkContext.accumulator(
+				zeroOfTargetDistribution, "Target counts", TargetDistribution.ACCUMULATOR_SINGLETON);
+		//		SequenceCounter zeroOfSequenceCounter = new SequenceCounter(null);
+		//		final Accumulator<SequenceCounter> sequenceCounterAccumulator = javaSparkContext.accumulator(
+		//				zeroOfSequenceCounter, "Sequence Checker", SequenceCounter.ACCUMULATOR_SINGLETON);
+
 
 		final Accumulator<Double> sumOfWeightsAccumulator = javaSparkContext.accumulator(0.0);
-		
+
 		JavaPairRDD<Instance, Long> indexed = instances.zipWithIndex();		
 		JavaPairRDD<Instance, Long> filtered = indexed.filter(new Function<Tuple2<Instance,Long>, Boolean>() {
 
 			public Boolean call(Tuple2<Instance, Long> tuple) throws Exception {
-				if(tuple._2() >= startIndex && tuple._2() < endIndex){
-					sumOfWeightsAccumulator.add(tuple._1().getWeight());					
+				Long index = tuple._2();
+				Instance instance = tuple._1();
+
+				// Collect into attribute's value into its own accumulator
+				Value value = instance.getValue(attributeIndex);
+				Map<Value, Double> attrValueCount = new HashMap<Value, Double>();
+				attrValueCount.put(value, 1.0);
+				TargetDistribution attrValueDist = new TargetDistribution(attrValueCount);
+				attrValueCountAccumulator.add(attrValueDist);
+
+				if(index >= startIndex && index < endIndex){					
+					sumOfWeightsAccumulator.add(instance.getWeight());
+
+					// Collect into target value distributions
+					Value targetClassValue = instance.getValue(attributes.size() -1);
+					Map<Value, Double> newTargetCount = new HashMap<Value, Double>();
+					newTargetCount.put(targetClassValue, instance.getWeight());
+					TargetDistribution td = new TargetDistribution(newTargetCount);
+					tdAccumulator.add(td);
+
 					return true;
 				}
 				return false;
 			}
 		});
-		
-//		JavaPairRDD<Long, Instance> filteredAndSwapped = filtered.mapToPair(new PairFunction<Tuple2<Instance,Long>, Long, Instance>() {
-//
-//			public Tuple2<Long, Instance> call(Tuple2<Instance, Long> tuple) throws Exception {
-//				return new Tuple2<Long, Instance>(tuple._2(), tuple._1());
-//			}
-//		});
-//
-//		Instance firstInstance = filteredAndSwapped.lookup(startIndex).get(0);
-//		Instance lastInstance = filteredAndSwapped.lookup(endIndex -1).get(0);
-//		
-//		System.out.println("First instance in sublist: " + firstInstance + " and last instance: " + lastInstance);
-		
+
 		JavaRDD<Instance> rddInstances = filtered.keys();
 		rddInstances.persist(StorageLevel.MEMORY_ONLY());
 		long size = rddInstances.count();
 		double sumOfWts = sumOfWeightsAccumulator.value();
-		SparkInstances result = new SparkInstances(attributes, classIndex, rddInstances, size, sumOfWts);
-		//OrderedInstances orderedInstancesResult = new OrderedInstances(attributes, classIndex, rddInstances, size, sumOfWts, 
-		//		firstInstance, lastInstance);
+		TargetDistribution targetDistribution = tdAccumulator.value();		
+		Map<Value, Double> totalTargetCounts = targetDistribution.getTotalTargetCounts();
+
+		if(sequenceCounts == null || sequenceCounts.size() == 0){
+			TargetDistribution finalSequenceCounter = attrValueCountAccumulator.value();
+			System.out.println("**** LAST SIMILAR VALUE SEQ CHECKER = " + finalSequenceCounter.hashCode());
+			Map<Value, Double> sequences = finalSequenceCounter.getTotalTargetCounts();
+			setSequenceCounts(sequences);
+		}
+
+
+		SparkInstances result = new SparkInstances(attributes, classIndex, rddInstances, size, sumOfWts, totalTargetCounts);
+
 		return result;
-		//return orderedInstancesResult;
 	}
 
 	@Override
@@ -886,7 +1004,7 @@ public class SparkInstances extends IInstances implements Serializable{
 		JavaRDD<Instance> otherInstList = otherInsts.getInstances();
 
 		final Accumulator<Double> sumOfWtsAccumulator = javaSparkContext.accumulator(0.0);
-		
+
 		JavaRDD<Instance> modifiedRDD = otherInstList.map(new Function<Instance, Instance>(){
 			public Instance call(Instance instance) throws Exception {
 				Double weight = weightFactor * instance.getWeight();
@@ -900,7 +1018,7 @@ public class SparkInstances extends IInstances implements Serializable{
 		instances = instances.union(modifiedRDD);
 		instances.cache();
 		size = instances.count();
-				
+
 		double sumOfWtsOfNewList = sumOfWtsAccumulator.value();
 		if(sumOfWeights == null){
 			System.out.println("WAIT HERE");
@@ -911,7 +1029,7 @@ public class SparkInstances extends IInstances implements Serializable{
 		}
 		frequencyCounts = null; // Will be re-evaluated when needed
 	}
-	
+
 	@Override
 	public void appendAllInstancesWithMissingAttributeValues(IInstances other, Attribute attribute, double wtFactor) {
 		JavaSparkContext javaSparkContext = JavaSparkContextSingleton.getInstance();
@@ -920,7 +1038,7 @@ public class SparkInstances extends IInstances implements Serializable{
 
 		//final Accumulator<Double> totalMissingInstancesCountAccumulator = javaSparkContext.accumulator(0.0);
 		final Accumulator<Double> sumOfWtsAccumulator = javaSparkContext.accumulator(0.0);
-		
+
 		final Accumulator<Double> sumOfWeightsAccumulator = javaSparkContext.accumulator(0.0);
 
 		TargetDistribution zeroOfTargetDistribution = new TargetDistribution();
@@ -934,11 +1052,11 @@ public class SparkInstances extends IInstances implements Serializable{
 		AttributeValueDistribution zeroOfAttrValueDistribution = new AttributeValueDistribution(attributes.size());
 		final Accumulator<AttributeValueDistribution> avAccumulator = javaSparkContext.accumulator(zeroOfAttrValueDistribution, "Attribute Value Target Counts",
 				AttributeValueDistribution.ACCUMULATOR_SINGLETON);
-		
+
 		AttributeMissingValuesDistribution zeroOfAttributeMissingValuesDistribution = new AttributeMissingValuesDistribution(attributes.size());
 		final Accumulator<AttributeMissingValuesDistribution> amvAccumulator = javaSparkContext.accumulator(zeroOfAttributeMissingValuesDistribution, 
 				"Attribute Missing values counts", AttributeMissingValuesDistribution.ACCUMULATOR_SINGLETON);
-		
+
 		final double weightFactor = wtFactor;
 		JavaRDD<Instance> modifiedRDD = otherInstList.map(new Function<Instance, Instance>(){
 			public Instance call(Instance ins) throws Exception {
@@ -946,12 +1064,12 @@ public class SparkInstances extends IInstances implements Serializable{
 				sumOfWtsAccumulator.add(weight);
 				Instance newInstance = new Instance(ins.getValues());
 				newInstance.setWeight(weight);
-								
+
 				// Aggregate into total sum
-				
+
 				System.out.println("Updated weight to add to accumulator = " + weight);
 				System.out.println("Instance weight added to accumulator = " + newInstance.getWeight());
-				
+
 				sumOfWeightsAccumulator.add(newInstance.getWeight());
 
 				// Collect into target value distributions
@@ -979,11 +1097,11 @@ public class SparkInstances extends IInstances implements Serializable{
 					Attribute currentAttribute = attributes.get(attributeIndex);
 
 					if(value.getType() == ValueType.MISSING){	
-//						if(!alreadyNotedMissingValue){
-//							double wtOfNewInstance = newInstance.getWeight();
-//							totalMissingInstancesCountAccumulator.add(wtOfNewInstance);
-//						}
-//						alreadyNotedMissingValue = true;
+						//						if(!alreadyNotedMissingValue){
+						//							double wtOfNewInstance = newInstance.getWeight();
+						//							totalMissingInstancesCountAccumulator.add(wtOfNewInstance);
+						//						}
+						//						alreadyNotedMissingValue = true;
 						valueAndTargetCountList.add(attributeIndex, null);
 						missingValueWeights.set(attributeIndex, newInstance.getWeight());
 						missingValueSizes.set(attributeIndex, 1);
@@ -1021,12 +1139,12 @@ public class SparkInstances extends IInstances implements Serializable{
 				AttributeMissingValuesDistribution amvDist = new AttributeMissingValuesDistribution(attributes.size(), missingValueWeights,
 						missingValueSizes);
 				amvAccumulator.add(amvDist);
-							
+
 				return newInstance;
 			}			
 		});
 
-		
+
 		size = instances.count();
 		long numNewInsts = modifiedRDD.count();
 		double sumOfWts = sumOfWeightsAccumulator.value();
@@ -1053,11 +1171,11 @@ public class SparkInstances extends IInstances implements Serializable{
 
 		AttributeValueDistribution attributeValDistributionResult = avAccumulator.value();
 		frequencCountsOfNewRDD.setValueAndTargetClassCount(attributeValDistributionResult.getValueAndTargetCountList());
-		
+
 		AttributeMissingValuesDistribution attributeMissingValuesDistributionResult = amvAccumulator.value();
 		List<Double> missingValuesSumOfWts = attributeMissingValuesDistributionResult.getMissingValueSumOfWeights();
 		List<Integer> missingValuesInstSizes = attributeMissingValuesDistributionResult.getMissingValueInstSizes();
-		
+
 		int attrIndex = 0;
 		Map<Attribute, Double> attributeMissingValuesInstWts = new HashMap<Attribute, Double>();
 		Map<Attribute, Integer> attributeMissingValuesInstSizes = new HashMap<Attribute, Integer>();
@@ -1069,14 +1187,14 @@ public class SparkInstances extends IInstances implements Serializable{
 		}
 		frequencCountsOfNewRDD.setAttributeAndMissingValueInstanceSizes(attributeMissingValuesInstSizes);
 		frequencCountsOfNewRDD.setAttributeAndMissingValueInstanceSumOfWeights(attributeMissingValuesInstWts);
-		
+
 		frequencyCounts.merge(frequencCountsOfNewRDD);
-		
+
 		instances = instances.union(modifiedRDD);
 		instances.cache();
 		sumOfWeights = frequencyCounts.getSumOfWeights();
 	}
-	
+
 	@Override
 	public String toString(){
 		List<Instance> insts = instances.collect();
@@ -1094,4 +1212,66 @@ public class SparkInstances extends IInstances implements Serializable{
 		JavaRDD<Instance> otherRDD = otherSparkInsts.getInstances();
 		JavaRDD<Instance> union = instances.union(otherRDD);
 	}
+
+	@Override
+	public Map<Value, Double> getTargetClassCounts() {
+		if(targetClassCounts != null){
+			return targetClassCounts;
+		}
+		else{
+			return getFrequencyCounts().getTotalTargetCounts();
+		}
+
+	}
+
+	@Override
+	public long getNextIndexWithDifferentValueInOrderedList(long index, Value value) {
+		
+		List<Value> values = new ArrayList(sequenceCounts.keySet());
+		java.util.Collections.sort(values, new ValueComparator());
+		
+		Value nextValue = null;
+		for(Value val : values){
+			if(val.isGreaterThan(value)){
+				nextValue = val;
+				break;
+			}
+		}
+		
+		Double count = sequenceCounts.get(nextValue);
+		if(count == null){
+			return index + 1;
+		}
+
+		return (long)(index + count);
+	}
+
+	//	@Override
+	//	public long getNextIndexWithDifferentValueInOrderedList(long splitPoint) {
+	//		if(similarSequenceIndexes == null || similarSequenceIndexes.size() == 0){
+	//			return splitPoint + 1;
+	//		}
+	//
+	//		int count = 0;
+	//		for(Long[] seq : similarSequenceIndexes){
+	//			Long first = seq[0];
+	//			if(splitPoint == first -1){
+	//				
+	//				if(seq[1] == null){
+	//					
+	//					if(count < similarSequenceIndexes.size() -2){
+	//						System.out.println("WAIT HERE");
+	//					}
+	//					
+	//					return splitPoint +1;
+	//				}
+	//				
+	//				return seq[1];
+	//			}
+	//			
+	//			count++;
+	//		}
+	//
+	//		return splitPoint + 1;
+	//	}
 }

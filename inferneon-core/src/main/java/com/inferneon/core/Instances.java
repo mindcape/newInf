@@ -527,4 +527,16 @@ public class Instances extends IInstances {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Map<Value, Double> getTargetClassCounts() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public long getNextIndexWithDifferentValueInOrderedList(long index, Value value) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

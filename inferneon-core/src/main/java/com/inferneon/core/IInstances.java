@@ -51,6 +51,7 @@ public abstract class IInstances implements Serializable{
 	public abstract void addInstance(Instance instance);
 	public abstract Double sumOfWeights();
 	public abstract Double sumOfWeights(long startIndex, long endIndex);
+	public abstract Map<Value, Double> getTargetClassCounts();
 	public abstract FrequencyCounts getFrequencyCounts();
 	
 	public abstract Long indexOfFirstInstanceWithMissingValueForAttribute(int attributeIndex);
@@ -77,4 +78,5 @@ public abstract class IInstances implements Serializable{
 
 	public abstract void union(IInstances missingValueInstsForAttribute);
 
+	public abstract long getNextIndexWithDifferentValueInOrderedList(long index, Value value);
 }

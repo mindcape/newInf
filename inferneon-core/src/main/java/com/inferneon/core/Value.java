@@ -133,4 +133,26 @@ public class Value implements Serializable{
 		}
 		return null;
 	}	
+	
+	public boolean isLesserThan(Value otherValue){
+		if(type == ValueType.NUMERIC){
+			long thisNum = getNumber().longValue();
+			long otherNum = otherValue.getNumber().longValue();
+			if(thisNum < otherNum){
+				return true;
+			}
+		}
+		else if(type == ValueType.REAL){
+			if(Double.compare(getReal(), otherValue.getReal()) < 0){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean isGreaterThan(Value otherValue){
+		return !this.equals(otherValue) &&  !isLesserThan(otherValue);
+	}
+	
 }

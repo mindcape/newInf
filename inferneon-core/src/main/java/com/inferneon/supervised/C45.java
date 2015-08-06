@@ -82,8 +82,8 @@ public class C45 {
 	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, IInstances instances) 
 			throws Exception{
 
-		if(decisionTreeEdge != null && decisionTreeEdge.toString().equalsIgnoreCase("Sunny")){
-			//System.out.println("WAIT HERE");
+		if(decisionTreeEdge != null && decisionTreeEdge.toString().contains("> 90.0")){
+			System.out.println("WAIT HERE");
 		}
 
 		// Determine the distribution of these instances. If the instances are the original one that is input
@@ -560,7 +560,11 @@ public class C45 {
 		long splitPoint = 0;
 
 		long minSplit = getMinSplit(instances.size(), instances.numClasses());
-
+		
+		if(attribute.getName().equalsIgnoreCase("Temperature")){
+			System.out.println("WAIT HERE: ");
+		}
+		
 		while(splitPoint < firstInstanceWithMissingValueForAttribute -1){			
 			IInstances splitBeforeThreshold = instances.getSubList(0, splitPoint + 1);
 			thresholdValue = splitBeforeThreshold.valueOfAttributeAtInstance(splitBeforeThreshold.size() -1, attributeIndex);			
@@ -627,7 +631,7 @@ public class C45 {
 			}			
 			splitPoint++;
 		}
-
+		
 		if(bestAttributeSearchResultWithMaxInfoGain != null){
 			splitPoint = bestAttributeSearchResultWithMaxInfoGain.getSplittingPoint();
 			double thresholdVal = 0.0;
@@ -664,14 +668,14 @@ public class C45 {
 
 		Map<Value, Double> cummulativeTargetCounts = null;
 		try{
-			cummulativeTargetCounts = split.getFrequencyCounts().getTotalTargetCounts();
+			cummulativeTargetCounts = split.getTargetClassCounts();
+			//cummulativeTargetCounts = split.getFrequencyCounts().getTotalTargetCounts();
 		}
 		catch(Exception e){
 			// Should not happen
 			e.printStackTrace();
 		}
 
-		//Map<Value, Double> cummulativeTargetCounts = split.cummulativeTargetClassCountForContinuousValuedAttribute(attributeIndex, targetClassCount);
 		Double entropyForVals = computeEntropy(totalOccurencesOfValue, cummulativeTargetCounts);
 		Double weightRatio = ((double)totalOccurencesOfValue) /((double) instancesSize);
 
