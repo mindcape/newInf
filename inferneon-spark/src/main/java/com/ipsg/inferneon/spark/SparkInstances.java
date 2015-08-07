@@ -800,9 +800,9 @@ public class SparkInstances extends IInstances implements Serializable{
 		JavaPairRDD<Value, Instance> orderedInstances = pair.sortByKey(valueComparator, true);
 		instances = orderedInstances.values();
 		instances.cache();		
-		
+
 		sequenceCounts = null; // Reset so we get the correct values for a range
-		
+
 	}
 
 	@Override
@@ -1226,10 +1226,19 @@ public class SparkInstances extends IInstances implements Serializable{
 
 	@Override
 	public long getNextIndexWithDifferentValueInOrderedList(long index, Value value) {
-		
+
 		List<Value> values = new ArrayList(sequenceCounts.keySet());
 		java.util.Collections.sort(values, new ValueComparator());
-		
+
+		if(index == 0){
+			Double count = sequenceCounts.get(value);
+			if(count == null){
+				return index + 1;
+			}
+
+			return (long)(index + count);
+		}
+
 		Value nextValue = null;
 		for(Value val : values){
 			if(val.isGreaterThan(value)){
@@ -1237,13 +1246,21 @@ public class SparkInstances extends IInstances implements Serializable{
 				break;
 			}
 		}
-		
+
 		Double count = sequenceCounts.get(nextValue);
 		if(count == null){
 			return index + 1;
 		}
 
 		return (long)(index + count);
+	}
+
+	@Override
+	public long getMaxIndexWithSameValueInOrderedList(Value value) {
+
+		double maxIndexWithSameValue = sequenceCounts.get(value);		
+		return (long)maxIndexWithSameValue;
+		
 	}
 
 	//	@Override

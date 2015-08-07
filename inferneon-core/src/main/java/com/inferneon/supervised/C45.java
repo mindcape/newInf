@@ -153,11 +153,11 @@ public class C45 {
 			}
 
 			System.out.println("Training on subset based on attribute = " + attribute.getName() + " with value = " + dtEdge);
-			
-			if(dtEdge.toString().contains("> 90")){
+
+			if(dtEdge.toString().contains("> 65")){
 				System.out.println("WAIT HERE");
 			}
-			
+
 			train(decisionTreeNode, dtEdge, newInstances);
 		}
 	}
@@ -560,32 +560,27 @@ public class C45 {
 		long splitPoint = 0;
 
 		long minSplit = getMinSplit(instances.size(), instances.numClasses());
-		
+
 		if(attribute.getName().equalsIgnoreCase("Temperature")){
 			System.out.println("WAIT HERE: ");
 		}
-		
+
+		boolean skip = false;
 		while(splitPoint < firstInstanceWithMissingValueForAttribute -1){			
 			IInstances splitBeforeThreshold = instances.getSubList(0, splitPoint + 1);
 			thresholdValue = splitBeforeThreshold.valueOfAttributeAtInstance(splitBeforeThreshold.size() -1, attributeIndex);			
 
-			long maxIndexWithSameValue = 1;
-			Value nextValue = instances.valueOfAttributeAtInstance(splitPoint + maxIndexWithSameValue, attributeIndex);
+			if(!skip){
+				long maxIndexWithSameValue =  instances.getMaxIndexWithSameValueInOrderedList(thresholdValue);
 
-			//while(Value.valuesAreIdentical(thresholdValue, nextValue)){
-			while(thresholdValue.equals(nextValue)){
-				maxIndexWithSameValue++;				
-				if(splitPoint + maxIndexWithSameValue >=  instances.size()){
-					break;
+				if(maxIndexWithSameValue > 1){
+					splitPoint += maxIndexWithSameValue -1;
+					skip = true;
+					continue;
 				}
-
-				nextValue = instances.valueOfAttributeAtInstance(splitPoint + maxIndexWithSameValue, attributeIndex);
 			}
-
-			if(maxIndexWithSameValue > 1){
-				splitPoint += maxIndexWithSameValue -1;
-				continue;
-			}
+			
+			skip = false;
 
 			IInstances splitAfterThreshold = instances.getSubList(splitPoint + 1, firstInstanceWithMissingValueForAttribute);
 
@@ -625,13 +620,12 @@ public class C45 {
 					splitPoint,  thresholdValue, splitBeforeThreshold, splitAfterThreshold);
 
 			if(Double.compare(infoGainForSplit, maxInfoGain) > 0){
-
 				maxInfoGain = infoGainForSplit;
 				bestAttributeSearchResultWithMaxInfoGain = attributeSearchResultWithMaxInfoGain;
 			}			
 			splitPoint++;
 		}
-		
+
 		if(bestAttributeSearchResultWithMaxInfoGain != null){
 			splitPoint = bestAttributeSearchResultWithMaxInfoGain.getSplittingPoint();
 			double thresholdVal = 0.0;

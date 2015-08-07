@@ -539,4 +539,10 @@ public class Instances extends IInstances {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	public long getMaxIndexWithSameValueInOrderedList(Value value) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

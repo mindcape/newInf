@@ -79,4 +79,6 @@ public abstract class IInstances implements Serializable{
 	public abstract void union(IInstances missingValueInstsForAttribute);
 
 	public abstract long getNextIndexWithDifferentValueInOrderedList(long index, Value value);
+
+	public abstract long getMaxIndexWithSameValueInOrderedList(Value value);
 }
