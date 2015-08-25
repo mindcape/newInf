@@ -32,6 +32,8 @@ public class Instances extends IInstances {
 	private List<Attribute> attributes;
 	private List<Instance> instances;
 	private int classIndex;
+	private int attributeIndex;   // Attribute index on which these instances are sorted on.
+	private Value thresholdValueOfSplitsInOrderedList;
 
 	public Instances(Context context){
 		super(context);
@@ -190,6 +192,8 @@ public class Instances extends IInstances {
 		Map<Attribute, IInstances> attributeAndMissingValueInstances = new HashMap<>();
 		
 		Map<Attribute, Double> attributeAndMissingValueInstancesSumOfWts = new HashMap<>();
+		
+		Map<Attribute, Integer> attributeAndMissingInstanceSizes = new HashMap<Attribute, Integer>();
 
 		Set<Instance> instancesWithMissingvalues = new HashSet<>();
 
@@ -228,11 +232,18 @@ public class Instances extends IInstances {
 					if(missingValueInstances == null){
 						missingValueInstances = new Instances(context, new ArrayList<Instance>(), attributes, classIndex);
 					}
-
+					
+					Integer currentNumMissingForAttr = attributeAndMissingInstanceSizes.get(currentAttribute);
+					if(currentNumMissingForAttr == null){
+						currentNumMissingForAttr = 0;
+					}
+					
 					missingValueInstances.addInstance(instance);
 					attributeAndMissingValueInstances.put(currentAttribute, missingValueInstances);
 					attributeAndMissingValueInstancesSumOfWts.put(currentAttribute, currentSumOfWtsOfMissingValuInstancesForAttr 
 										+ instance.getWeight());
+					attributeAndMissingInstanceSizes.put(currentAttribute, currentNumMissingForAttr + 1);
+					
 					instancesWithMissingvalues.add(instance);
 					continue;
 				}
@@ -315,7 +326,7 @@ public class Instances extends IInstances {
 		frequencyCounts.setAttributeValueCounts(attributeValueCounts);
 		frequencyCounts.setAttributeAndMissingValueInstances(attributeAndMissingValueInstances);
 		frequencyCounts.setAttributeAndMissingValueInstanceSumOfWeights(attributeAndMissingValueInstancesSumOfWts);
-		
+		frequencyCounts.setAttributeAndMissingValueInstanceSizes(attributeAndMissingInstanceSizes);
 		frequencyCounts.setTotalInstancesWithMissingValues(getSumOfWeights(instancesWithMissingvalues));
 
 		return frequencyCounts;
@@ -410,14 +421,18 @@ public class Instances extends IInstances {
 	@Override
 	public void sort(Attribute attribute) {
 		Collections.sort(instances, new InstanceComparator(attribute, attributes));
+		this.attributeIndex  = attributes.indexOf(attribute);		
 	}
 
 	@Override
 	public IInstances getSubList(long fromIndex, long toIndex) {
 		// In the stand-alone mode, integer should suffice on the instances collection
 		List<Instance> insts = new ArrayList<>(instances.subList((int)fromIndex, (int)toIndex));
-
-		return new Instances(context, insts,  attributes, classIndex);
+		
+		Instance thresholdInstance = instances.get((int)toIndex -1);
+		thresholdValueOfSplitsInOrderedList = thresholdInstance.getValue(attributeIndex);
+	
+		return new Instances(context, insts,  attributes, classIndex);		
 	}
 
 	@Override
@@ -516,33 +531,25 @@ public class Instances extends IInstances {
 	}
 
 	@Override
-	public void appendAllInstancesWithMissingAttributeValues(IInstances other,
-			Attribute attribute, double weightFactor) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void union(IInstances missingValueInstsForAttribute) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public Map<Value, Double> getTargetClassCounts() {
-		// TODO Auto-generated method stub
-		return null;
+		return getFrequencyCounts().getTotalTargetCounts();
 	}
 
 	@Override
-	public long getNextIndexWithDifferentValueInOrderedList(long index, Value value) {
-		// TODO Auto-generated method stub
-		return 0;
+	public long getNumOccurrencesOfValueInOrderedList(Value value) {
+		Long numOccurrences = 0L;
+		for(Instance inst : instances){
+			Value valueOfAttrInInst = inst.getValue(attributeIndex);
+			if(value.equals(valueOfAttrInInst)){
+				numOccurrences++;
+			}
+		}
+		
+		return numOccurrences;
 	}
 
 	@Override
-	public long getMaxIndexWithSameValueInOrderedList(Value value) {
-		// TODO Auto-generated method stub
-		return 0;
+	public Value getThresholdValueOfSplitsInOrderedList() {
+		return thresholdValueOfSplitsInOrderedList;
 	}
 }

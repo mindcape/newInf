@@ -154,10 +154,6 @@ public class C45 {
 
 			System.out.println("Training on subset based on attribute = " + attribute.getName() + " with value = " + dtEdge);
 
-			if(dtEdge.toString().contains("> 65")){
-				System.out.println("WAIT HERE");
-			}
-
 			train(decisionTreeNode, dtEdge, newInstances);
 		}
 	}
@@ -448,7 +444,6 @@ public class C45 {
 
 			Double ratio = (double) split.sumOfWeights() / instancesSize;
 			split.appendAll(instancesWithMissingValue, ratio);				
-			//split.appendAllInstancesWithMissingAttributeValues(instancesWithMissingValue, attribute, ratio);
 		}		
 	}
 
@@ -551,7 +546,8 @@ public class C45 {
 
 		instances.sort(attribute);
 
-		long firstInstanceWithMissingValueForAttribute = instances.indexOfFirstInstanceWithMissingValueForAttribute(attributeIndex);
+		long firstInstanceWithMissingValueForAttribute = frequencyCounts.getNumInstances() - 
+							frequencyCounts.getAttributeAndMissingValueInstanceSizes().get(attribute);
 
 		Double maxInfoGain = 0.0;
 		BestAttributeSearchResult bestAttributeSearchResultWithMaxInfoGain = null;
@@ -559,20 +555,20 @@ public class C45 {
 
 		long splitPoint = 0;
 
-		long minSplit = getMinSplit(instances.size(), instances.numClasses());
+		long instSize = frequencyCounts.getNumInstances();
+		long minSplit = getMinSplit(instSize, instances.numClasses());
 
-		if(attribute.getName().equalsIgnoreCase("Temperature")){
-			System.out.println("WAIT HERE: ");
-		}
+		Double instancesWithKnownValuesSize = getSizeOfInstancesWithKnownValuesForAttribute(attribute, instances, frequencyCounts);
+		Double knownValueInstancesRatio =  ((double)instancesWithKnownValuesSize) /((double) instances.sumOfWeights());	
 
 		boolean skip = false;
 		while(splitPoint < firstInstanceWithMissingValueForAttribute -1){			
 			IInstances splitBeforeThreshold = instances.getSubList(0, splitPoint + 1);
-			thresholdValue = splitBeforeThreshold.valueOfAttributeAtInstance(splitBeforeThreshold.size() -1, attributeIndex);			
+			Double sumOfWeightsBeforeThreshold = splitBeforeThreshold.sumOfWeights();
+			thresholdValue = instances.getThresholdValueOfSplitsInOrderedList();
 
 			if(!skip){
-				long maxIndexWithSameValue =  instances.getMaxIndexWithSameValueInOrderedList(thresholdValue);
-
+				long maxIndexWithSameValue =  instances.getNumOccurrencesOfValueInOrderedList(thresholdValue);
 				if(maxIndexWithSameValue > 1){
 					splitPoint += maxIndexWithSameValue -1;
 					skip = true;
@@ -581,11 +577,13 @@ public class C45 {
 			}
 			
 			skip = false;
+			
+			if(sumOfWeightsBeforeThreshold <  minSplit){
+				splitPoint++;
+				continue;
+			}
 
 			IInstances splitAfterThreshold = instances.getSubList(splitPoint + 1, firstInstanceWithMissingValueForAttribute);
-
-			Double sumOfWeightsBeforeThreshold = instances.sumOfWeights(0, splitPoint + 1);
-			//Double sumOfWeightsAfterThreshold = instances.sumOfWeights(splitPoint + 1, firstInstanceWithMissingValueForAttribute);
 			Double sumOfWeightsAfterThreshold = splitAfterThreshold.sumOfWeights();
 
 			if (!(sumOfWeightsBeforeThreshold >=  minSplit && sumOfWeightsAfterThreshold >=  minSplit)) {
@@ -593,22 +591,10 @@ public class C45 {
 				continue;
 			}
 
-			Double instancesWithKnownValuesSize = getSizeOfInstancesWithKnownValuesForAttribute(attribute, instances, frequencyCounts);
-			Double knownValueInstancesRatio =  ((double)instancesWithKnownValuesSize) /((double) instances.sumOfWeights());	
-
-			//			if(attribute.getName().equalsIgnoreCase("Temperature")){
-			//				System.out.println("Inferneon: Size of instances with known values at split point: " + splitPoint +  
-			//						" and split weights (" + sumOfWeightsBeforeThreshold + ", " +  sumOfWeightsAfterThreshold + ") ="
-			//						+  instancesWithKnownValuesSize);
-			//				System.out.println("Inferneon: Ratio of instances with known values at split point: " + splitPoint +  
-			//						" and split weights (" + sumOfWeightsBeforeThreshold + ", " +  sumOfWeightsAfterThreshold + ") ="
-			//						+  knownValueInstancesRatio);
-			//			}
-
 			Double weightedEntropy = getWeightedEntropyForValuesSubset(attributeIndex, splitBeforeThreshold,
-					instancesWithKnownValuesSize,  targetClassCount);			
+					instancesWithKnownValuesSize);			
 			weightedEntropy += getWeightedEntropyForValuesSubset(attributeIndex, splitAfterThreshold,
-					instancesWithKnownValuesSize,  targetClassCount);
+					instancesWithKnownValuesSize);
 			Double infoGainForSplit = knownValueInstancesRatio * (entropyOfTrainingSample - weightedEntropy);
 			if(attribute.getName().equalsIgnoreCase("Temperature")){
 				System.out.println("Inferneon: Ratio of instances with known values at split point: " + splitPoint +  
@@ -655,8 +641,7 @@ public class C45 {
 		return bestAttributeSearchResultWithMaxInfoGain;
 	}
 
-	private Double getWeightedEntropyForValuesSubset(int attributeIndex, IInstances split, Double instancesSize,
-			Map<Value, Map<Value, Double>> targetClassCount)  {
+	private Double getWeightedEntropyForValuesSubset(int attributeIndex, IInstances split, Double instancesSize)  {
 
 		double totalOccurencesOfValue = split.sumOfWeights();
 

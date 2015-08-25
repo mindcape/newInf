@@ -386,14 +386,13 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		String fileName = "C45ManyMissingValuesAtRandom.arff";
 
-		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45);
+		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();
 		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
 		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
 				attributes, attributes.size() -1, csvFilePath);
-
 
 		dt.train(instances);
 

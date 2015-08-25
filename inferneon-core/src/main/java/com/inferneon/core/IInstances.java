@@ -1,12 +1,8 @@
 package com.inferneon.core;
 
-import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import com.inferneon.supervised.FrequencyCounts;
 
@@ -66,19 +62,29 @@ public abstract class IInstances implements Serializable{
 	
 	public abstract Double getMaxValueLesserThanOrEqualTo(double thresholdValue, Attribute attribute);
 	
-	public abstract void sort(Attribute attribute);
-	
-	public abstract IInstances getSubList(long start, long end); 
-	
 	public abstract Value valueOfAttributeAtInstance(long index, int attributeIndex);
 	
 	public abstract void appendAll(IInstances other, double weightFactor);
 	
-	public abstract void appendAllInstancesWithMissingAttributeValues(IInstances other, Attribute attribute, double weightFactor);
-
-	public abstract void union(IInstances missingValueInstsForAttribute);
-
-	public abstract long getNextIndexWithDifferentValueInOrderedList(long index, Value value);
-
-	public abstract long getMaxIndexWithSameValueInOrderedList(Value value);
+	/**
+	 * This implementation should sort instances based on the values of the attribute passed. The attribute should be of numeric (or real) type. 
+	 */
+	public abstract void sort(Attribute attribute);	
+	
+	/**
+	 * This implementation should return a subset of instances that are already sort based on an attribute through the sort() function. 
+	 */
+	public abstract IInstances getSubList(long start, long end); 
+	
+	/**
+	 * This implementation returns the number of occurrences of the given value. The relevant attribute should already be known 
+	 * to the implementation.
+	 */
+	public abstract long getNumOccurrencesOfValueInOrderedList(Value value);
+	
+	/**
+	 * This implementation returns the threshold value when it split based on an numeric attribute. The relevant attribute should already be known 
+	 * to the implementation.
+	 * */	
+	public abstract Value getThresholdValueOfSplitsInOrderedList();
 }
