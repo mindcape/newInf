@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.inferneon.core.Attribute;
@@ -25,6 +26,8 @@ import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 import com.inferneon.supervised.DecisionTreeBuilder.Method;
+import com.inferneon.supervised.utils.DecisionTreeUtils;
+import com.inferneon.supervised.utils.DescriptiveTree;
 
 public class DecisionTreeTest extends SupervisedLearningTest{
 
@@ -151,6 +154,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equals("N"));		
 	}	
 
+	@Ignore
 	@Test
 	public void testC45NoMissingValues() throws Exception {
 		String fileName = "C45NoMissingValues.arff";
@@ -172,6 +176,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 
+	@Ignore
 	@Test
 	public void testC45OneMissingValue() throws Exception {
 
@@ -197,6 +202,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 
+	@Ignore
 	@Test
 	public void testC45TwoMissingValuesOfDiffAttrsInDiffInstances() throws Exception {
 
@@ -219,6 +225,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));
 	}
 
+	@Ignore
 	@Test
 	public void testC45ThreeMissingDiscreteValuesOfSameAttrsInDiffInstances() throws Exception {
 
@@ -243,6 +250,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 	}
 
+	@Ignore
 	@Test
 	public void testC45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance() throws Exception {
 
@@ -267,6 +275,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 	}
 
+	@Ignore
 	@Test
 	public void testC45OneMissingContinuousValue() throws Exception {
 
@@ -290,6 +299,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 
+	@Ignore
 	@Test
 	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance() throws Exception {
 
@@ -313,6 +323,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 
+	@Ignore
 	@Test
 	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances() throws Exception {
 
@@ -336,6 +347,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 
+	@Ignore
 	@Test
 	public void testC45TwoMissingContinuousValuesInSameInstance() throws Exception {
 
@@ -359,6 +371,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));		
 	}
 
+	@Ignore
 	@Test
 	public void testC45TwoMissingContinuousValuesInDiffInstances() throws Exception {
 
@@ -381,6 +394,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));		
 	}
 
+	@Ignore
 	@Test
 	public void testC45ManyMissingValuesAtRandom() throws Exception {
 
@@ -402,13 +416,14 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		Value targetClassValue = dt.classify(newInstance);
 		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("NO"));		
 	}
-
+	
 	@Test
 	public void testC45GainRatioManyMissingValuesAtRandom() throws Exception {
 
 		String fileName = "C45ManyMissingValuesAtRandom.arff";
+		String jsonFormatFile = "C45ManyMissingValuesAtRandom.json";
 
-		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
+		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();		
@@ -416,85 +431,14 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
 				attributes, attributes.size() -1, csvFilePath);
 
-		dt.train(instances);
+		dtBuilder.train(instances);
 
-		List<Value> newValues = getValueListForTestInstance(attributes, "Sunny", "65", "90", "true");
-		Instance newInstance = new Instance(newValues);
+		dtBuilder.train(instances);			
+		DecisionTree dt = (DecisionTree)dtBuilder.getDecisionTree();		
+		DescriptiveTree expectedTree = DecisionTreeUtils.getDescriptiveTreeFromJSON(ROOT, jsonFormatFile);
+		System.out.println("********** EXPECTED  TREE:");
+		expectedTree.emitTree();
+		check(expectedTree, dt);	
 
-		Value targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("Yes"));	
-
-		newValues = getValueListForTestInstance(attributes, "Overcast", "65", "95", "true");
-		newInstance = new Instance(newValues);
-
-		targetClassValue = dt.classify(newInstance);
-		Assert.assertTrue(targetClassValue.getName().equalsIgnoreCase("No"));	
-
-	}
-	
-	private void verifyTree(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, DecisionTreeNode rootNode,
-			String rootNodeName, Map<String, List<String>> parentAndOutgoingEdgeNames, Map<String, String> edgeAndTargetNode){
-
-		Assert.assertTrue(rootNodeName.equals(rootNode.getAttribute().getName()));
-
-		Set<Entry<String, List<String>>> entries = parentAndOutgoingEdgeNames.entrySet();
-		Iterator<Entry<String, List<String> >> iterator = entries.iterator();
-		while(iterator.hasNext()){
-			Entry<String, List<String> > entry = iterator.next();
-			String attrName = entry.getKey();
-			List<String> outgoingEdgeNames = entry.getValue();
-
-			DecisionTreeNode nodeInTree = getNodeByName(decisionTree, attrName);
-			Set<DecisionTreeEdge>  outgoingEdgesOfNodeInTree = decisionTree.outgoingEdgesOf(nodeInTree);
-
-			Assert.assertTrue(outgoingEdgesOfNodeInTree.size() == outgoingEdgeNames.size());
-
-			Iterator<DecisionTreeEdge> edgesIterator = outgoingEdgesOfNodeInTree.iterator();
-			while(edgesIterator.hasNext()){
-				DecisionTreeEdge edge = edgesIterator.next();
-				String edgeName = edge.toString();
-				Assert.assertTrue(outgoingEdgeNames.contains(edgeName));
-
-				String targetNodeName = decisionTree.getEdgeTarget(edge).getAttribute().getName();
-				Assert.assertTrue(targetNodeName.equals(edgeAndTargetNode.get(edgeName)));				
-			}
-		}		
-	}
-
-	private DecisionTreeNode getNodeByName(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, String name){
-		Set<DecisionTreeNode> nodes = decisionTree.vertexSet();
-		Iterator<DecisionTreeNode> iterator = nodes.iterator();
-		while(iterator.hasNext()){
-			DecisionTreeNode node = iterator.next();
-			if(name.equals(node.getAttribute().getName())){
-				return node;
-			}
-		}
-
-		return null;
-	}
-
-	private DecisionTreeEdge getEdgeByName(DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge> decisionTree, String name){
-		Set<DecisionTreeEdge> edges = decisionTree.edgeSet();
-		Iterator<DecisionTreeEdge> iterator = edges.iterator();
-		while(iterator.hasNext()){
-			DecisionTreeEdge edge = iterator.next();
-			if(edge.toString().equals(name)){
-				return edge;
-			}
-		}
-
-		return null;
-	}
-
-
-	private Set<String> getEdgeNames(Set<DecisionTreeEdge>  edgesInTree){		
-		Set<String> edgeNames = new HashSet<>();
-		Iterator<DecisionTreeEdge> iterator = edgesInTree.iterator();
-		while(iterator.hasNext()){
-			DecisionTreeEdge edge = iterator.next();
-			edgeNames.add(edge.toString());
-		}
-		return edgeNames;		
 	}
 }

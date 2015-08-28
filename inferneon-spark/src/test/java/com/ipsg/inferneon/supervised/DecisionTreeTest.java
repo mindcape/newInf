@@ -7,21 +7,22 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
-import com.inferneon.core.Instance;
 import com.inferneon.core.InstancesFactory;
-import com.inferneon.core.Value;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
+import com.inferneon.supervised.DecisionTree;
 import com.inferneon.supervised.DecisionTreeBuilder;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 import com.inferneon.supervised.DecisionTreeBuilder.Method;
+import com.inferneon.supervised.SupervisedLearningTest;
+import com.inferneon.supervised.utils.DecisionTreeUtils;
+import com.inferneon.supervised.utils.DescriptiveTree;
 
-public class DecisionTreeTest {
+public class DecisionTreeTest extends SupervisedLearningTest{
 	
 	private static final String ROOT = "/TestResources";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
@@ -35,15 +36,15 @@ public class DecisionTreeTest {
 	}
 
 	private String getAppTempDir(){
-		
+
 		String sysTempFolder = System.getProperty("java.io.tmpdir");
 		String tempPath = sysTempFolder + (sysTempFolder.endsWith(File.separator)? "": File.separator) + APP_TEMP_FOLDER + File.separator;
 		File tempDir = new File(tempPath);
 		tempDir.mkdir();
-		
+
 		return tempPath;
 	}
-	
+
 	private String getCreatedCSVFilePath(String arffFileName, String data){
 		PrintWriter out = null;
 		String csvFileName = null;
@@ -64,7 +65,7 @@ public class DecisionTreeTest {
 
 		return csvFileName;
 	}
-	
+
 	@Test
 	public void testC45NoMissingValues() throws Exception {
 		String fileName = "C45NoMissingValues.arff";
@@ -78,7 +79,7 @@ public class DecisionTreeTest {
 
 		dt.train(instances);
 	}	
-	
+
 	@Test
 	public void testC45TwoMissingContinuousValuesInSameInstance() throws Exception {
 
@@ -97,10 +98,10 @@ public class DecisionTreeTest {
 
 	@Test
 	public void testC45GainRatioManyMissingValuesAtRandom() throws Exception {
-
 		String fileName = "C45ManyMissingValuesAtRandom.arff";
+		String jsonFormatFile = "C45ManyMissingValuesAtRandom.json";
 
-		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
+		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
 		List<Attribute> attributes = arffElements.getAttributes();		
@@ -108,9 +109,14 @@ public class DecisionTreeTest {
 		IInstances instances = InstancesFactory.getInstance().createInstances("SPARK", 
 				attributes, attributes.size() -1, csvFilePath);
 
-		dt.train(instances);		
+		dtBuilder.train(instances);			
+		DecisionTree dt = (DecisionTree)dtBuilder.getDecisionTree();		
+		DescriptiveTree expectedTree = DecisionTreeUtils.getDescriptiveTreeFromJSON(ROOT, jsonFormatFile);
+		System.out.println("********** EXPECTED  TREE:");
+		expectedTree.emitTree();
+		check(expectedTree, dt);		
 	}
-		
+
 	@After
 	public void tearDown(){
 		File tempPath = new File(getAppTempDir());

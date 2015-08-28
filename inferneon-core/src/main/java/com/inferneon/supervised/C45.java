@@ -67,11 +67,11 @@ public class C45 {
 		decisionTree.emitTree();
 		System.out.println("TREE AFTER COLLAPSING: ");
 
-		collapseTree();
+		//collapseTree();
 
-		System.out.println("######################## STARTED PRUNING DECISION TREE NOW WITH ########################");
+		//System.out.println("######################## STARTED PRUNING DECISION TREE NOW WITH ########################");
 
-		pruneDecisionTree(decisionTree.getDecisionTreeRootNode());
+		//pruneDecisionTree(decisionTree.getDecisionTreeRootNode());
 
 		long after = new Date().getTime();
 
@@ -508,7 +508,8 @@ public class C45 {
 		DecisionTreeNode leafNode = new DecisionTreeNode(frequencyCounts, targetValue);
 		decisionTree.addVertex(leafNode);
 		edge.setSource(parentNode); edge.setTarget(leafNode);
-		System.out.println("Adding edge " + edge + " between attributes " + parentNode + " and leaf node " + leafNode);		
+		System.out.println("Adding edge " + edge + " between attributes " + parentNode + " and leaf node " + leafNode);	
+		
 		decisionTree.addDagEdge(parentNode, leafNode, edge);		
 	}
 

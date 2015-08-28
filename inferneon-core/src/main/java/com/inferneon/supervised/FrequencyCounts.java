@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
 import com.inferneon.core.Value;
+import com.inferneon.core.utils.MathUtils;
 
 /**
  * Represents several counts for a given set of instances.
@@ -259,5 +260,12 @@ public class FrequencyCounts implements Serializable{
 		}
 		description += newLine;
 		return description;
+	}
+
+	public String getDistrbutionDesc() {
+
+		Double numErrors = getErrorOnDistribution();		
+		return  MathUtils.roundDouble(sumOfWeights, 2)
+				+ (Double.compare(numErrors, 0.0) > 0 ? "/" + MathUtils.roundDouble(numErrors, 2) : "");
 	}
 }

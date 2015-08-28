@@ -85,12 +85,7 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 			String distDescription = "";
 			if(target.isLeaf()){
 				FrequencyCounts frequencyCounts = target.getFrequencyCounts();
-				Double sumOfWeights = frequencyCounts.getSumOfWeights();
-				Double numErrors = frequencyCounts.getErrorOnDistribution();
-							
-				distDescription += "(" + MathUtils.roundDouble(sumOfWeights, 2)
-						+ (Double.compare(numErrors, 0.0) > 0 ? "/" + MathUtils.roundDouble(numErrors, 2) : "") 
-						+ ")";
+				distDescription += "(" + frequencyCounts.getDistrbutionDesc() + ")";
 			}
 
 			String childDesc = "	(" + edge + ") -> " + target  +  " " + distDescription;
@@ -101,5 +96,5 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 		for(DecisionTreeNode child : children){
 			emitTree(child, depthStack);
 		}		
-	}	
+	}
 }

@@ -1,10 +1,17 @@
 package com.inferneon.supervised;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import org.junit.Assert;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Value;
+import com.inferneon.supervised.utils.DescriptiveTree;
+import com.inferneon.supervised.utils.DescriptiveTreeEdge;
+import com.inferneon.supervised.utils.DescriptiveTreeNode;
 
 public class SupervisedLearningTest {
 
@@ -72,5 +79,162 @@ public class SupervisedLearningTest {
 
 		vals.add(null);		
 		return vals;		
+	}	
+	
+	protected void check(DescriptiveTree expectedTree, DecisionTree dt) {		
+		DescriptiveTreeNode rootNameExpected = expectedTree.getRootNode();
+		DecisionTreeNode dtRootNode = dt.getDecisionTreeRootNode();
+		check(expectedTree, rootNameExpected, dt, dtRootNode);		
+	}
+	
+	private void check(DescriptiveTree expectedTree, DescriptiveTreeNode expectedNode,
+			DecisionTree dt, DecisionTreeNode dtNode) {
+		Assert.assertTrue(checkLeafNodeName(dtNode, expectedNode));
+		
+		if(dtNode.isLeaf()){
+			Assert.assertTrue(expectedNode.isLeaf());
+			String nodeLeafDist = dtNode.getFrequencyCounts().getDistrbutionDesc();
+			String expectedNodeLeafDist = expectedNode.getLeafDistribution();
+			Assert.assertTrue(expectedNodeLeafDist.equals(nodeLeafDist));
+			return;
+		}
+		
+		Set<DecisionTreeEdge> outgoingEdges = dt.outgoingEdgesOf(dtNode);
+		Set<DescriptiveTreeEdge> expectedOutgoingEdges = expectedTree.outgoingEdgesOf(expectedNode);		
+		Assert.assertTrue(outgoingEdges.size() == expectedOutgoingEdges.size());
+		
+		Iterator<DecisionTreeEdge> outgoingEdgeIterator = outgoingEdges.iterator();
+		
+		List<DecisionTreeNode> targetNodes = new ArrayList<DecisionTreeNode>();
+		List<DescriptiveTreeNode> expectedTargetNodes = new ArrayList<DescriptiveTreeNode>();
+		
+		while(outgoingEdgeIterator.hasNext()){
+			DecisionTreeEdge edge = outgoingEdgeIterator.next();
+			String edgeName = edge.toString();
+			DecisionTreeNode targetNode = dt.getEdgeTarget(edge);
+			targetNodes.add(targetNode);
+			
+			DescriptiveTreeNode expectedTargetNode = getExpectedTargetNode(expectedTree, expectedNode, edgeName);
+			Assert.assertNotNull(expectedTargetNode);				
+			expectedTargetNodes.add(expectedTargetNode);			
+		}
+		
+		int numTargets = targetNodes.size();
+		for(int i = 0; i < numTargets; i++){
+			DecisionTreeNode targetNode = targetNodes.get(i);
+			DescriptiveTreeNode expectedTargetNode = expectedTargetNodes.get(i);
+			
+			check(expectedTree, expectedTargetNode, dt, targetNode);			
+		}		
+	}
+
+	private boolean checkLeafNodeName(DecisionTreeNode dtNode, DescriptiveTreeNode expectedNode) {
+		if(dtNode.toString().equals(expectedNode.getName())){
+			return true;
+		}
+
+		FrequencyCounts frequencyCounts = dtNode.getFrequencyCounts();
+
+		if(Double.compare(frequencyCounts.getSumOfWeights(), 0.0) == 0){
+			// Does not matter what the leaf is
+			return true;
+		}
+
+		return false;
+		
+	}
+
+	private DescriptiveTreeNode getExpectedTargetNode(DescriptiveTree expectedTree, DescriptiveTreeNode nameExpected,
+			String edgeName) {
+		DescriptiveTreeNode targetExpectedNode = null;
+		
+		Set<DescriptiveTreeEdge> edges = expectedTree.outgoingEdgesOf(nameExpected);
+		Iterator<DescriptiveTreeEdge> iterator = edges.iterator();
+		while(iterator.hasNext()){
+			DescriptiveTreeEdge edge = iterator.next();
+			if(edgeNamesAreSimilar(edge.getName(), edgeName)){
+				return expectedTree.getEdgeTarget(edge);
+			}
+			
+		}
+		
+		return targetExpectedNode;
+	}
+
+	private boolean edgeNamesAreSimilar(String name1, String name2) {
+		if(name1.equals(name2)){
+			return true;
+		}
+		
+		boolean foundNumberedEdge = false;
+		if(name1.startsWith("<= ") && name2.startsWith("<= ")){
+			name1 = name1.substring(3, name1.length());
+			name2 = name2.substring(3, name2.length());
+			foundNumberedEdge = true;
+		}
+		
+		if(name1.startsWith("> ") && name2.startsWith("> ")){
+			name1 = name1.substring(2, name1.length());
+			name2 = name2.substring(2, name2.length());
+			foundNumberedEdge = true;
+		}
+		
+		if(!foundNumberedEdge){
+			return false;
+		}
+		
+		boolean isName1Int = false;
+		boolean isName2Int = false;
+		boolean isName1Dbl = false;
+		boolean isName2Dbl = false;
+		
+		try{
+			Integer intName1 = Integer.parseInt(name1);
+			isName1Int = true;
+		}
+		catch(NumberFormatException nfe){
+			try{
+				Double dblName1 = Double.parseDouble(name1);
+				isName1Dbl = true;
+			}
+			catch(NumberFormatException nfe1){}		
+		}
+		
+		try{
+			Integer intName2 = Integer.parseInt(name2);
+			isName2Int = true;
+		}
+		catch(NumberFormatException nfe){
+			try{
+				Double dblName2 = Double.parseDouble(name2);
+				isName2Dbl = true;
+			}
+			catch(NumberFormatException nfe1){}		
+		}
+		
+		if(isName1Int && isName2Dbl){
+			Integer intName1 = Integer.parseInt(name1);
+			Double dblName2 = Double.parseDouble(name2);
+			String dblName2Str = dblName2.toString();
+			if(dblName2Str.endsWith(".0")){
+				double name2Val = dblName2.doubleValue();
+				if(intName1.intValue() == (int)name2Val){
+					return true;
+				}
+			}			
+		}
+		
+		if(isName2Int && isName1Dbl){
+			Integer intName2 = Integer.parseInt(name2);
+			Double dblName1 = Double.parseDouble(name1);
+			String dblName1Str = dblName1.toString();
+			if(dblName1Str.endsWith(".0")){
+				double name1Val = dblName1.doubleValue();
+				if(intName2.intValue() == (int)name1Val){
+					return true;
+				}
+			}			
+		}		
+		return false;		
 	}	
 }
