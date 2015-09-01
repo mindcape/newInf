@@ -68,38 +68,71 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 	@Test
 	public void testC45NoMissingValues() throws Exception {
-		String fileName = "C45NoMissingValues.arff";
-		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
-
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
-		List<Attribute> attributes = arffElements.getAttributes();		
-		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
-		IInstances instances = InstancesFactory.getInstance().createInstances("SPARK", 
-				attributes, attributes.size() -1, csvFilePath);
-
-		dt.train(instances);
+		test("C45NoMissingValues.arff", "C45NoMissingValues.json");		
 	}	
+	
+	@Test
+	public void testC45OneMissingValue() throws Exception {
+		test("C45OneMissingValue.arff", "C45OneMissingValue.json");		
+	}
+	
+	@Test
+	public void testC45OneMissingContinuousValue() throws Exception {
+		test("C45OneMissingContinuousValue.arff",  "C45OneMissingContinuousValue.json");			
+	}
 
 	@Test
 	public void testC45TwoMissingContinuousValuesInSameInstance() throws Exception {
-
-		String fileName = "C45TwoMissingContinuousValuesInSameInstance.arff";
-
-		DecisionTreeBuilder dt = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
-
-		ArffElements arffElements = ParserUtils.getArffElements(ROOT, fileName);		
-		List<Attribute> attributes = arffElements.getAttributes();		
-		String csvFilePath = getCreatedCSVFilePath(fileName, arffElements.getData());
-		IInstances instances = InstancesFactory.getInstance().createInstances("SPARK", 
-				attributes, attributes.size() -1, csvFilePath);
-
-		dt.train(instances);	
-	}	
+		test( "C45TwoMissingContinuousValuesInSameInstance.arff",  "C45TwoMissingContinuousValuesInSameInstance.json");
+	}
+	
+	@Test
+	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance() throws Exception {
+		test( "C45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance.arff",  
+				"C45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance.json");
+	}
 
 	@Test
+	public void testC45TwoMissingValuesOfDiffAttrsInDiffInstances() throws Exception {
+		test( "C45TwoMissingValuesOfDiffAttrsInDiffInstances.arff",  
+				"C45TwoMissingValuesOfDiffAttrsInDiffInstances.json");
+	}
+
+	@Test
+	public void testC45ThreeMissingDiscreteValuesOfSameAttrsInDiffInstances() throws Exception {
+		test( "C45ThreeMissingDiscreteValuesOfSameAttrInDiffInstances.arff",  
+				"C45ThreeMissingDiscreteValuesOfSameAttrInDiffInstances.json");
+	}
+
+	@Test
+	public void testC45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance() throws Exception {
+		test( "C45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance.arff",  
+				"C45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance.json");
+	}
+	
+	@Test
+	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances() throws Exception {
+		test( "C45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances.arff",  
+				"C45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances.json");	
+	}
+
+	@Test
+	public void testC45TwoMissingContinuousValuesInDiffInstances() throws Exception {
+		test( "C45TwoMissingContinuousValuesInDiffInstances.arff", "C45TwoMissingContinuousValuesInDiffInstances.json");	
+	}
+
+
+	@Test
+	public void testC45ManyMissingValuesAtRandom() throws Exception {
+		test("C45ManyMissingValuesAtRandom.arff", "C45ManyMissingValuesAtRandom.json");
+	}
+	
+	@Test
 	public void testC45GainRatioManyMissingValuesAtRandom() throws Exception {
-		String fileName = "C45ManyMissingValuesAtRandom.arff";
-		String jsonFormatFile = "C45ManyMissingValuesAtRandom.json";
+		test("C45ManyMissingValuesAtRandom.arff", "C45ManyMissingValuesAtRandom.json");
+	}
+
+	private void test(String fileName, String jsonFormatFileExpected) throws Exception {
 
 		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
 
@@ -111,12 +144,13 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		dtBuilder.train(instances);			
 		DecisionTree dt = (DecisionTree)dtBuilder.getDecisionTree();		
-		DescriptiveTree expectedTree = DecisionTreeUtils.getDescriptiveTreeFromJSON(ROOT, jsonFormatFile);
+		DescriptiveTree expectedTree = DecisionTreeUtils.getDescriptiveTreeFromJSON(ROOT, jsonFormatFileExpected);
 		System.out.println("********** EXPECTED  TREE:");
 		expectedTree.emitTree();
-		check(expectedTree, dt);		
+		check(expectedTree, dt);
+		
 	}
-
+	
 	@After
 	public void tearDown(){
 		File tempPath = new File(getAppTempDir());

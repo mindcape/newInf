@@ -164,6 +164,22 @@ public class FrequencyCounts implements Serializable{
 		return sumOfWts;
 	}
 	
+	public Long getMissingValueInstancesCountForAttribute(Attribute attribute){
+		
+		if(attributeAndMissingValueInstanceSizes == null) {
+			return 0L;
+		}
+		else{
+			Integer count = attributeAndMissingValueInstanceSizes.get(attribute);
+			
+			if(count == null){
+				return 0L;
+			}
+			
+			return (long)count;
+		}
+	}
+	
 	public Map<Value, Double> getTargetCounts(int attributeIndex,
 			Value targetValue) {
 		Map<Value, Map<Value, Double>> valueAndTargetCounts = valueAndTargetClassCount.get(attributeIndex);

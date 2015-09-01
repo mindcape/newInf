@@ -1,10 +1,8 @@
 package com.inferneon.supervised;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,15 +14,8 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Attribute.Type;
 import com.inferneon.core.IInstances;
-import com.inferneon.core.IInstances.Context;
-import com.inferneon.core.Instance;
-import com.inferneon.core.InstanceComparator;
-import com.inferneon.core.Instances;
 import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.Value;
-import com.inferneon.core.Value.ValueType;
-import com.inferneon.core.exceptions.InvalidDataException;
-import com.inferneon.core.utils.DataLoader;
 import com.inferneon.core.utils.StatisticsUtils;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 
@@ -82,7 +73,7 @@ public class C45 {
 	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, IInstances instances) 
 			throws Exception{
 
-		if(decisionTreeEdge != null && decisionTreeEdge.toString().contains("> 90.0")){
+		if(decisionTreeEdge != null && decisionTreeEdge.toString().contains("<= 65")){
 			System.out.println("WAIT HERE");
 		}
 
@@ -548,7 +539,7 @@ public class C45 {
 		instances.sort(attribute);
 
 		long firstInstanceWithMissingValueForAttribute = frequencyCounts.getNumInstances() - 
-							frequencyCounts.getAttributeAndMissingValueInstanceSizes().get(attribute);
+							frequencyCounts.getMissingValueInstancesCountForAttribute(attribute);
 
 		Double maxInfoGain = 0.0;
 		BestAttributeSearchResult bestAttributeSearchResultWithMaxInfoGain = null;

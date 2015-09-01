@@ -3,25 +3,15 @@ package com.inferneon.supervised;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.junit.After;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
-import com.inferneon.core.Instance;
 import com.inferneon.core.InstancesFactory;
-import com.inferneon.core.Value;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
@@ -29,8 +19,8 @@ import com.inferneon.supervised.DecisionTreeBuilder.Method;
 import com.inferneon.supervised.utils.DecisionTreeUtils;
 import com.inferneon.supervised.utils.DescriptiveTree;
 
-public class DecisionTreeTest extends SupervisedLearningTest{
-/*
+public class C45DecisionTreeTest extends SupervisedLearningTest{
+
 	private static final String ROOT = "/TestResources";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 
@@ -42,28 +32,17 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 			e.printStackTrace();
 		}
 	}
-	
-	private String getCreatedCSVFilePath(String arffFileName, String data){
-		PrintWriter out = null;
-		String csvFileName = null;
-		String tempPath = getAppTempDir(APP_TEMP_FOLDER);
-		try{
-			String fileNameWithouExt = arffFileName.substring(0, arffFileName.lastIndexOf(".arff"));
-			csvFileName = tempPath + fileNameWithouExt + ".csv";			
-			out = new PrintWriter(csvFileName);
-			out.print(data);
-		}
-		catch(Exception e){
-			e.printStackTrace();
-			return csvFileName;
-		}
-		finally{
-			out.close();
-		}
 
-		return csvFileName;
+	private String getAppTempDir(){
+		
+		String sysTempFolder = System.getProperty("java.io.tmpdir");
+		String tempPath = sysTempFolder + (sysTempFolder.endsWith(File.separator)? "": File.separator) + APP_TEMP_FOLDER + File.separator;
+		File tempDir = new File(tempPath);
+		tempDir.mkdir();
+		
+		return tempPath;
 	}
-
+	
 	@After
 	public void tearDown(){
 		File tempPath = new File(getAppTempDir());
@@ -76,7 +55,6 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 	}
 	
 	
-
 	@Test
 	public void testC45NoMissingValues() throws Exception {
 		test("C45NoMissingValues.arff", "C45NoMissingValues.json");	
@@ -143,7 +121,7 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, inputFileName);		
 		List<Attribute> attributes = arffElements.getAttributes();		
-		String csvFilePath = getCreatedCSVFilePath(inputFileName, arffElements.getData());
+		String csvFilePath = getCreatedCSVFilePath(inputFileName, arffElements.getData(), APP_TEMP_FOLDER);
 		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
 				attributes, attributes.size() -1, csvFilePath);
 
@@ -156,5 +134,5 @@ public class DecisionTreeTest extends SupervisedLearningTest{
 		expectedTree.emitTree();
 		check(expectedTree, dt);	
 	}
-	*/
+	
 }

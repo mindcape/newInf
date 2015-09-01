@@ -1,9 +1,13 @@
 package com.inferneon.supervised;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.junit.Assert;
 
@@ -15,6 +19,38 @@ import com.inferneon.supervised.utils.DescriptiveTreeNode;
 
 public class SupervisedLearningTest {
 
+	protected String getCreatedCSVFilePath(String arffFileName, String data, String appTempFolder){
+		PrintWriter out = null;
+		String csvFileName = null;
+		String tempPath = getAppTempDir(appTempFolder);
+		try{
+			String fileNameWithouExt = arffFileName.substring(0, arffFileName.lastIndexOf(".arff"));
+			csvFileName = tempPath + fileNameWithouExt + ".csv";			
+			out = new PrintWriter(csvFileName);
+			out.print(data);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return csvFileName;
+		}
+		finally{
+			out.close();
+		}
+
+		return csvFileName;
+	}
+
+	private String getAppTempDir(String appTempFolder){
+		
+		String sysTempFolder = System.getProperty("java.io.tmpdir");
+		String tempPath = sysTempFolder + (sysTempFolder.endsWith(File.separator)? "": File.separator) + appTempFolder + File.separator;
+		File tempDir = new File(tempPath);
+		tempDir.mkdir();
+		
+		return tempPath;
+	}
+	
+	
 	protected List<Attribute> createAttributesWithNominalValues(
 			List<String> attrNames, int[] lengths,
 			List<String> attrNominalValues) {
@@ -89,7 +125,7 @@ public class SupervisedLearningTest {
 	
 	private void check(DescriptiveTree expectedTree, DescriptiveTreeNode expectedNode,
 			DecisionTree dt, DecisionTreeNode dtNode) {
-		Assert.assertTrue(checkLeafNodeName(dtNode, expectedNode));
+		Assert.assertTrue(checkLeafNodeName(dt, expectedTree, dtNode, expectedNode));
 		
 		if(dtNode.isLeaf()){
 			Assert.assertTrue(expectedNode.isLeaf());
@@ -128,7 +164,8 @@ public class SupervisedLearningTest {
 		}		
 	}
 
-	private boolean checkLeafNodeName(DecisionTreeNode dtNode, DescriptiveTreeNode expectedNode) {
+	private boolean checkLeafNodeName(DecisionTree dt, DescriptiveTree expectedTree, 
+			DecisionTreeNode dtNode, DescriptiveTreeNode expectedNode) {
 		if(dtNode.toString().equals(expectedNode.getName())){
 			return true;
 		}
@@ -140,6 +177,34 @@ public class SupervisedLearningTest {
 			return true;
 		}
 
+		Map<Value, Double> targetCounts = frequencyCounts.getTotalTargetCounts();
+		Set<Entry<Value, Double>> entries = targetCounts.entrySet();
+		Iterator<Entry<Value, Double>> iterator = entries.iterator();
+		
+		boolean firstNumFound = false;
+		Double referenceValue = null;
+		boolean allCountsEqual = true;
+		while(iterator.hasNext()){
+			Entry<Value, Double> entry = iterator.next();
+			Double numInstances = entry.getValue();
+			
+			if(!firstNumFound){
+				firstNumFound = true;
+				referenceValue = numInstances;
+				continue;
+			}
+
+			if(Double.compare(referenceValue, numInstances) != 0){
+				allCountsEqual = false;
+				break;
+			}
+		}
+		
+		if(allCountsEqual){
+			// Does not matter
+			return true;
+		}
+		
 		return false;
 		
 	}
