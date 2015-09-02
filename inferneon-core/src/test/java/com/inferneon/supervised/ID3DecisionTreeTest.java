@@ -18,6 +18,14 @@ public class ID3DecisionTreeTest extends SupervisedLearningTest{
 	private static final String ROOT = "/TestResources";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 	
+	static {
+		try {
+			Class.forName("com.inferneon.core.Instances");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	@Test
 	public void testID3Simple1() throws Exception {
 		String fileName = "ID3Simple1.arff";

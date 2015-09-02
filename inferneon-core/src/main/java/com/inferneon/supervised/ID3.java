@@ -163,4 +163,12 @@ public class ID3 {
 	public DecisionTree getDecisionTree(){
 		return decisionTree;
 	}
+
+	public void setCollapseTree(boolean collapseTree) {
+		
+	}
+
+	public void setPruneTree(boolean pruneTree) {
+		
+	}
 }

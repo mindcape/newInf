@@ -28,7 +28,6 @@ public class C45DecisionTreeTest extends SupervisedLearningTest{
 		try {
 			Class.forName("com.inferneon.core.Instances");
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -54,70 +53,79 @@ public class C45DecisionTreeTest extends SupervisedLearningTest{
 		}
 	}
 	
-	
 	@Test
-	public void testC45NoMissingValues() throws Exception {
-		test("C45NoMissingValues.arff", "C45NoMissingValues.json");	
+	public void noMissingValues() throws Exception {
+		test("C45NoMissingValues.arff", "C45NoMissingValues.json", false, false);	
 	}
 
 	@Test
-	public void testC45OneMissingValue() throws Exception {
-		test("C45OneMissingValue.arff", "C45OneMissingValue.json");		
+	public void oneMissingValue() throws Exception {
+		test("C45OneMissingValue.arff", "C45OneMissingValue.json", false, false);		
 	}
 	
 	@Test
-	public void testC45OneMissingContinuousValue() throws Exception {
-		test("C45OneMissingContinuousValue.arff",  "C45OneMissingContinuousValue.json");			
+	public void oneMissingContinuousValue() throws Exception {
+		test("C45OneMissingContinuousValue.arff",  "C45OneMissingContinuousValue.json", false, false);			
 	}
 
 	@Test
-	public void testC45TwoMissingContinuousValuesInSameInstance() throws Exception {
-		test( "C45TwoMissingContinuousValuesInSameInstance.arff",  "C45TwoMissingContinuousValuesInSameInstance.json");
+	public void twoMissingContinuousValuesInSameInstance() throws Exception {
+		test( "C45TwoMissingContinuousValuesInSameInstance.arff",  "C45TwoMissingContinuousValuesInSameInstance.json", false, false);
 	}
 	
 	@Test
-	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance() throws Exception {
+	public void oneMissingDiscreteAndOneMissingContinuousValueInSameInstance() throws Exception {
 		test( "C45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance.arff",  
-				"C45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance.json");
+				"C45OneMissingDiscreteAndOneMissingContinuousValueInSameInstance.json", false, false);
 	}
 
 	@Test
-	public void testC45TwoMissingValuesOfDiffAttrsInDiffInstances() throws Exception {
+	public void twoMissingValuesOfDiffAttrsInDiffInstances() throws Exception {
 		test( "C45TwoMissingValuesOfDiffAttrsInDiffInstances.arff",  
-				"C45TwoMissingValuesOfDiffAttrsInDiffInstances.json");
+				"C45TwoMissingValuesOfDiffAttrsInDiffInstances.json", false, false);
 	}
 
 	@Test
-	public void testC45ThreeMissingDiscreteValuesOfSameAttrsInDiffInstances() throws Exception {
+	public void threeMissingDiscreteValuesOfSameAttrsInDiffInstances() throws Exception {
 		test( "C45ThreeMissingDiscreteValuesOfSameAttrInDiffInstances.arff",  
-				"C45ThreeMissingDiscreteValuesOfSameAttrInDiffInstances.json");
+				"C45ThreeMissingDiscreteValuesOfSameAttrInDiffInstances.json", false, false);
 	}
 
 	@Test
-	public void testC45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance() throws Exception {
+	public void twoMissingDiscreteValuesOfDiffAttrsInSameInstance() throws Exception {
 		test( "C45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance.arff",  
-				"C45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance.json");
+				"C45TwoMissingDiscreteValuesOfDiffAttrsInSameInstance.json", false, false);
 	}
 	
 	@Test
-	public void testC45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances() throws Exception {
+	public void tneMissingDiscreteAndOneMissingContinuousValueInDiffInstances() throws Exception {
 		test( "C45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances.arff",  
-				"C45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances.json");	
+				"C45OneMissingDiscreteAndOneMissingContinuousValueInDiffInstances.json", false, false);	
 	}
 
 	@Test
-	public void testC45TwoMissingContinuousValuesInDiffInstances() throws Exception {
-		test( "C45TwoMissingContinuousValuesInDiffInstances.arff", "C45TwoMissingContinuousValuesInDiffInstances.json");	
+	public void twoMissingContinuousValuesInDiffInstances() throws Exception {
+		test( "C45TwoMissingContinuousValuesInDiffInstances.arff", "C45TwoMissingContinuousValuesInDiffInstances.json", false, false);	
 	}
 
-
 	@Test
-	public void testC45ManyMissingValuesAtRandom() throws Exception {
-		test("C45ManyMissingValuesAtRandom.arff", "C45ManyMissingValuesAtRandom.json");
+	public void manyMissingValuesAtRandom() throws Exception {
+		test("C45ManyMissingValuesAtRandom.arff", "C45ManyMissingValuesAtRandom.json", false, false);
 	}
 	
-	private void test(String inputFileName, String jsonFormatFileExpected) throws Exception{
-		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO);
+	@Test
+	public void manyMissingValuesAtRandomCollapsed() throws Exception {
+		test("C45ManyMissingValuesAtRandomCollapsed.arff", "C45ManyMissingValuesAtRandomCollapsed.json", true, false);
+	}
+	
+	@Test
+	public void manyMissingValuesAtRandomCollapsedAndPruned() throws Exception {
+		test("C45ManyMissingValuesAtRandomCollapsedAndPruned.arff", "C45ManyMissingValuesAtRandomCollapsedAndPruned.json", true, true);
+	}
+		
+	private void test(String inputFileName, String jsonFormatFileExpected,
+			boolean collapseTree, boolean pruneTree) throws Exception{
+		DecisionTreeBuilder dtBuilder = new DecisionTreeBuilder(Method.C45, Criterion.GAIN_RATIO, collapseTree, pruneTree);
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, inputFileName);		
 		List<Attribute> attributes = arffElements.getAttributes();		
@@ -126,13 +134,10 @@ public class C45DecisionTreeTest extends SupervisedLearningTest{
 				attributes, attributes.size() -1, csvFilePath);
 
 		dtBuilder.train(instances);
-
-		dtBuilder.train(instances);			
 		DecisionTree dt = (DecisionTree)dtBuilder.getDecisionTree();		
 		DescriptiveTree expectedTree = DecisionTreeUtils.getDescriptiveTreeFromJSON(ROOT, jsonFormatFileExpected);
 		System.out.println("********** EXPECTED  TREE:");
 		expectedTree.emitTree();
 		check(expectedTree, dt);	
-	}
-	
+	}	
 }

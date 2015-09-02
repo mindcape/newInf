@@ -28,6 +28,8 @@ public class DecisionTreeBuilder extends Supervised{
 
 	private Criterion criteria;
 	private Method method;
+	private boolean collapseTree;
+	private boolean pruneTree;
 
 	private DecisionTree decisionTree;
 	private DecisionTreeNode decisionTreeRootNode; 
@@ -42,7 +44,6 @@ public class DecisionTreeBuilder extends Supervised{
 	public DecisionTreeBuilder(Method method){
 		this.method = method;
 		criteria = Criterion.INFORMATION_GAIN;
-		//criteria = Criterion.GAIN_RATIO;
 		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
 
@@ -52,18 +53,31 @@ public class DecisionTreeBuilder extends Supervised{
 		decisionTree = new DecisionTree(DecisionTreeEdge.class);
 	}
 
+	public DecisionTreeBuilder(Method method, Criterion criteria, boolean collapseTree, boolean pruneTree){
+		this.method = method;
+		this.criteria = criteria;
+		decisionTree = new DecisionTree(DecisionTreeEdge.class);
+		this.collapseTree = collapseTree;
+		this.pruneTree = pruneTree;
+	}
+	
 	@Override
 	public void train(IInstances instances) throws Exception {
 		this.attributes = instances.getAttributes();
 		try {
 			if(method == Method.ID3){
 				ID3 id3 = new ID3(criteria);
+				id3.setCollapseTree(collapseTree);
+				id3.setPruneTree(pruneTree);
 				id3.train(instances);
 				decisionTree = id3.getDecisionTree();
 				decisionTreeRootNode = decisionTree.getDecisionTreeRootNode();
 			}
 			else if(method == Method.C45){
 				C45 c45 = new C45(criteria);
+				c45.setCollapseTree(collapseTree);
+				c45.setPruneTree(pruneTree);
+				
 				c45.train(instances);
 				decisionTree = c45.getDecisionTree();
 				decisionTreeRootNode = decisionTree.getDecisionTreeRootNode();

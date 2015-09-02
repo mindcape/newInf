@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Attribute.Type;
@@ -20,7 +22,9 @@ import com.inferneon.core.utils.StatisticsUtils;
 import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
 
 public class C45 {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(C45.class);
+	
 	private Criterion criteria;
 
 	private DecisionTree decisionTree;
@@ -33,7 +37,10 @@ public class C45 {
 	private int minNumSplitsWithMinNumInstances;
 
 	// Collapse the sub-tree if the collapsing does not increase the error in training
-	private boolean collapseTree = true;
+	private boolean collapseTree;
+	
+	// Prune the tree
+	private boolean pruneTree;
 
 	// Frequency counts of all instances (computed once)
 	private FrequencyCounts frequencyCountsOfAllInstances;
@@ -54,15 +61,18 @@ public class C45 {
 		long before = new Date().getTime();
 		train(null, null, instances);
 
-		System.out.println("TREE BEFORE COLLAPSING: ");
+		System.out.println("TREE DETERMINED AFTER TRAINING: ");
 		decisionTree.emitTree();
-		System.out.println("TREE AFTER COLLAPSING: ");
 
-		//collapseTree();
+		if(collapseTree){			
+			collapseTree();
+			System.out.println("TREE AFTER COLLAPSING: ");
+		}
 
-		//System.out.println("######################## STARTED PRUNING DECISION TREE NOW WITH ########################");
-
-		//pruneDecisionTree(decisionTree.getDecisionTreeRootNode());
+		if(pruneTree){
+			pruneDecisionTree(decisionTree.getDecisionTreeRootNode());
+			System.out.println("TREE AFTER PRUNING: ");
+		}
 
 		long after = new Date().getTime();
 
@@ -73,9 +83,8 @@ public class C45 {
 	private void train(DecisionTreeNode parentDecisionTreeNode, DecisionTreeEdge decisionTreeEdge, IInstances instances) 
 			throws Exception{
 
-		if(decisionTreeEdge != null && decisionTreeEdge.toString().contains("<= 65")){
-			System.out.println("WAIT HERE");
-		}
+		LOG.debug(parentDecisionTreeNode == null && decisionTreeEdge == null ? "Training start at root" 
+						: "Training on node decisionTreeNode " + parentDecisionTreeNode + " on outgoing edge " + decisionTreeEdge);
 
 		// Determine the distribution of these instances. If the instances are the original one that is input
 		// the code, use the one thats already computed
@@ -86,17 +95,15 @@ public class C45 {
 		else{
 			frequencyCounts = instances.getFrequencyCounts();
 		}
-
-		//		System.out.println("Parent node sum of wts: " + frequencyCounts.getSumOfWeights()
-		//				 + ", num Errors = " + frequencyCounts.getErrorOnDistribution());
-		//		
+	
 		// Get the best attribute (the one with the most info gain)
 		BestAttributeSearchResult bestAttributeSearchResult = searchForBestAttributeToSplitOn(instances, frequencyCounts);
 		if(bestAttributeSearchResult == null){
-			// Could not find a suitable attribute to split on. Create leaf and return			
+			// Could not find a suitable attribute to split on. Create leaf and return	
 			Value mostFrequentlyOccuringTargetValue  = mostFrequentlyOccuringTargetValue(frequencyCounts.getTotalTargetCounts());			
 			createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, 
 					mostFrequentlyOccuringTargetValue, frequencyCounts);
+			LOG.debug("No suitable attribute to split on, created leaf " + mostFrequentlyOccuringTargetValue);
 
 			return;
 		}		
@@ -132,18 +139,10 @@ public class C45 {
 			DecisionTreeEdge dtEdge = entry.getKey();			
 			IInstances splitInstances = entry.getValue();
 
-			if(dtEdge.toString().equals("Sunny") || dtEdge.toString().equals("Overcast") || dtEdge.toString().equals("Rainy")){
-				System.out.println("WAIT HERE");
-				//System.out.println("===================Instances for " + dtEdge + ": ");
-				//System.out.println(splitInstances);
-			}
-
 			IInstances newInstances = splitInstances;
 			if(attribute.getType() == Attribute.Type.NOMINAL && frequencyCounts.getTotalInstancesWithMissingValues() == 0){
 				newInstances = splitInstances.removeAttribute(attribute);
 			}
-
-			System.out.println("Training on subset based on attribute = " + attribute.getName() + " with value = " + dtEdge);
 
 			train(decisionTreeNode, dtEdge, newInstances);
 		}
@@ -207,7 +206,7 @@ public class C45 {
 
 			searchResults.add(bestAttributeSearchResult);
 
-			System.out.println("Info gain for attr: " + attribute.getName() + " = " + infoGainForAttribute);
+			LOG.debug("Info gain for attr: " + attribute.getName() + " = " + infoGainForAttribute);
 			if(Double.compare(infoGainForAttribute, maxInfoGain) > 0){
 				maxInfoGain = infoGainForAttribute;
 				attrWithMaxInfoGain = attribute;
@@ -223,7 +222,7 @@ public class C45 {
 				bestAttributeSearchResultWithMaxInfoGain, averageInfoGain);		
 
 		if(attrWithMaxInfoGain != null){
-			System.out.println("**************************************************** Max info gain = " + result.getAttribute().getName());
+			LOG.debug("**************************************************** Max info gain = " + result.getAttribute().getName());
 		}
 
 		return result;
@@ -692,10 +691,6 @@ public class C45 {
 	}
 
 	private void collapseTree() throws CycleFoundException {
-		if(!collapseTree){
-			return;
-		}
-
 		// Need to collapse the tree
 		List<DecisionTreeNode> nodesToBeRemoved = new ArrayList<>();
 		collapseTree(decisionTree.getDecisionTreeRootNode(), nodesToBeRemoved);
@@ -770,10 +765,6 @@ public class C45 {
 	}
 
 	private void pruneDecisionTree(DecisionTreeNode node) throws CycleFoundException {
-		System.out.println("CURRENT TREE: ");
-		decisionTree.emitTree();
-		System.out.println("END CURRENT TREE ");
-
 		if(! node.isLeaf()){
 			Set<DecisionTreeNode> childNodes = decisionTree.getChildNodes(node);
 			FrequencyCounts frequencyCounts = node.getFrequencyCounts();			
@@ -912,5 +903,13 @@ public class C45 {
 
 	public DecisionTree getDecisionTree(){
 		return decisionTree;
+	}
+
+	public void setCollapseTree(boolean collapseTree) {
+		this.collapseTree = collapseTree;
+	}
+
+	public void setPruneTree(boolean pruneTree) {
+		this.pruneTree = pruneTree;
 	}
 }
