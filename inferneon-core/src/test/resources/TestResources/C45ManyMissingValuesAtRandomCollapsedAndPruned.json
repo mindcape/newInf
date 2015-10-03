@@ -1,0 +1,1 @@
+[{"id":801016395,"name":"Humidity","children":[{"id":107567722,"edgeName":"<= 90"},{"id":1856956527,"edgeName":"> 90"}]},{"id":107567722,"name":"yes","leafDist":"16.33/5.0","incomingEdge":"<= 90"},{"id":1856956527,"name":"no","leafDist":"4.67/1.67","incomingEdge":"> 90"}]

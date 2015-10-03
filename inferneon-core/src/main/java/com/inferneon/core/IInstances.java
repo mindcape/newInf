@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
+import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.supervised.FrequencyCounts;
 
 public abstract class IInstances implements Serializable{
@@ -50,7 +52,7 @@ public abstract class IInstances implements Serializable{
 	public abstract Map<Value, Double> getTargetClassCounts();
 	public abstract FrequencyCounts getFrequencyCounts();
 	
-	public abstract Long indexOfFirstInstanceWithMissingValueForAttribute(int attributeIndex);
+	//public abstract Long indexOfFirstInstanceWithMissingValueForAttribute(int attributeIndex);
 	
 	/** 
 	 * Splits the instances based on the attribute passed. If an instance does not have a value
@@ -87,4 +89,8 @@ public abstract class IInstances implements Serializable{
 	 * to the implementation.
 	 * */	
 	public abstract Value getThresholdValueOfSplitsInOrderedList();
+	
+	public abstract IMatrix matrix(long startRowIndex, long startColumnIndex, long endRowIndex, long endColumnIndex) throws MatrixElementIndexOutOfBounds;
+	
+	public abstract IMatrix[] matrixAndClassVector(boolean regularize);
 }

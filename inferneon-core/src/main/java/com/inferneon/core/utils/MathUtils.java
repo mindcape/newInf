@@ -1,5 +1,6 @@
 package com.inferneon.core.utils;
 
+
 public class MathUtils {
 
 	public static double roundDouble(double value, int afterDecimalPoint) {

@@ -21,7 +21,7 @@ public class TransformStringToRDD implements Function<String, Instance>{
 	}
 
 	public Instance call(String csvInstance) throws Exception {
-
+		
 		if(discardFirstRow){
 			//TODO How to ignore this?
 			// continue;?

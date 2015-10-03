@@ -17,18 +17,21 @@ import au.com.bytecode.opencsv.CSVReader;
 
 import com.inferneon.core.Value.ValueType;
 import com.inferneon.core.exceptions.InvalidDataException;
+import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
+import com.inferneon.core.matrices.IMatrix;
+import com.inferneon.core.matrices.Matrix;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
 
 public class Instances extends IInstances {
-	
+
 	// Register this class with the factory
 	static
 	{
 		InstancesFactory factory = InstancesFactory.getInstance();
 		factory.registerProduct("STAND_ALONE", new Instances(Context.STAND_ALONE));
 	}
-	
+
 	private List<Attribute> attributes;
 	private List<Instance> instances;
 	private int classIndex;
@@ -127,11 +130,6 @@ public class Instances extends IInstances {
 			}
 		}
 		return knownValues;
-
-	}
-
-	public Iterator<Instance> iterator(){
-		return instances.iterator();
 	}
 
 	public int attributeIndex(Attribute attribute){
@@ -190,9 +188,9 @@ public class Instances extends IInstances {
 		Map<Attribute, Map<Value, Double>> attributeValueCounts = new HashMap<>();
 
 		Map<Attribute, IInstances> attributeAndMissingValueInstances = new HashMap<>();
-		
+
 		Map<Attribute, Double> attributeAndMissingValueInstancesSumOfWts = new HashMap<>();
-		
+
 		Map<Attribute, Integer> attributeAndMissingInstanceSizes = new HashMap<Attribute, Integer>();
 
 		Set<Instance> instancesWithMissingvalues = new HashSet<>();
@@ -232,18 +230,18 @@ public class Instances extends IInstances {
 					if(missingValueInstances == null){
 						missingValueInstances = new Instances(context, new ArrayList<Instance>(), attributes, classIndex);
 					}
-					
+
 					Integer currentNumMissingForAttr = attributeAndMissingInstanceSizes.get(currentAttribute);
 					if(currentNumMissingForAttr == null){
 						currentNumMissingForAttr = 0;
 					}
-					
+
 					missingValueInstances.addInstance(instance);
 					attributeAndMissingValueInstances.put(currentAttribute, missingValueInstances);
 					attributeAndMissingValueInstancesSumOfWts.put(currentAttribute, currentSumOfWtsOfMissingValuInstancesForAttr 
-										+ instance.getWeight());
+							+ instance.getWeight());
 					attributeAndMissingInstanceSizes.put(currentAttribute, currentNumMissingForAttr + 1);
-					
+
 					instancesWithMissingvalues.add(instance);
 					continue;
 				}
@@ -338,24 +336,9 @@ public class Instances extends IInstances {
 			IInstances instances =  new Instances(Context.STAND_ALONE, new ArrayList<Instance>(), attributes, classIndex);
 			return instances;
 		}
-		
+
 		InputStream inputStream = new FileInputStream(sourceURI);
 		return loadData(attributes, inputStream, false);
-	}
-	
-	@Override
-	public Long indexOfFirstInstanceWithMissingValueForAttribute(
-			int attributeIndex) {
-		long firstInstanceWithMissingValueForAttribute = 0;
-		for(Instance inst : instances){
-			Value val = inst.getValue(attributeIndex);
-			if(val.getType() == ValueType.MISSING){
-				break;
-			}
-			firstInstanceWithMissingValueForAttribute++;
-		}
-
-		return firstInstanceWithMissingValueForAttribute;
 	}
 
 	@Override
@@ -428,10 +411,10 @@ public class Instances extends IInstances {
 	public IInstances getSubList(long fromIndex, long toIndex) {
 		// In the stand-alone mode, integer should suffice on the instances collection
 		List<Instance> insts = new ArrayList<>(instances.subList((int)fromIndex, (int)toIndex));
-		
+
 		Instance thresholdInstance = instances.get((int)toIndex -1);
 		thresholdValueOfSplitsInOrderedList = thresholdInstance.getValue(attributeIndex);
-	
+
 		return new Instances(context, insts,  attributes, classIndex);		
 	}
 
@@ -464,7 +447,7 @@ public class Instances extends IInstances {
 		if(removeFirstRow){
 			rowsList.remove(0);
 		}
-		
+
 		int count = 0;
 		for(String[] row : rowsList) {
 
@@ -544,12 +527,82 @@ public class Instances extends IInstances {
 				numOccurrences++;
 			}
 		}
-		
+
 		return numOccurrences;
 	}
 
 	@Override
 	public Value getThresholdValueOfSplitsInOrderedList() {
 		return thresholdValueOfSplitsInOrderedList;
+	}
+
+	@Override
+	public IMatrix matrix(long startRowIndex, long startColumnIndex, long endRowIndex, long endColumnIndex)
+			throws MatrixElementIndexOutOfBounds{
+		int numRows = (int) (endRowIndex - startRowIndex +1);
+		int numColumns = (int) (endColumnIndex - startColumnIndex +1);
+		double data[][] = new double[numRows][numColumns];
+		for(int i = (int)startRowIndex; i < (int) endRowIndex; i++){
+			Instance inst = instances.get(i);
+			double vals[] = new double[numColumns];
+			for(int j = 0; j < numColumns; j++){
+				Value value = inst.getValue(i);
+				vals[j] = value.getNumericValueAsDouble();
+			}
+			
+			data[i] = vals;
+		}
+		
+		Matrix matrix = new Matrix(data);
+		return matrix;
+	}
+	
+	@Override
+	public IMatrix[] matrixAndClassVector(boolean regularize){
+		int numRows = instances.size();
+		int totalAttributes = attributes.size();
+		
+		int numColumnsOfMatrix = totalAttributes -1;
+		
+		double data[][] = new double[numRows][numColumnsOfMatrix];		
+		Matrix valuesMat = new Matrix(data);
+		
+		double classVectorData[][] = new double[numRows][1];
+		Matrix classVector = new Matrix(classVectorData);
+		
+		for(int i = 0; i < numRows; i++){
+			Instance inst = instances.get(i);
+			double vals[] = new double[numColumnsOfMatrix];
+			double targetValues[] = new double[1];
+			
+			for(int j = 0; j < totalAttributes; j++){
+				Value value = inst.getValue(j);
+				
+				if(j == classIndex){
+					if(value.getType() == Value.ValueType.MISSING){
+						targetValues[0] = Double.NaN;
+					}
+					else{
+						targetValues[0] = value.getNumericValueAsDouble();
+					}
+				}
+				else{
+					vals[j] = value.getNumericValueAsDouble();
+				}
+			}
+			classVectorData[i] = targetValues;
+			data[i] = vals;
+		}
+		
+		IMatrix matrixAndClassVector[] = new IMatrix[2];
+		if(regularize){
+			valuesMat = (Matrix)valuesMat.normalize(true, true);
+			classVector = (Matrix) classVector.normalize(true, false);
+		}
+		
+		matrixAndClassVector[0] = valuesMat;
+		matrixAndClassVector[1] = classVector;
+		
+		return matrixAndClassVector;
 	}
 }

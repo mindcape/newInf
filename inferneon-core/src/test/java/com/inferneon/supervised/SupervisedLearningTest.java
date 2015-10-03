@@ -40,7 +40,7 @@ public class SupervisedLearningTest {
 		return csvFileName;
 	}
 
-	private String getAppTempDir(String appTempFolder){
+	protected String getAppTempDir(String appTempFolder){
 		
 		String sysTempFolder = System.getProperty("java.io.tmpdir");
 		String tempPath = sysTempFolder + (sysTempFolder.endsWith(File.separator)? "": File.separator) + appTempFolder + File.separator;

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.math3.optim.SimpleValueChecker;
 import org.apache.spark.Accumulator;
 import org.apache.spark.AccumulatorParam;
 import org.apache.spark.api.java.JavaDoubleRDD;
@@ -21,6 +20,9 @@ import org.apache.spark.api.java.function.DoubleFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.api.java.function.VoidFunction;
+import org.apache.spark.mllib.linalg.DenseVector;
+import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.mllib.linalg.distributed.RowMatrix;
 import org.apache.spark.storage.StorageLevel;
 
 import scala.Tuple2;
@@ -32,6 +34,8 @@ import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.Value;
 import com.inferneon.core.Value.ValueType;
 import com.inferneon.core.ValueComparator;
+import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
+import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
 import com.ipsg.inferneon.spark.commonfunctions.TransformStringToRDD;
@@ -794,26 +798,7 @@ public class SparkInstances extends IInstances implements Serializable{
 		sequenceCounts = null; // Reset so we get the correct values for a range
 
 	}
-
-	@Override
-	public Long indexOfFirstInstanceWithMissingValueForAttribute(int attributeIndex) {
-
-		final int attrIndex = attributeIndex;
-
-		JavaRDD<Instance> instancesWithNonMissingValues = instances.filter(new Function<Instance, Boolean>() {
-
-			public Boolean call(Instance instance) throws Exception {
-				Value value = instance.getValue(attrIndex);
-				if(value.getType() != Value.ValueType.MISSING){
-					return true;
-				}
-				return false;
-			}
-		});
-
-		return instancesWithNonMissingValues.count();		
-	}
-
+	
 	@Override
 	public Double sumOfWeights(final long startIndex, final long endIndex) {
 
@@ -1071,5 +1056,63 @@ public class SparkInstances extends IInstances implements Serializable{
 	@Override
 	public Value getThresholdValueOfSplitsInOrderedList() {
 		return thresholdValueOfSplitsInOrderedList;
+	}
+
+	@Override
+	public IMatrix matrix(long startRowIndex, long startColumnIndex,
+			long endRowIndex, long endColumnIndex)
+			throws MatrixElementIndexOutOfBounds {
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IMatrix[] matrixAndClassVector(boolean regularize) {
+		JavaRDD<Vector> valuesVector = instances.map(new Function<Instance, Vector>() {
+
+			public Vector call(Instance instance) throws Exception {
+				
+				int exampleSize = attributes.size() -1;
+				double values[] = new double[exampleSize];
+				for(int i = 0; i < attributes.size(); i++){
+					if(i != classIndex){
+						values[i]  = instance.getValue(i).getNumericValueAsDouble();
+					}
+					
+				}
+				
+				Vector vector = new DenseVector(values);
+				return vector;
+			}
+		});
+		
+		JavaRDD<Vector> targetsVector = instances.map(new Function<Instance, Vector>() {
+
+			public Vector call(Instance instance) throws Exception {
+				
+				int exampleSize = attributes.size() -1;
+				double values[] = new double[exampleSize];
+				for(int i = 0; i < attributes.size(); i++){
+					if(i == classIndex){
+						values[i]  = instance.getValue(i).getNumericValueAsDouble();
+					}					
+				}
+				
+				Vector vector = new DenseVector(values);
+				return vector;
+			}
+		});
+		
+		RowMatrix valuesMatrix = new RowMatrix(valuesVector.rdd());
+		RowMatrix targetsMatrix = new RowMatrix(targetsVector.rdd());
+		
+//		SparkMatrix valuesSparkMatrix = new SparkMatrix(valuesMatrix);
+//		SparkMatrix targetsSparkMatrix = new SparkMatrix(targetsMatrix);
+//		
+//		IMatrix[] matrices = new IMatrix[2];
+//		matrices[0] = valuesSparkMatrix; matrices[1] = targetsSparkMatrix;
+//		return matrices;
+		return null;
 	}
 }

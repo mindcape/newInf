@@ -2,7 +2,6 @@ package com.inferneon.supervised;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -32,19 +31,9 @@ public class C45DecisionTreeTest extends SupervisedLearningTest{
 		}
 	}
 
-	private String getAppTempDir(){
-		
-		String sysTempFolder = System.getProperty("java.io.tmpdir");
-		String tempPath = sysTempFolder + (sysTempFolder.endsWith(File.separator)? "": File.separator) + APP_TEMP_FOLDER + File.separator;
-		File tempDir = new File(tempPath);
-		tempDir.mkdir();
-		
-		return tempPath;
-	}
-	
 	@After
 	public void tearDown(){
-		File tempPath = new File(getAppTempDir());
+		File tempPath = new File(getAppTempDir(APP_TEMP_FOLDER));
 		try {
 			FileUtils.cleanDirectory(tempPath);
 		} catch (IOException e) {
