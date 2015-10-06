@@ -13,6 +13,7 @@
 		<module>inferneon-core</module>
 		<module>inferneon-gui</module>
 		<module>inferneon-spark</module>
+		<module>InferneonWebUI</module>
 	</modules>
 	
 	<organization>
