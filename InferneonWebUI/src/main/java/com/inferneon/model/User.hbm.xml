@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.inferneon.model.User" table="user" catalog="inferneon_db">
+		<id name="id" type="java.lang.Integer">
+			<column name="id" />
+			<generator class="identity" />
+		</id>
+		<property name="Firstname" type="string">
+			<column name="Firstname" length="45" />
+		</property>
+		<property name="Lastname" type="string">
+			<column name="Lastname" length="45" />
+		</property>
+		<property name="password" type="string">
+			<column name="password" length="45" />
+		</property>
+		<property name="Email" type="string">
+			<column name="Email" length="45" />
+		</property>
+		<set name="projects" table="project" fetch="select">
+			<key>
+				<column name="id" not-null="true" />
+			</key>
+			<one-to-many class="com.inferneon.model.Project" />
+		</set>
+	</class>
+	<class name="com.inferneon.model.Project" table="project"
+		catalog="inferneon_db">
+		<id name="projectid" type="java.lang.Integer">
+			<column name="projectid" />
+			<generator class="identity" />
+		</id>
+		<property name="project_name" type="string">
+			<column name="project_name" />
+		</property>
+		<property name="date_created" type="string">
+			<column name="date_created" />
+		</property>
+		<property name="id" type="java.lang.Integer">
+			<column name="id" />
+		</property>
+		<set name="attributes" table="project_attributes" fetch="select">
+			<key>
+				<column name="projectid" not-null="true" />
+			</key>
+			<one-to-many class="com.inferneon.model.Attributes" />
+		</set>
+	</class>
+	<class name="com.inferneon.model.Attributes" table="project_attributes"
+		catalog="inferneon_db">
+		<id name="attributeid" type="java.lang.Integer">
+			<column name="attributeid" not-null="true" />
+			<generator class="identity" />
+		</id>
+		<property name="projectid" type="java.lang.Integer">
+			<column name="projectid" />
+		</property>
+		<one-to-one name="attributenames" class="com.inferneon.model.attributeNames" />
+	</class>
+	<class name="com.inferneon.model.attributeNames" table="attribute_names"
+		catalog="inferneon_db">
+		<id name="Attribute_name_id" type="java.lang.Integer">
+			<column name="Attribute_name_id" />
+			<generator class="identity" />
+		</id>
+		<property name="Attribute_name" type="string">
+			<column name="Attribute_name" />
+		</property>
+		<property name="Attribute_type" type="string">
+			<column name="Attribute_type" />
+		</property>
+		<property name="Attributeid" type="java.lang.Integer">
+			<column name="Attribute_id" />
+		</property>
+		<one-to-one name="attributes" class="com.inferneon.model.Attributes" />
+
+		<set name="attributeNominalValues" table="attribute_nominal_values" fetch="select">
+			<key>
+				<column name="Attribute_name_id" not-null="true" />
+			</key>
+			<one-to-many class="com.inferneon.model.attributeNominalValues" />
+		</set>
+	</class>
+	<class name="com.inferneon.model.attributeNominalValues" table="attribute_nominal_values"
+			catalog="inferneon_db">
+	<id name="Nominal_id" type="java.lang.Integer">
+		<column name="Nominal_id" />
+		<generator class="identity" />
+	</id>
+	<property name="Nominal_values" type="string">
+		<column name="Nominal_values" />
+	</property>
+	<property name="Attribute_name_id" type="java.lang.Integer">
+		<column name="Attribute_name_id" />
+	</property>
+</class>
+</hibernate-mapping>
