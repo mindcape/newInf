@@ -1,5 +1,7 @@
 package com.inferneon.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 
 
@@ -7,23 +9,51 @@ public class Project implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 	private int projectid;
 	private String project_name;
-	private String date_created;
+	private Date date_created;
 	private int id;
 	private User user;
 	 private Set<Attributes> attributes;
+	 private Set<Activities> activities;
+	 private Set<FileUpload> fileupload;
 	public Project() {
 
 	}
 
-	public Project(int projectid, String project_name, String date_created,int id,User user) {
+
+	public Project(int projectid, String project_name, Date date_created,
+			int id, User user, Set<Attributes> attributes,Set<FileUpload> fileupload,
+			Set<Activities> activities) {
 		super();
 		this.projectid = projectid;
 		this.project_name = project_name;
 		this.date_created = date_created;
-		this.id=id;
-		this.user=user;
-		
+		this.id = id;
+		this.user = user;
+		this.attributes = attributes;
+		this.activities = activities;
+		this.fileupload=fileupload;
 	}
+
+
+	public Set<FileUpload> getFileupload() {
+		return fileupload;
+	}
+
+
+	public void setFileupload(Set<FileUpload> fileupload) {
+		this.fileupload = fileupload;
+	}
+
+
+	public Set<Activities> getActivities() {
+		return activities;
+	}
+
+
+	public void setActivities(Set<Activities> activities) {
+		this.activities = activities;
+	}
+
 
 	public Set<Attributes> getAttributes() {
 		return attributes;
@@ -57,11 +87,11 @@ public class Project implements java.io.Serializable {
 		this.project_name = project_name;
 	}
 
-	public String getdate_created() {
+	public Date getdate_created() {
 		return date_created;
 	}
 
-	public void setdate_created(String date_created) {
+	public void setdate_created(Date date_created) {
 		this.date_created = date_created;
 	}
 

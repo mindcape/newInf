@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-	<class name="com.inferneon.model.User" table="user" catalog="inferneon_db">
+	<class name="com.inferneon.model.User" table="user" catalog="inferneon_database">
 		<id name="id" type="java.lang.Integer">
 			<column name="id" />
 			<generator class="identity" />
@@ -27,7 +27,7 @@
 		</set>
 	</class>
 	<class name="com.inferneon.model.Project" table="project"
-		catalog="inferneon_db">
+		catalog="inferneon_database">
 		<id name="projectid" type="java.lang.Integer">
 			<column name="projectid" />
 			<generator class="identity" />
@@ -35,7 +35,7 @@
 		<property name="project_name" type="string">
 			<column name="project_name" />
 		</property>
-		<property name="date_created" type="string">
+		<property name="date_created" type="timestamp">
 			<column name="date_created" />
 		</property>
 		<property name="id" type="java.lang.Integer">
@@ -47,9 +47,22 @@
 			</key>
 			<one-to-many class="com.inferneon.model.Attributes" />
 		</set>
+		<set name="activities" table="activities" fetch="select">
+			<key>
+				<column name="projectid" not-null="true" />
+			</key>
+			<one-to-many class="com.inferneon.model.Activities" />
+		</set>
+		<!-- <set name="fileupload" table="fileupload" fetch="select">
+			<key>
+				<column name="projectid" not-null="true" />
+			</key>
+			<one-to-many class="com.inferneon.model.FileUpload" />
+		</set> -->
+		
 	</class>
 	<class name="com.inferneon.model.Attributes" table="project_attributes"
-		catalog="inferneon_db">
+		catalog="inferneon_database">
 		<id name="attributeid" type="java.lang.Integer">
 			<column name="attributeid" not-null="true" />
 			<generator class="identity" />
@@ -60,7 +73,7 @@
 		<one-to-one name="attributenames" class="com.inferneon.model.attributeNames" />
 	</class>
 	<class name="com.inferneon.model.attributeNames" table="attribute_names"
-		catalog="inferneon_db">
+		catalog="inferneon_database">
 		<id name="Attribute_name_id" type="java.lang.Integer">
 			<column name="Attribute_name_id" />
 			<generator class="identity" />
@@ -76,7 +89,8 @@
 		</property>
 		<one-to-one name="attributes" class="com.inferneon.model.Attributes" />
 
-		<set name="attributeNominalValues" table="attribute_nominal_values" fetch="select">
+		<set name="attributeNominalValues" table="attribute_nominal_values"
+			fetch="select">
 			<key>
 				<column name="Attribute_name_id" not-null="true" />
 			</key>
@@ -84,16 +98,48 @@
 		</set>
 	</class>
 	<class name="com.inferneon.model.attributeNominalValues" table="attribute_nominal_values"
-			catalog="inferneon_db">
-	<id name="Nominal_id" type="java.lang.Integer">
-		<column name="Nominal_id" />
-		<generator class="identity" />
-	</id>
-	<property name="Nominal_values" type="string">
-		<column name="Nominal_values" />
-	</property>
-	<property name="Attribute_name_id" type="java.lang.Integer">
-		<column name="Attribute_name_id" />
-	</property>
-</class>
+		catalog="inferneon_database">
+		<id name="Nominal_id" type="java.lang.Integer">
+			<column name="Nominal_id" />
+			<generator class="identity" />
+		</id>
+		<property name="Nominal_values" type="string">
+			<column name="Nominal_values" />
+		</property>
+		<property name="Attribute_name_id" type="java.lang.Integer">
+			<column name="Attribute_name_id" />
+		</property>
+	</class>
+	<class name="com.inferneon.model.Activities" table="activities"
+		catalog="inferneon_database">
+		<id name="Activities_id" type="java.lang.Integer">
+			<column name="Activities_id" />
+			<generator class="identity" />
+		</id>
+		<property name="Activities_name" type="string">
+			<column name="Activities_name" />
+		</property>
+
+		<property name="Run_date" type="date">
+			<column name="Run_date" />
+		</property>
+		<property name="projectid" type="java.lang.Integer">
+			<column name="projectid" />
+		</property>
+	</class>
+	<!-- <class name="com.inferneon.model.FileUpload" table="fileupload" catalog="inferneon_database">
+	<id name="fileupload_id" type="java.lang.Integer">
+			<column name="fileupload_id" />
+			<generator class="identity" />
+		</id>
+		<property name="file_name" type="string">
+			<column name="file_name" />
+		</property>
+		<property name="file_data" type="binary">
+			<column name="file_data" />
+		</property>
+		<property name="projectid" type="java.lang.Integer">
+			<column name="projectid" />
+		</property>
+	</class> -->
 </hibernate-mapping>
