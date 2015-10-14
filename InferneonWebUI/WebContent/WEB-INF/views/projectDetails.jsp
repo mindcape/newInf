@@ -44,7 +44,7 @@ font: 100;
 						<p class="symbol"></td>
 
 					<td><c:out value="${result[1]}" />
-						</p></td>
+						</td>
 					<td><p class="name">
 							<c:out value="${result[2]}" />
 						</p></td>

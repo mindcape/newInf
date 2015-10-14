@@ -421,13 +421,9 @@ Add Project
 						<div id="TextBoxContainer">
 							<!--Textboxes will be added here -->
 						</div>
-						<br /> <input id="btnGet" type="button" value="Get Values" />
-
+						
 						<div class="modal-footer">
-							<!-- <form id="projectForm"> -->
-							<!--                                         	<input placeholder='Project Name' type='text' name="project_name">
- -->
-							<button type="button" class="btn btn-default"
+								<button type="button" class="btn btn-default"
 								data-dismiss="modal">Close</button>
 							<button type="submit" id="Save" class="btn btn-primary">Save</button>
 							<!-- </form> -->
