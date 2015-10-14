@@ -22,6 +22,7 @@ import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.core.matrices.Matrix;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.functions.MultilayerNeuralNetwork;
 
 public class Instances extends IInstances {
 
@@ -604,5 +605,11 @@ public class Instances extends IInstances {
 		matrixAndClassVector[1] = classVector;
 		
 		return matrixAndClassVector;
+	}
+
+	@Override
+	public double trainNeuralNetwork(MultilayerNeuralNetwork network) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

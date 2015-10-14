@@ -7,6 +7,7 @@ import java.util.Map;
 import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
 import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.functions.MultilayerNeuralNetwork;
 
 public abstract class IInstances implements Serializable{
 
@@ -93,4 +94,6 @@ public abstract class IInstances implements Serializable{
 	public abstract IMatrix matrix(long startRowIndex, long startColumnIndex, long endRowIndex, long endColumnIndex) throws MatrixElementIndexOutOfBounds;
 	
 	public abstract IMatrix[] matrixAndClassVector(boolean regularize);
+
+	public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network);
 }
