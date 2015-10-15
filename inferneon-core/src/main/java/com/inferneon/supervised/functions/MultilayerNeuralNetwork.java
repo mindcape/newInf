@@ -14,6 +14,9 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 	 * 
 	 */
 	private List<NeuralNode> rootNodes;
+	private List<List<NeuralNode>> hiddenLayers;
+	private List<NeuralNode> hiddenNodes;
+	private List<NeuralNode> outputNodes;
 	public MultilayerNeuralNetwork(Class<? extends NeuralConnnection> neuralConnection) {
 		super(neuralConnection);
 	}
@@ -25,6 +28,26 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 		return rootNodes;
 		
 	}
+	
+	public List<NeuralNode> getHiddenNodes() {
+		return hiddenNodes;
+	}
+	public void setHiddenNodes(List<NeuralNode> hiddenNodes) {
+		this.hiddenNodes = hiddenNodes;
+	}
+	public List<NeuralNode> getOutputNodes() {
+		return outputNodes;
+	}
+	public void setOutputNodes(List<NeuralNode> outputNodes) {
+		this.outputNodes = outputNodes;
+	}
+	public List<List<NeuralNode>> getHiddenLayers() {
+		return hiddenLayers;
+	}
+	public void setHiddenLayers(List<List<NeuralNode>> hiddenLayers) {
+		this.hiddenLayers = hiddenLayers;
+	}
+	
 	public void emitTree() {
 		for(int i=0; i < rootNodes.size(); i++) {
 			emitTree(rootNodes.get(i));
@@ -61,4 +84,5 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 		}		
 		
 	}
+
 }

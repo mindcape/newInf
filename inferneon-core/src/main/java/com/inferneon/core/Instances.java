@@ -23,6 +23,9 @@ import com.inferneon.core.matrices.Matrix;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
 import com.inferneon.supervised.functions.MultilayerNeuralNetwork;
+import com.inferneon.supervised.functions.NeuralConnnection;
+import com.inferneon.supervised.functions.NeuralNode;
+import com.inferneon.supervised.functions.NeuralNode.TYPE;
 
 public class Instances extends IInstances {
 
@@ -35,6 +38,7 @@ public class Instances extends IInstances {
 
 	private List<Attribute> attributes;
 	private List<Instance> instances;
+	private Instance currentInstance;
 	private int classIndex;
 	private int attributeIndex;   // Attribute index on which these instances are sorted on.
 	private Value thresholdValueOfSplitsInOrderedList;
@@ -550,35 +554,35 @@ public class Instances extends IInstances {
 				Value value = inst.getValue(i);
 				vals[j] = value.getNumericValueAsDouble();
 			}
-			
+
 			data[i] = vals;
 		}
-		
+
 		Matrix matrix = new Matrix(data);
 		return matrix;
 	}
-	
+
 	@Override
 	public IMatrix[] matrixAndClassVector(boolean regularize){
 		int numRows = instances.size();
 		int totalAttributes = attributes.size();
-		
+
 		int numColumnsOfMatrix = totalAttributes -1;
-		
+
 		double data[][] = new double[numRows][numColumnsOfMatrix];		
 		Matrix valuesMat = new Matrix(data);
-		
+
 		double classVectorData[][] = new double[numRows][1];
 		Matrix classVector = new Matrix(classVectorData);
-		
+
 		for(int i = 0; i < numRows; i++){
 			Instance inst = instances.get(i);
 			double vals[] = new double[numColumnsOfMatrix];
 			double targetValues[] = new double[1];
-			
+
 			for(int j = 0; j < totalAttributes; j++){
 				Value value = inst.getValue(j);
-				
+
 				if(j == classIndex){
 					if(value.getType() == Value.ValueType.MISSING){
 						targetValues[0] = Double.NaN;
@@ -594,22 +598,49 @@ public class Instances extends IInstances {
 			classVectorData[i] = targetValues;
 			data[i] = vals;
 		}
-		
+
 		IMatrix matrixAndClassVector[] = new IMatrix[2];
 		if(regularize){
 			valuesMat = (Matrix)valuesMat.normalize(true, true);
 			classVector = (Matrix) classVector.normalize(true, false);
 		}
-		
+
 		matrixAndClassVector[0] = valuesMat;
 		matrixAndClassVector[1] = classVector;
-		
+
 		return matrixAndClassVector;
 	}
 
 	@Override
 	public double trainNeuralNetwork(MultilayerNeuralNetwork network) {
-		// TODO Auto-generated method stub
+		
+		for(int ins=0; ins<instances.size(); ins++){
+			currentInstance = instances.get(ins);
+			for(int a = 0; a < attributes.size(); a++){
+				List<NeuralNode> inputNodes = network.getInputNodes();
+				for(int inp = 0; inp < inputNodes.size(); inp++) {
+					inputNodes.get(inp).setOutput(currentInstance.getValue(a).getNumber());
+				}
+				List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
+				for(int i = 0; i < hiddenLayers.size(); i++) {
+					List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+					for( int j = 0; j < hiddenNodes.size(); j++){
+						double totalOutput = 0d;
+						NeuralNode hiddenNode = hiddenNodes.get(j);
+						Set<NeuralConnnection> inputConnections = network.incomingEdgesOf(hiddenNode);
+						Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+						while(connectionIterator.hasNext()){
+							NeuralConnnection connection = connectionIterator.next();
+							double weight = connection.getWeight();
+							NeuralNode sourceNode = (NeuralNode) connection.getSource();
+							totalOutput += weight*sourceNode.getOutput();
+						}
+						
+					}
+
+				}
+			}
+		}
 		return 0;
 	}
 }

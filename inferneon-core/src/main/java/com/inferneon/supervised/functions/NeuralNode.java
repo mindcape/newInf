@@ -1,21 +1,22 @@
 package com.inferneon.supervised.functions;
 
 import java.util.List;
+import java.util.Random;
 
 public class NeuralNode {
 	public enum TYPE {INPUT,OUTPUT,HIDDEN}; 
-	private List<NeuralNode> inputNodes;
-	private List<NeuralNode> outputNodes;
 	
 	private double output;
 	private double error;
-	
+	private double[] weights;
 	private TYPE type;
 	private String name;
 
-	public NeuralNode(String name, TYPE type) {
+	public NeuralNode(String name, TYPE type, Random r) {
 		this.name = name;
 		this.type = type;
+	    this.weights = new double[1];
+	    this.weights[0] = r.nextDouble() * .1 - .05;
 	}
 
 	public String getName() {
@@ -28,22 +29,6 @@ public class NeuralNode {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public List<NeuralNode> getOutputNodes() {
-		return outputNodes;
-	}
-
-	public void setOutputNodes(List<NeuralNode> outputNodes) {
-		this.outputNodes = outputNodes;
-	}
-
-	public List<NeuralNode> getInputNodes() {
-		return inputNodes;
-	}
-
-	public void setInputNodes(List<NeuralNode> inputNodes) {
-		this.inputNodes = inputNodes;
 	}
 
 	public double getError() {
