@@ -629,12 +629,19 @@ public class Instances extends IInstances {
 						NeuralNode hiddenNode = hiddenNodes.get(j);
 						Set<NeuralConnnection> inputConnections = network.incomingEdgesOf(hiddenNode);
 						Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
-						for (int c = 0; connectionIterator.hasNext(); c++){
+						int c = 0;
+						while (connectionIterator.hasNext()){
 							NeuralConnnection connection = connectionIterator.next();
 							double weights[] = hiddenNode.getWeights();
 							double value = weights[0];
 							NeuralNode sourceNode = (NeuralNode) connection.getSource();
-							totalOutput += value*sourceNode.getOutput()*weights[0+1];
+							if(connectionIterator.hasNext()){
+							totalOutput += value*sourceNode.getOutput()*weights[c+1];
+							}
+							else {
+								continue;
+							}
+							c++;
 						}
 						hiddenNode.setOutput(totalOutput);
 					}

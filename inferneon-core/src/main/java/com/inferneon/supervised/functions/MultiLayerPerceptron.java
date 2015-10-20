@@ -86,8 +86,8 @@ public class MultiLayerPerceptron {
 				if(i == 0){
 					// First hidden layer
 					for(int k = 0; k < inputNodes.size(); k++) {
-						double weight = Math.random();
-						NeuralConnnection connection = new NeuralConnnection(weight);
+					//	double weight = Math.random();
+						NeuralConnnection connection = new NeuralConnnection();
 						try {
 							connection.setSource(inputNodes.get(k));
 							connection.setTarget(hiddenNode);
@@ -100,8 +100,8 @@ public class MultiLayerPerceptron {
 				else if(i <= (numLayers-1)){
 					// Some inner hidden layer
 					for(int l = 0; l < prevHiddenNodes.size(); l++) {
-						double weight = Math.random();
-						NeuralConnnection connection = new NeuralConnnection(weight);
+					//	double weight = Math.random();
+						NeuralConnnection connection = new NeuralConnnection();
 						try {
 							connection.setSource(prevHiddenNodes.get(l));
 							connection.setTarget(hiddenNode);
@@ -113,8 +113,8 @@ public class MultiLayerPerceptron {
 					if(i == (numLayers-1)) {
 						// Last layer
 						for(int k = 0; k < outputNodes.size(); k++) {
-							double weight = Math.random();
-							NeuralConnnection connection = new NeuralConnnection(weight);
+						//	double weight = Math.random();
+							NeuralConnnection connection = new NeuralConnnection();
 							try {
 								connection.setSource(hiddenNode);
 								connection.setTarget(outputNodes.get(k));

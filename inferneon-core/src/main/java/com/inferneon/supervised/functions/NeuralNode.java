@@ -16,7 +16,7 @@ public class NeuralNode {
 	public NeuralNode(String name, TYPE type, Random r) {
 		this.name = name;
 		this.type = type;
-	    this.weights = new double[1];
+	 //   this.weights = new double[10];
 	 //   this.weights[0] = r.nextDouble() * .1 - .05;
 	    this.weights[0] = getSomeHardCodeWeight(name);
 	}
