@@ -26,15 +26,21 @@ After installing the dependencies, import the project into eclipse as a maven pr
 
 ### Building and starting the server ###
 
-Start the server and in eclipse go to servers.xml and modify the following line as follows:
+Start the server and deploy the app on tomcat. In eclipse go to servers.xml and modify the following line as follows:
 
 <Context docBase="inferneonAng" path="/" reloadable="true" source="org.eclipse.jst.j2ee.server:inferneonAng"/>
 
-After changing the above line, update the profiles on the server by going to Run -> Run Configurations 
-On the left side, server apache tomcat configuration is available 
-Under Arguments add: 
+Remove inferneonAng from the path as shown above.
 
- -Dspring.profiles.active=test
+After changing the above line, update the profiles on the server by going to:
+
+Run -> Run Configurations 
+
+    On the left side, server apache tomcat configuration is available 
+
+Under Arguments add:
+
+    -Dspring.profiles.active=test
  
 The spring test profile will activate an in-memory database. After the server starts, the application is accessible at the following URL:
 
