@@ -17,7 +17,7 @@ import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.supervised.SupervisedLearningTest;
 
 public class MultilayerPerceptronTest  extends SupervisedLearningTest{
-
+/* testcases for multilayer perceptron */
 	private static final String ROOT = "/TestResources";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 
