@@ -47,7 +47,7 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 		
 	private void test(String inputFileName) throws Exception{
 
-		MultiLayerPerceptron mlp = new MultiLayerPerceptron("2, 2");
+		MultiLayerPerceptron mlp = new MultiLayerPerceptron("2, 2", 0.3);
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, inputFileName);		
 		List<Attribute> attributes = arffElements.getAttributes();		
 		String csvFilePath = getCreatedCSVFilePath(inputFileName, arffElements.getData(), APP_TEMP_FOLDER);
@@ -55,8 +55,8 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 				attributes, attributes.size() -1, csvFilePath);
 
 		mlp.learn(instances);
-		MultilayerNeuralNetwork network = mlp.getNetwork();
-		System.out.println("********** TREE:");
-		network.emitTree();
+//		MultilayerNeuralNetwork network = mlp.getNetwork();
+//		System.out.println("********** TREE:");
+//		network.emitTree();
 	}	
 }

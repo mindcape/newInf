@@ -19,10 +19,12 @@ public class MultiLayerPerceptron {
 	private int m_numAttributes = 0;
 	private Random random;
 	private MultilayerNeuralNetwork network;
+	private double learningRate;
 
 	private String hiddenLayerDesc;
-	public MultiLayerPerceptron(String hiddenLayerDesc){
+	public MultiLayerPerceptron(String hiddenLayerDesc, double learningRate){
 		this.hiddenLayerDesc = hiddenLayerDesc;
+		this.learningRate = learningRate;
 	}
 
 	public void learn(IInstances instances){
@@ -49,6 +51,7 @@ public class MultiLayerPerceptron {
 			}
 			NeuralNode inputNode = new NeuralNode(attributes.get(i).getName(), TYPE.INPUT, random);
 			inputNode.setOutput(Double.NaN);
+			inputNode.setAttr(attributes.get(i));
 			network.addVertex(inputNode);
 			inputNodes.add(inputNode);
 		}
@@ -61,6 +64,7 @@ public class MultiLayerPerceptron {
 			for(int i =0; i < targetValues.size(); i++){
 				NeuralNode outputNode = new NeuralNode(targetValues.get(i).toString(), TYPE.OUTPUT, random);
 				outputNode.setOutput(Double.NaN);
+				outputNode.setAttr(target);
 				network.addVertex(outputNode);
 				outputNodes.add(outputNode);
 			}
@@ -68,6 +72,7 @@ public class MultiLayerPerceptron {
 		else {
 			NeuralNode outputNode = new NeuralNode(target.getName(), TYPE.OUTPUT, random);
 			outputNode.setOutput(Double.NaN);
+			outputNode.setAttr(target);
 			network.addVertex(outputNode);
 			outputNodes.add(outputNode);
 		}
@@ -92,6 +97,12 @@ public class MultiLayerPerceptron {
 							connection.setSource(inputNodes.get(k));
 							connection.setTarget(hiddenNode);
 							network.addDagEdge(inputNodes.get(k), hiddenNode, connection);
+							List<Double> weights = hiddenNode.getWeights();
+							weights.add(NeuralNode.getSomeHardCodeWeight(hiddenNode.getName()));
+							hiddenNode.setWeights(weights);
+							List<Double> cweights = hiddenNode.getChangeInweights();
+							cweights.add(0d);
+							hiddenNode.setChangeInweights(cweights);
 						} catch (CycleFoundException e) {
 							e.printStackTrace();
 						}
@@ -106,6 +117,12 @@ public class MultiLayerPerceptron {
 							connection.setSource(prevHiddenNodes.get(l));
 							connection.setTarget(hiddenNode);
 							network.addDagEdge(prevHiddenNodes.get(l), hiddenNode, connection);
+							List<Double> weights = hiddenNode.getWeights();
+							weights.add(NeuralNode.getSomeHardCodeWeight(hiddenNode.getName()));
+							hiddenNode.setWeights(weights);
+							List<Double> cweights = hiddenNode.getChangeInweights();
+							cweights.add(0d);
+							hiddenNode.setChangeInweights(cweights);
 						} catch (CycleFoundException e) {
 							e.printStackTrace();
 						}
@@ -119,6 +136,12 @@ public class MultiLayerPerceptron {
 								connection.setSource(hiddenNode);
 								connection.setTarget(outputNodes.get(k));
 								network.addDagEdge(hiddenNode, outputNodes.get(k), connection);
+								List<Double> weights = outputNodes.get(k).getWeights();
+								weights.add(NeuralNode.getSomeHardCodeWeight(outputNodes.get(k).getName()));
+								outputNodes.get(k).setWeights(weights);
+								List<Double> cweights = outputNodes.get(k).getChangeInweights();
+								cweights.add(0d);
+								outputNodes.get(k).setChangeInweights(cweights);
 							} catch (CycleFoundException e) {
 								e.printStackTrace();
 							}
@@ -144,7 +167,7 @@ public class MultiLayerPerceptron {
 	}
 	
 	private void trainNetwork() {
-		instances.trainNeuralNetwork(network);
+		instances.trainNeuralNetwork(network, learningRate);
 		
 	}
 }

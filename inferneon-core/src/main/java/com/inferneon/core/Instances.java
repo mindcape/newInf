@@ -612,75 +612,193 @@ public class Instances extends IInstances {
 	}
 
 	@Override
-	public double trainNeuralNetwork(MultilayerNeuralNetwork network) {
+	public double trainNeuralNetwork(MultilayerNeuralNetwork network,double learningRate) {
 
 		for(int ins=0; ins<instances.size(); ins++){
 			currentInstance = instances.get(ins);
-			for(int a = 0; a < attributes.size(); a++){
-				List<NeuralNode> inputNodes = network.getInputNodes();
-				for(int inp = 0; inp < inputNodes.size(); inp++) {
-					inputNodes.get(inp).setOutput(currentInstance.getValue(a).getNumber());
-				}
-				List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
-				for(int i = 0; i < hiddenLayers.size(); i++) {
-					List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
-					for( int j = 0; j < hiddenNodes.size(); j++){
-						double totalOutput = 0d;
-						NeuralNode hiddenNode = hiddenNodes.get(j);
-						Set<NeuralConnnection> inputConnections = network.incomingEdgesOf(hiddenNode);
-						Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
-						int c = 0;
-						while (connectionIterator.hasNext()){
-							NeuralConnnection connection = connectionIterator.next();
-							double weights[] = hiddenNode.getWeights();
-							double value = weights[0];
-							NeuralNode sourceNode = (NeuralNode) connection.getSource();
-							if(connectionIterator.hasNext()){
-							totalOutput += value*sourceNode.getOutput()*weights[c+1];
-							}
-							else {
-								continue;
-							}
-							c++;
-						}
-						hiddenNode.setOutput(totalOutput);
-					}
-				}
-				List<NeuralNode> outputNodes = network.getOutputNodes();
-				for(int op = 0; op < outputNodes.size(); op++) {
-					NeuralNode outputNode = outputNodes.get(op);
-					Set<NeuralConnnection> inutConnections = network.incomingEdgesOf(outputNode);
-					Iterator<NeuralConnnection> connectionIterator = inutConnections.iterator();
-					double totalOutput = 0d;
-					for (int c = 0; connectionIterator.hasNext(); c++){
+			//for(int a = 0; a < attributes.size(); a++){
+			List<NeuralNode> inputNodes = network.getInputNodes();
+			for(int inp = 0; inp < inputNodes.size(); inp++) {
+				inputNodes.get(inp).setOutput(currentInstance.getValue(inp).getNumber());
+			}
+			List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
+			for(int i = 0; i < hiddenLayers.size(); i++) {
+				List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+				for( int j = 0; j < hiddenNodes.size(); j++){
+					//double totalOutput = 0d;
+					NeuralNode hiddenNode = hiddenNodes.get(j);
+					Set<NeuralConnnection> inputConnections = network.incomingEdgesOf(hiddenNode);
+					Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+					int c = 0;
+					List<Double> weights = hiddenNode.getWeights();
+					double value = weights.get(0);
+					while (connectionIterator.hasNext()){
 						NeuralConnnection connection = connectionIterator.next();
-						double weight = connection.getWeight();
 						NeuralNode sourceNode = (NeuralNode) connection.getSource();
-						double weights[] = sourceNode.getWeights();
-						double value = weights[0];
-
-						totalOutput += value*sourceNode.getOutput()*weights[0+1];
-						//	totalOutput += weight*sourceNode.getOutput();
+						value += sourceNode.getOutput()*weights.get(c+1);
+						c++;
+					} 
+					//sigmoid function
+					if (value < -45) {
+						value = 0;
 					}
-					outputNode.setOutput(totalOutput);
-				}
-				for(int inp = 0; inp < inputNodes.size(); inp++) {
-					NeuralNode inpuNode = inputNodes.get(inp);
-					System.out.println("output "+inp+": "+inpuNode.getOutput());
-				}
-				for(int i = 0; i < hiddenLayers.size(); i++) {
-					List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
-					for( int j = 0; j < hiddenNodes.size(); j++){
+					else if (value > 45) {
+						value = 1;
+					}
+					else {
+						value = 1 / (1 + Math.exp(-value));
+					}  
 
-						NeuralNode hiddenNode = hiddenNodes.get(j);
-						System.out.println("hiddenNode "+j+": "+hiddenNode.getOutput());
+
+					hiddenNode.setOutput(value);
+				}
+			}
+			List<NeuralNode> outputNodes = network.getOutputNodes();
+			for(int op = 0; op < outputNodes.size(); op++) {
+				NeuralNode outputNode = outputNodes.get(op);
+				Set<NeuralConnnection> inputConnections = network.incomingEdgesOf(outputNode);
+				Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+				List<Double> weights = outputNode.getWeights();
+				double value = weights.get(0);
+				for (int c = 0; connectionIterator.hasNext(); c++){
+					NeuralConnnection connection = connectionIterator.next();
+					NeuralNode sourceNode = (NeuralNode) connection.getSource();
+					value += sourceNode.getOutput()*weights.get(c+1);
+				}
+				outputNode.setOutput(value);
+			}
+			for(int inp = 0; inp < inputNodes.size(); inp++) {
+				NeuralNode inpuNode = inputNodes.get(inp);
+				System.out.println("input "+inp+": "+inpuNode.getOutput());
+			}
+			for(int i = 0; i < hiddenLayers.size(); i++) {
+				List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+				for( int j = 0; j < hiddenNodes.size(); j++){
+
+					NeuralNode hiddenNode = hiddenNodes.get(j);
+					System.out.println(""+hiddenNode.getName()+": "+hiddenNode.getOutput());
+				}
+			}
+			for(int op = 0; op < outputNodes.size(); op++) {
+				NeuralNode outputNode = outputNodes.get(op);
+				System.out.println("output "+op+": "+outputNode.getOutput());
+			}
+			
+			
+//			//Error  calculation
+			double error = 0d;
+			// double totalError = 0d;
+			for(int op = 0; op < outputNodes.size(); op++ ) {
+				NeuralNode outputNode = outputNodes.get(op);
+				for(int k = 0; k < attributes.size(); k++){
+					if(attributes.get(k).getName().equals(outputNode.getAttr().getName())) {
+						double calculatedOutput = outputNode.getOutput();
+						double expectedValue = currentInstance.getValue(k).getNumericValueAsDouble();
+						error = expectedValue - calculatedOutput;
+						// TODO check this later
+					//	totalError = calculatedOutput*(1-calculatedOutput) * (error);
 					}
 				}
-				for(int op = 0; op < outputNodes.size(); op++) {
-					NeuralNode outputNode = outputNodes.get(op);
-					System.out.println("output "+op+": "+outputNode.getOutput());
-				}
+				outputNode.setError(error);
+			}
 
+			for(int i = hiddenLayers.size() - 1 ; i >= 0 ; i--) {
+				List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+				for( int j = 0; j < hiddenNodes.size(); j++){
+					//double totalOutput = 0d;
+					NeuralNode hiddenNode = hiddenNodes.get(j);
+					double errorConnection = 0;
+					Set<NeuralConnnection> outputConnections = network.outgoingEdgesOf(hiddenNode);
+					Iterator<NeuralConnnection> connectionIterator = outputConnections.iterator();
+					int c = 0;
+					
+					while (connectionIterator.hasNext()){
+
+						NeuralConnnection connection = connectionIterator.next();
+						NeuralNode targetNode = (NeuralNode) connection.getTarget();
+						List<Double> weights = targetNode.getWeights();
+						errorConnection+= targetNode.getError()*weights.get(c+1);
+						c++;
+					}
+					error =  hiddenNode.getOutput()*( 1 - hiddenNode.getOutput() )*(errorConnection);
+					hiddenNode.setError(error);
+				}
+			}
+			for(int i = 0; i < hiddenLayers.size(); i++) {
+				List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+				for( int j = 0; j < hiddenNodes.size(); j++){
+
+					NeuralNode hiddenNode = hiddenNodes.get(j);
+					System.out.println("error"+hiddenNode.getName()+": "+hiddenNode.getError());
+				}
+			}
+			for(int op = 0; op < outputNodes.size(); op++) {
+				NeuralNode outputNode = outputNodes.get(op);
+				System.out.println("outputerror "+op+": "+outputNode.getError());
+			}
+			//Weight change and update
+			for(int op = 0; op < outputNodes.size(); op++ ) {
+				NeuralNode outputNode = outputNodes.get(op);
+				Set<NeuralConnnection> inutConnections = network.incomingEdgesOf(outputNode);
+				Iterator<NeuralConnnection> connectionIterator = inutConnections.iterator();
+			//	List<Double> weights = outputNode.getWeights();
+				List<Double> cweights = outputNode.getChangeInweights();
+				List<Double> tempWeights = new ArrayList<>();
+				for (int c = 0; connectionIterator.hasNext(); c++){
+					NeuralConnnection connection = connectionIterator.next();
+					NeuralNode sourceNode = (NeuralNode) connection.getSource();
+					if(c==0){
+						double learnTimesError = learningRate * outputNode.getError();
+						double weightChange = cweights.get(c)+ (learnTimesError);
+						tempWeights.add(cweights.get(c) + weightChange);
+					}
+					double weightChange = cweights.get(c+1)+ (sourceNode.getOutput()*(learningRate * outputNode.getError()));
+					tempWeights.add(cweights.get(c+1) + weightChange);
+				}
+				outputNode.setWeights(tempWeights);
+			}
+			for(int i = hiddenLayers.size() - 1 ; i >= 0 ; i--) {
+				List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+				for( int j = 0; j < hiddenNodes.size(); j++){
+					//double totalOutput = 0d;
+					NeuralNode hiddenNode = hiddenNodes.get(j);
+					Set<NeuralConnnection> inputConnections = network.incomingEdgesOf(hiddenNode);
+					Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+					int c = 0;
+				//	List<Double> weights = hiddenNode.getWeights();
+					List<Double> cweights = hiddenNode.getChangeInweights();
+					List<Double> tempWeights = new ArrayList<>();
+					while (connectionIterator.hasNext()){
+
+						NeuralConnnection connection = connectionIterator.next();
+						NeuralNode sourceNode = (NeuralNode) connection.getSource();
+//						   double learnTimesError = 0;
+//						    learnTimesError = learningRate * hiddenNode.getError();
+//						double count = learnTimesError + momentum * cWeights[0];
+						//***weights.set(c+1)***=weights.get(c+1) + ( sourceNode.getOutput()*hiddenNode.getError()*sourceNode.getLearningRate() );
+						if(c==0){
+							double weightChange = cweights.get(c)+ (learningRate * hiddenNode.getError());
+							tempWeights.add(cweights.get(c) + weightChange);
+						}
+						double weightChange = cweights.get(c+1)+ (sourceNode.getOutput()*(learningRate * hiddenNode.getError()));
+						tempWeights.add(cweights.get(c+1) + weightChange);
+						c++;
+					}
+					hiddenNode.setWeights(tempWeights);
+				}
+			}
+			
+			for(int i = 0; i < hiddenLayers.size(); i++) {
+				List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+				for( int j = 0; j < hiddenNodes.size(); j++){
+
+					NeuralNode hiddenNode = hiddenNodes.get(j);
+					System.out.println(""+hiddenNode.getName()+": "+hiddenNode.getWeights());
+				}
+			}
+			for(int op = 0; op < outputNodes.size(); op++) {
+				NeuralNode outputNode = outputNodes.get(op);
+				System.out.println("output "+op+": "+outputNode.getWeights());
 			}
 		}
 		return 0;
