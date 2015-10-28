@@ -98,4 +98,6 @@ public abstract class IInstances implements Serializable{
 	//public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network);
 
 	public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate);
+
+	public abstract double stochasticTrainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate);
 }
