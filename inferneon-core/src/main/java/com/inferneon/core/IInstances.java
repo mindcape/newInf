@@ -95,9 +95,6 @@ public abstract class IInstances implements Serializable{
 	
 	public abstract IMatrix[] matrixAndClassVector(boolean regularize);
 
-	//public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network);
+	public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate, boolean isStochastic);
 
-	public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate);
-
-	public abstract double stochasticTrainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate);
 }

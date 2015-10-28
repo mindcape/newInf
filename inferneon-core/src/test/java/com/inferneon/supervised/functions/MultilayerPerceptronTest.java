@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Assert;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -17,7 +19,7 @@ import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.supervised.SupervisedLearningTest;
 
 public class MultilayerPerceptronTest  extends SupervisedLearningTest{
-/* testcases for multilayer perceptron */
+	/* testcases for multilayer perceptron */
 	private static final String ROOT = "/TestResources";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 
@@ -39,24 +41,62 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 			e.printStackTrace();
 		}
 	}
-	
+
+	@Test
+	public void testNumWeightsComputation() {
+		Integer [] hiddenNodeNConfig = new Integer[] {};
+		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3, false);
+		try{
+			int numWts = mlp.getNumWeights(3, hiddenNodeNConfig);
+		}
+		catch(IllegalArgumentException e){
+			Assert.assertTrue(e.getMessage().equals("MLP must have at least one hidden layer."));
+		}
+
+		try{
+			hiddenNodeNConfig = new Integer[] {-1};
+			mlp.getNumWeights(3, hiddenNodeNConfig);
+		}
+		catch(IllegalArgumentException e){
+			Assert.assertTrue(e.getMessage().equals("A hidden layer must have at least one node."));
+		}
+
+		hiddenNodeNConfig = new Integer[] {1};
+		int numWts = mlp.getNumWeights(3, hiddenNodeNConfig);
+		Assert.assertTrue(numWts == 5);
+
+		hiddenNodeNConfig = new Integer[] {2, 2};
+		numWts = mlp.getNumWeights(3, hiddenNodeNConfig);
+		Assert.assertTrue(numWts == 15);
+		
+		hiddenNodeNConfig = new Integer[] {2, 3, 5};
+		numWts = mlp.getNumWeights(3, hiddenNodeNConfig);
+		Assert.assertTrue(numWts == 41);
+		
+		hiddenNodeNConfig = new Integer[] {2, 3, 5};
+		numWts = mlp.getNumWeights(4, hiddenNodeNConfig);
+		Assert.assertTrue(numWts == 43);
+	}
+
 	@Test
 	public void createNetwork() throws Exception {
 		test("newMLPData5-07092015.arff");	
 	}
-		
+
 	private void test(String inputFileName) throws Exception{
 
-		MultiLayerPerceptron mlp = new MultiLayerPerceptron("2, 2", 0.3);
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, inputFileName);		
-		List<Attribute> attributes = arffElements.getAttributes();		
+		List<Attribute> attributes = arffElements.getAttributes();	
+		Integer [] hiddenNodeNConfig = new Integer[] {2, 2};
+		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3, false);
+
 		String csvFilePath = getCreatedCSVFilePath(inputFileName, arffElements.getData(), APP_TEMP_FOLDER);
 		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
 				attributes, attributes.size() -1, csvFilePath);
 
-		mlp.learn(instances);
-//		MultilayerNeuralNetwork network = mlp.getNetwork();
-//		System.out.println("********** TREE:");
-//		network.emitTree();
+		mlp.train(instances);
+		//		MultilayerNeuralNetwork network = mlp.getNetwork();
+		//		System.out.println("********** TREE:");
+		//		network.emitTree();
 	}	
 }
