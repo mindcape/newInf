@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +19,8 @@ import com.inferneon.core.IInstances;
 import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.Value;
 import com.inferneon.core.utils.StatisticsUtils;
-import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
+import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Criterion;
 
 public class C45 {
 	

@@ -20,9 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.inferneon.core.arffparser.ParserUtils;
-import com.inferneon.supervised.DecisionTree;
-import com.inferneon.supervised.DecisionTreeEdge;
-import com.inferneon.supervised.DecisionTreeNode;
+import com.inferneon.supervised.decisiontree.DecisionTree;
+import com.inferneon.supervised.decisiontree.DecisionTreeEdge;
+import com.inferneon.supervised.decisiontree.DecisionTreeNode;
 
 public final class DecisionTreeUtils {
 

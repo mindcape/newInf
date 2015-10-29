@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,6 +10,7 @@ import java.util.Stack;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 
 import com.inferneon.core.utils.MathUtils;
+import com.inferneon.supervised.FrequencyCounts;
 
 public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>{
 

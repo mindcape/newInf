@@ -1,4 +1,4 @@
-package com.inferneon.supervised.functions;
+package com.inferneon.supervised.neuralnetwork;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,7 +13,7 @@ import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Value;
 import com.inferneon.supervised.Supervised;
-import com.inferneon.supervised.functions.NeuralNode.TYPE;
+import com.inferneon.supervised.neuralnetwork.NeuralNode.TYPE;
 
 public class MultiLayerPerceptron extends Supervised {
 

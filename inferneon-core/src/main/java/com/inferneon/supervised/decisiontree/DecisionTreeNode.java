@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import java.util.Map;
 
@@ -7,6 +7,7 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
+import com.inferneon.supervised.FrequencyCounts;
 
 public class DecisionTreeNode {
 	

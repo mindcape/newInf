@@ -1,4 +1,4 @@
-package com.inferneon.supervised.functions;
+package com.inferneon.supervised.neuralnetwork;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,10 +17,11 @@ import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.supervised.SupervisedLearningTest;
+import com.inferneon.supervised.neuralnetwork.MultiLayerPerceptron;
 
 public class MultilayerPerceptronTest  extends SupervisedLearningTest{
-	/* testcases for multilayer perceptron */
-	private static final String ROOT = "/TestResources";
+	
+	private static final String ROOT = "/TestResources/MLP";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 
 	static {

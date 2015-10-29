@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;

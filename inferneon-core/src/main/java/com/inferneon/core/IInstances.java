@@ -7,8 +7,8 @@ import java.util.Map;
 import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
 import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.supervised.FrequencyCounts;
-import com.inferneon.supervised.Impurity;
-import com.inferneon.supervised.functions.MultilayerNeuralNetwork;
+import com.inferneon.supervised.decisiontree.Impurity;
+import com.inferneon.supervised.neuralnetwork.MultilayerNeuralNetwork;
 
 public abstract class IInstances implements Serializable{
 

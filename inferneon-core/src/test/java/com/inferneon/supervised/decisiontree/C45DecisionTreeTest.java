@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,14 +13,17 @@ import com.inferneon.core.IInstances;
 import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
-import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
-import com.inferneon.supervised.DecisionTreeBuilder.Method;
+import com.inferneon.supervised.SupervisedLearningTest;
+import com.inferneon.supervised.decisiontree.DecisionTree;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Criterion;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Method;
 import com.inferneon.supervised.utils.DecisionTreeUtils;
 import com.inferneon.supervised.utils.DescriptiveTree;
 
 public class C45DecisionTreeTest extends SupervisedLearningTest{
 
-	private static final String ROOT = "/TestResources";
+	private static final String ROOT = "/TestResources/C45";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 
 	static {

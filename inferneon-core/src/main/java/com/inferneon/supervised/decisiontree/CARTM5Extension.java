@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Value;
-import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
+import com.inferneon.supervised.Supervised;
 
 public class CARTM5Extension extends Supervised {
 

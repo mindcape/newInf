@@ -23,7 +23,7 @@ public class InstancesTest extends SupervisedLearningTest{
 		}
 	}
 
-	private static final String ROOT = "/TestResources";
+	private static final String ROOT = "/TestResources/Core";
 
 	@Test 
 	public void insertMissingNominalValuesWithModes() throws Exception{

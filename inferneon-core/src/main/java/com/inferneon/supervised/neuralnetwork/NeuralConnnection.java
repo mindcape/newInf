@@ -1,4 +1,4 @@
-package com.inferneon.supervised.functions;
+package com.inferneon.supervised.neuralnetwork;
 
 import org.jgraph.graph.DefaultEdge;
 

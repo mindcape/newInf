@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import org.junit.After;
 import org.junit.Ignore;
@@ -6,14 +6,16 @@ import org.junit.Test;
 
 import com.inferneon.core.CommonTestUtils;
 import com.inferneon.core.IInstances;
-import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
-import com.inferneon.supervised.DecisionTreeBuilder.Method;
+import com.inferneon.supervised.SupervisedLearningTest;
+import com.inferneon.supervised.decisiontree.CARTM5Extension;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Criterion;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Method;
 import com.inferneon.supervised.utils.DecisionTreeUtils;
 import com.inferneon.supervised.utils.DescriptiveTree;
 
 public class CARTM5ExtensionTest extends SupervisedLearningTest{
 
-	private static final String ROOT = "/TestResources";
+	private static final String ROOT = "/TestResources/CARTM5";
 
 	static {
 		try {

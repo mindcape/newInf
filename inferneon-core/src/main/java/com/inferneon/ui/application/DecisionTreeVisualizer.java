@@ -44,9 +44,9 @@ import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.core.exceptions.InvalidDataException;
 import com.inferneon.core.utils.DataLoader;
-import com.inferneon.supervised.DecisionTreeBuilder;
-import com.inferneon.supervised.DecisionTreeEdge;
-import com.inferneon.supervised.DecisionTreeNode;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder;
+import com.inferneon.supervised.decisiontree.DecisionTreeEdge;
+import com.inferneon.supervised.decisiontree.DecisionTreeNode;
 import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 

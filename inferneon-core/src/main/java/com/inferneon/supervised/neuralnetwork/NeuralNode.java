@@ -1,4 +1,4 @@
-package com.inferneon.supervised.functions;
+package com.inferneon.supervised.neuralnetwork;
 
 import java.util.ArrayList;
 import java.util.List;

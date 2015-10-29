@@ -1,4 +1,4 @@
-package com.inferneon.supervised.functions;
+package com.inferneon.supervised.neuralnetwork;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,7 +9,7 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Instance;
-import com.inferneon.supervised.functions.NeuralNode.TYPE;
+import com.inferneon.supervised.neuralnetwork.NeuralNode.TYPE;
 
 public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, NeuralConnnection>{
 	

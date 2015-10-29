@@ -13,6 +13,9 @@ import org.junit.Assert;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.Value;
+import com.inferneon.supervised.decisiontree.DecisionTree;
+import com.inferneon.supervised.decisiontree.DecisionTreeEdge;
+import com.inferneon.supervised.decisiontree.DecisionTreeNode;
 import com.inferneon.supervised.utils.DescriptiveTree;
 import com.inferneon.supervised.utils.DescriptiveTreeEdge;
 import com.inferneon.supervised.utils.DescriptiveTreeNode;

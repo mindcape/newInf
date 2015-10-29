@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +12,7 @@ import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Value;
 import com.inferneon.core.exceptions.InvalidDataException;
+import com.inferneon.supervised.Supervised;
 
 public class DecisionTreeBuilder extends Supervised{
 

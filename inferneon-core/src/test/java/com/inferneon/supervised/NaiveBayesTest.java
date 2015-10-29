@@ -24,7 +24,7 @@ import com.inferneon.core.utils.DataLoader;
 
 public class NaiveBayesTest  extends SupervisedLearningTest  {
 	
-	private static final String ROOT = "/TestResources";
+	private static final String ROOT = "/TestResources/NaiveBayes";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 	
 	static {

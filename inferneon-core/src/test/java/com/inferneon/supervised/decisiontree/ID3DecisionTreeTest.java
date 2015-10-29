@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.decisiontree;
 
 import java.util.List;
 
@@ -12,10 +12,13 @@ import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.Value;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
+import com.inferneon.supervised.SupervisedLearningTest;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder;
+import com.inferneon.supervised.decisiontree.DecisionTreeNode;
 
 public class ID3DecisionTreeTest extends SupervisedLearningTest{
 	
-	private static final String ROOT = "/TestResources";
+	private static final String ROOT = "/TestResources/ID3";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 	
 	static {

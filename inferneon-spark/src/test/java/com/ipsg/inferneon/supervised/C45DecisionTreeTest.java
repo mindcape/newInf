@@ -15,11 +15,11 @@ import com.inferneon.core.IInstances;
 import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
-import com.inferneon.supervised.DecisionTree;
-import com.inferneon.supervised.DecisionTreeBuilder;
-import com.inferneon.supervised.DecisionTreeBuilder.Criterion;
-import com.inferneon.supervised.DecisionTreeBuilder.Method;
 import com.inferneon.supervised.SupervisedLearningTest;
+import com.inferneon.supervised.decisiontree.DecisionTree;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Criterion;
+import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Method;
 import com.inferneon.supervised.utils.DecisionTreeUtils;
 import com.inferneon.supervised.utils.DescriptiveTree;
 
