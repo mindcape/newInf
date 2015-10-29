@@ -20,6 +20,8 @@ public class BestAttributeSearchResult {
 	private Double infoGain;
 	private Double gainRatio;	
 	
+	private Impurity impurity;
+	
 	public BestAttributeSearchResult(Attribute attributeWithNominalValues, Double infoGain){
 		this.attribute = attributeWithNominalValues;
 		this.infoGain = infoGain;
@@ -33,6 +35,22 @@ public class BestAttributeSearchResult {
 		this.threshold = threshold;
 		this.splitBeforeThreshold = splitBeforeThreshold;
 		this.splitAfterThreshold = splitAfterThreshold;
+	}
+	
+	public BestAttributeSearchResult(Attribute attributeWithContinuousValues, Impurity impurity, long splittingPoint,  Value threshold,
+			IInstances splitBeforeThreshold,  IInstances splitAfterThreshold){
+		this.attribute = attributeWithContinuousValues;
+		this.impurity = impurity;
+		this.splittingPoint = splittingPoint;
+		this.threshold = threshold;
+		this.splitBeforeThreshold = splitBeforeThreshold;
+		this.splitAfterThreshold = splitAfterThreshold;
+	}
+	
+	public BestAttributeSearchResult(Attribute attribute, Impurity impurity){
+		this.attribute = attribute;
+		this.impurity = impurity;
+		
 	}
 	
 	public Value getThreshold() {
@@ -85,5 +103,13 @@ public class BestAttributeSearchResult {
 	
 	public Double getGainRatio() {
 		return gainRatio;
+	}
+	
+	public void setImpurity(Impurity impurity) {
+		this.impurity = impurity;
+	}
+	
+	public Impurity getImpurity() {
+		return impurity;
 	}
 }

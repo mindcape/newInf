@@ -10,11 +10,12 @@ import com.inferneon.core.Value;
 
 public class DecisionTreeNode {
 	
-	private enum Type{ATTRIBUTE, VALUE};	
+	private enum Type{ATTRIBUTE, VALUE, IMPURITY};	
 	
 	private Type type;	
 	private Attribute attribute;
 	private Value value;
+	private Impurity impurity;
 	private Double numInstances;	
 	private FrequencyCounts frequencyCounts;
 
@@ -30,6 +31,13 @@ public class DecisionTreeNode {
 		type = Type.VALUE;
 		this.numInstances = frequencyCounts.getSumOfWeights();
 		this.frequencyCounts = frequencyCounts;
+	}
+	
+	public DecisionTreeNode(Impurity impurity, Attribute attribute){
+		this.impurity = impurity;
+		this.attribute = attribute;
+		type = Type.IMPURITY;
+		this.numInstances = impurity.getNumInstances();
 	}
 
 	public FrequencyCounts getFrequencyCounts() {
@@ -61,7 +69,7 @@ public class DecisionTreeNode {
 	}
 
 	public String toString(){
-		if(type == Type.ATTRIBUTE){
+		if(type == Type.ATTRIBUTE || type == Type.IMPURITY){
 			return attribute.getName();
 		}
 		else if(type == Type.VALUE){

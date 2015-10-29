@@ -114,7 +114,7 @@ NEWLINE	:	'\r'?'\n';
 LINE_COMMENT : '%' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;};
 
 NAME : (ALPHA | OTHER_CHARS)+
-      | '\'' (ALPHA | OTHER_CHARS)+ '\''
+      | '\'' (ALPHA | OTHER_CHARS | COMMA)+ '\''
       ;
 fragment ALPHA
 	: 'A'..'Z'

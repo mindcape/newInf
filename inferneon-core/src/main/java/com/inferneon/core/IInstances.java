@@ -44,6 +44,16 @@ public abstract class IInstances implements Serializable{
 		return classAttribute.getNumValues();
 	}
 	
+	public Attribute getAttributeByName(String attributeName){
+		for(Attribute attribute : attributes){
+			if(attribute.getName().equals(attributeName)){
+				return attribute;
+			}
+		}
+		
+		return null;
+	}
+	
 	public abstract IInstances createInstances(List<Attribute> attributes, int classIndex, String sourceURI) throws Exception;	
 	public abstract String getContextId();
 	public abstract long size();

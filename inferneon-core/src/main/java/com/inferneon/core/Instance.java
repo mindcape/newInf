@@ -69,4 +69,28 @@ public class Instance implements Serializable{
 		}
 		return false;
 	}	
+	
+	@Override
+	public boolean equals(Object obj){
+		if(!(obj instanceof Instance)){
+			return false;
+		}
+		
+		Instance other = (Instance) obj;
+		List<Value> valuesOfOther = other.getValues();
+		if(values.size() != valuesOfOther.size()){
+			return false;
+		}
+		
+		int valueCount = 0;
+		for(Value value : values){
+			Value valOfOther = valuesOfOther.get(valueCount);
+			if(!(value.equals(valOfOther))){
+				return false;
+			}
+			valueCount++;
+		}
+		
+		return true;
+	}		
 }
