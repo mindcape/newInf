@@ -38,6 +38,8 @@ import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
 import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.Impurity;
+import com.inferneon.supervised.functions.MultilayerNeuralNetwork;
 import com.ipsg.inferneon.spark.commonfunctions.TransformStringToRDD;
 import com.ipsg.inferneon.spark.utils.JavaSparkContextSingleton;
 import com.ipsg.inferneon.spark.utils.SparkUtils;
@@ -1113,6 +1115,51 @@ public class SparkInstances extends IInstances implements Serializable{
 //		IMatrix[] matrices = new IMatrix[2];
 //		matrices[0] = valuesSparkMatrix; matrices[1] = targetsSparkMatrix;
 //		return matrices;
+		return null;
+	}
+
+	@Override
+	public IInstances insertMissingNominalValuesWithModes(
+			Map<Attribute, Map<Value, Double>> attributesAndValueCounts) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double mean(Attribute attribute, long startIndex, long endIndex) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double standardDeviation(Attribute attribute, long startIndex, long endIndex) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public IInstances convertNominalToSyntheticBinaryAttributes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate, boolean isStochastic) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Impurity initializeImpurity(Attribute attribute,
+			long partitionIndex, int impurityOrder) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Impurity updateImpurity(long startIndex, long endIndex,
+			Impurity impurity) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

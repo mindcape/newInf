@@ -3,12 +3,11 @@ package com.ipsg.inferneon.spark.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
 import com.inferneon.core.Instance;
+import com.ipsg.inferneon.spark.commonfunctions.AddDistributionWrappers;
 import com.ipsg.inferneon.spark.commonfunctions.AddDoubleToInstanceWeight;
 import com.ipsg.inferneon.spark.commonfunctions.AddInstanceWeights;
 import com.ipsg.inferneon.spark.commonfunctions.WeightSumWrapper;

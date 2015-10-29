@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.inferneon.core.Attribute;
@@ -22,6 +23,7 @@ import com.inferneon.supervised.SupervisedLearningTest;
 import com.inferneon.supervised.utils.DecisionTreeUtils;
 import com.inferneon.supervised.utils.DescriptiveTree;
 
+@Ignore
 public class C45DecisionTreeTest extends SupervisedLearningTest{
 	
 	private static final String ROOT = "/TestResources";

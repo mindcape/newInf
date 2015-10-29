@@ -6,15 +6,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+import com.inferneon.core.Attribute.NumericType;
 import com.inferneon.core.Value.ValueType;
 import com.inferneon.core.exceptions.InvalidDataException;
 import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
@@ -22,10 +25,9 @@ import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.core.matrices.Matrix;
 import com.inferneon.core.utils.DataLoader;
 import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.Impurity;
 import com.inferneon.supervised.functions.MultilayerNeuralNetwork;
-import com.inferneon.supervised.functions.NeuralConnnection;
 import com.inferneon.supervised.functions.NeuralNode;
-import com.inferneon.supervised.functions.NeuralNode.TYPE;
 
 public class Instances extends IInstances {
 
@@ -36,7 +38,6 @@ public class Instances extends IInstances {
 		factory.registerProduct("STAND_ALONE", new Instances(Context.STAND_ALONE));
 	}
 
-	private List<Attribute> attributes;
 	private List<Instance> instances;
 	private int classIndex;
 	private int attributeIndex;   // Attribute index on which these instances are sorted on.
@@ -335,6 +336,282 @@ public class Instances extends IInstances {
 	}
 
 	@Override
+	public IInstances insertMissingNominalValuesWithModes(Map<Attribute, Map<Value, Double>> attributesAndValueCounts){
+		if(attributesAndValueCounts == null){
+			FrequencyCounts frequencyCounts = getFrequencyCounts();
+			attributesAndValueCounts = frequencyCounts.getAttributeValueCounts();
+		}
+
+		Map<Attribute, Value> modesOfNominalAttributes = modesOfNominalAttributes(attributesAndValueCounts);
+
+		List<Instance> newInsts = new ArrayList<>();
+		for(Instance instance : instances){	
+			List<Value> newValues = new ArrayList<>();
+
+			int attributeIndex = 0;
+			for(Attribute attribute : attributes){
+				Value value = instance.getValue(attributeIndex);
+				if(!(attribute.getType() == Attribute.Type.NOMINAL  && value.getType() == ValueType.MISSING )){
+					newValues.add(instance.getValue(attributeIndex));
+					attributeIndex++;
+					continue;
+				}
+
+				Value newValue = modesOfNominalAttributes.get(attribute);
+				newValues.add(newValue);
+				attributeIndex++;
+			}			
+			Instance newInst = new Instance(newValues);
+			newInsts.add(newInst);
+		}
+		Instances newInstances = new Instances(context, newInsts, attributes, classIndex);		
+		return newInstances;
+	}
+
+	private Map<Attribute, Value> modesOfNominalAttributes(Map<Attribute, Map<Value, Double>> attributesAndValueCounts) {
+		Iterator<Entry<Attribute, Map<Value, Double>>> iterator = attributesAndValueCounts.entrySet().iterator();
+		Map<Attribute, Value> modes = new HashMap<>();
+		while(iterator.hasNext()){
+			Entry<Attribute, Map<Value, Double>> entry = iterator.next();
+			Attribute attribute = entry.getKey();
+			Map<Value, Double>  valueAndCounts = entry.getValue();
+
+			Value valueWithMaxCount = null; 
+			Double maxCount = 0.0;
+			Iterator<Entry<Value, Double>> modesIter = valueAndCounts.entrySet().iterator();
+			while(modesIter.hasNext()){
+				Entry<Value, Double> modesEntry = modesIter.next();
+				Value val = modesEntry.getKey();
+				Double count = modesEntry.getValue();
+				if(Double.compare(count, maxCount) > 0){
+					maxCount = count;
+					valueWithMaxCount = val; 
+				}
+			}			
+			modes.put(attribute, valueWithMaxCount);			
+		}
+		return modes;
+	}
+
+	@Override
+	public IInstances convertNominalToSyntheticBinaryAttributes() {
+
+		Instances modifiedInsts = (Instances)insertMissingNominalValuesWithModes(null);		
+		Map<Attribute, List<Value>>  sortedValuesOnTargetAverages = modifiedInsts.getSortedValuesOnTargetAverages();
+
+		List<Attribute> newAttrList = new ArrayList<>();
+
+		Map<Attribute, List<List<Value>>> attributeAndNewAttributeValueList = new HashMap<>();
+		int newClassIndex = classIndex;
+		int currentOldAttributeIndex = 0;
+		for(Attribute attribute : attributes){
+			if(attribute.getType() != Attribute.Type.NOMINAL){
+				newAttrList.add(attribute);
+				currentOldAttributeIndex++;
+				continue;
+			}
+
+			List<Value> sortedValues = sortedValuesOnTargetAverages.get(attribute);
+
+			List<List<Value>> newAttributeValueList = new ArrayList<>();			
+			for(int i = 1; i < sortedValues.size(); i++){
+				List<Value> subList = sortedValues.subList(i, sortedValues.size());
+				String newAttrName = buildAttributeName(attribute.getName(), subList);
+				Attribute newAttribute = new Attribute(newAttrName, NumericType.INTEGER);
+				newAttrList.add(newAttribute);
+				newAttributeValueList.add(subList);
+			}
+
+			attributeAndNewAttributeValueList.put(attribute, newAttributeValueList);
+			if(currentOldAttributeIndex <= classIndex){
+				newClassIndex += sortedValues.size() -2;
+			}
+			currentOldAttributeIndex++;
+		}
+
+		List<Instance> newInsts = new ArrayList<>();
+		List<Instance> completedInsts = modifiedInsts.getInstances();
+		for(Instance instance : completedInsts){
+			List<Value> newValues = new ArrayList<>();
+			int attributeIndex = 0;
+			for(Attribute oldAttribute : attributes){				
+				Value oldValue = instance.getValue(attributeIndex);
+				if(oldAttribute.getType() != Attribute.Type.NOMINAL){					
+					newValues.add(oldValue);
+					attributeIndex++;
+					continue;
+				}
+
+				List<List<Value>> newAttributeValueList= attributeAndNewAttributeValueList.get(oldAttribute);
+
+				for(List<Value> valsInNewAttribute : newAttributeValueList){
+					Long newBinaryValue = 0L;
+					if(valsInNewAttribute.contains(oldValue)){						
+						newBinaryValue = 1L;
+					}
+					else{
+						newBinaryValue = 0L;
+					}
+					Value newVal = new Value(newBinaryValue);
+					newValues.add(newVal);
+				}		
+				attributeIndex++;
+			}
+
+			Instance newInst = new Instance(newValues);
+			newInsts.add(newInst);
+		}
+
+		Instances newInstances = new Instances(context, newInsts, newAttrList, newClassIndex);
+		return newInstances;
+	}
+
+	private String buildAttributeName(String oldAttributeName, List<Value> values){
+		String newAttributeName = oldAttributeName + "=";
+		for(int i = 0; i < values.size(); i++){
+			Value value = values.get(i);
+			newAttributeName += value.getName() + (i == values.size() -1 ? "" : ",");
+		}
+		return newAttributeName;
+	}
+
+	protected Map<Attribute, List<Value>> getSortedValuesOnTargetAverages(){
+		List<Integer> nominalAttrIndices = new ArrayList<>();
+		int numAttributes = attributes.size();
+
+		for(int a = 0; a < numAttributes; a++){
+			Attribute attribute = attributes.get(a);
+			if(attribute.getType() == Attribute.Type.NOMINAL){
+				nominalAttrIndices.add(a);
+			}
+		}
+
+		int numNominalAttributes = nominalAttrIndices.size();
+		Map<Attribute, Map<Value, Double>> attributeAndTargetValueSums = new HashMap<>();
+		Map<Attribute, Map<Value, Double>> attributeAndValueCounts = new HashMap<>();
+
+		int numInsts = instances.size();
+		for(int i = 0; i < numInsts; i++){
+			Instance instance = instances.get(i);
+			double targetVal = instance.getValue(classIndex).getNumericValueAsDouble();
+
+			for(int j = 0; j < numNominalAttributes; j++){
+				Value value = instance.getValue(j);
+				if(value.getType() == Value.ValueType.MISSING){
+					continue;
+				}
+
+				Attribute attribute = attributes.get(j);
+				Map<Value, Double> targetValueSum = attributeAndTargetValueSums.get(attribute);
+				if(targetValueSum == null){					
+					targetValueSum = new HashMap<>();
+					targetValueSum.put(value, targetVal);
+					attributeAndTargetValueSums.put(attribute, targetValueSum);
+
+					Map<Value, Double> valueCounts = new HashMap<>();
+					valueCounts.put(value, instance.getWeight());
+
+					if(attribute.getName().equals("motor") && value.toString().equals("E")){
+						System.out.println("First update for E: " + 1);
+					}
+
+					attributeAndValueCounts.put(attribute, valueCounts);
+				}
+				else{
+					Double currentVal = targetValueSum.get(value);
+					if(currentVal != null){
+						targetValueSum.put(value, currentVal + targetVal);
+					}
+					else{
+						targetValueSum.put(value, targetVal);
+					}
+
+					Map<Value, Double> currentValueCounts = attributeAndValueCounts.get(attribute);
+					if(currentValueCounts == null){
+						currentValueCounts = new HashMap<>();
+
+
+						if(attribute.getName().equals("motor") && value.toString().equals("E")){
+							System.out.println("Second update for E: " + 1);
+						}
+
+						currentValueCounts.put(value, instance.getWeight());
+						attributeAndValueCounts.put(attribute, currentValueCounts);
+					}
+					else{
+						Double currentValueCount = currentValueCounts.get(value);
+						if(currentValueCount == null){
+
+							if(attribute.getName().equals("motor") && value.toString().equals("E")){
+								System.out.println("Third update for E: " + 1);
+							}
+							currentValueCounts.put(value, instance.getWeight());							
+						}
+						else{
+
+							if(attribute.getName().equals("motor") && value.toString().equals("E")){
+								System.out.println("Fourth updates for E: " + (currentValueCount + instance.getWeight()));
+							}
+							currentValueCounts.put(value, currentValueCount + instance.getWeight());
+						}
+					}
+				}
+			}
+		}
+
+		Map<Attribute, List<Value>> attributeAndSortedValuesOnTargetCounts = new HashMap<>();
+
+		Iterator<Map.Entry<Attribute, Map<Value, Double>>> iterator = attributeAndTargetValueSums.entrySet().iterator();
+		while(iterator.hasNext()){
+			Map.Entry<Attribute, Map<Value, Double>> entry = iterator.next();
+			Attribute attribute = entry.getKey();
+			Map<Value, Double> targetSums = entry.getValue();
+			Map<Value, Double> valueCounts = attributeAndValueCounts.get(attribute);
+
+			List<Value> sortedValues = getSortedValuesOnTargetCounts(attribute, targetSums, valueCounts);
+			attributeAndSortedValuesOnTargetCounts.put(attribute, sortedValues);			
+		}						
+		return attributeAndSortedValuesOnTargetCounts;		
+	}
+
+	private List<Value> getSortedValuesOnTargetCounts(Attribute attribute, Map<Value, Double> targetSums, Map<Value, Double> valueCounts) {
+		List<Value> nominalValues = attribute.getAllValues();	
+
+		List<Value> sortedResult = new ArrayList<>();
+		List<Value> missingValues = new ArrayList<>();
+		Map<Value, Double> valueAndAverages = new HashMap<>();
+		for(Value nominalValue : nominalValues){
+			Double sums = targetSums.get(nominalValue);
+			Double counts = valueCounts.get(nominalValue);
+			if(sums == null || counts == null){
+				missingValues.add(nominalValue);
+				continue;
+			}
+
+			valueAndAverages.put(nominalValue, sums/counts);	
+		}
+
+		List<Map.Entry<Value, Double>> entries = new ArrayList<Entry<Value, Double>>(valueAndAverages.entrySet());
+		Collections.sort(entries, new Comparator<Map.Entry<Value, Double>>() {
+			public int compare(Map.Entry<Value, Double> entry1, Map.Entry<Value, Double> entry2){
+				int compare = entry1.getValue().compareTo(entry2.getValue());
+				if(compare != 0){
+					return compare;
+				}
+
+				return entry1.getKey().isGreaterThan(entry2.getKey()) ? 1 : -1;
+			}
+		});
+
+		for(Map.Entry<Value, Double> entry : entries){
+			sortedResult.add(entry.getKey());
+		}
+
+		sortedResult.addAll(missingValues);
+		return sortedResult;		
+	}
+
+	@Override
 	public IInstances createInstances(List<Attribute> attributes, int classIndex, String sourceURI) throws IOException, InvalidDataException{		
 		if(sourceURI == null){
 			IInstances instances =  new Instances(Context.STAND_ALONE, new ArrayList<Instance>(), attributes, classIndex);
@@ -409,6 +686,54 @@ public class Instances extends IInstances {
 	public void sort(Attribute attribute) {
 		Collections.sort(instances, new InstanceComparator(attribute, attributes));
 		this.attributeIndex  = attributes.indexOf(attribute);		
+	}
+
+	@Override
+	public double mean(Attribute attribute, long startIndex, long endIndex){
+
+		double sum = 0.0;
+		int numInsts = instances.size();
+		int missingCount = 0;
+		for(int i = 0; i < numInsts; i++){
+			Instance inst = instances.get(i);
+			Value value = inst.getValue(attributeIndex);
+			if(value.getType() == ValueType.MISSING){
+				missingCount++;
+				continue;
+			}
+
+			sum += value.getNumericValueAsDouble();
+		}
+
+		int netCount = numInsts - missingCount;
+		double mean = sum / netCount;				
+		return mean;
+	}
+
+	@Override
+	public double standardDeviation(Attribute attribute, long startIndex, long endIndex){
+		int attributeIndex = attributes.indexOf(attribute);
+		double standardDeviation = 0.0;
+		double mean = mean(attribute, startIndex, endIndex);
+		int missingCount = 0;
+		double sse = 0.0;
+		int numInsts = (int)(endIndex - startIndex + 1);
+		for(int i = (int)startIndex; i < (int)endIndex; i++){
+			Instance inst = instances.get(i);
+			Value value = inst.getValue(attributeIndex);
+			if(value.getType() == ValueType.MISSING){
+				missingCount++;
+				continue;
+			}
+
+			double diff = value.getNumericValueAsDouble() - mean;
+			sse += Math.pow(diff, 2.0);
+		}
+
+		int netCount = numInsts - missingCount;
+		standardDeviation = Math.sqrt(sse  / netCount);
+
+		return standardDeviation;
 	}
 
 	@Override
@@ -611,6 +936,42 @@ public class Instances extends IInstances {
 	}
 
 	@Override
+	public boolean equals(Object obj){
+		if(!(obj instanceof Instances)){
+			return false;
+		}
+
+		Instances other = (Instances) obj;
+		List<Attribute> attributesOfOther = other.getAttributes();
+		if(attributes.size() != attributesOfOther.size()){
+			return false;
+		}
+
+		int attrCount = 0;
+		for(Attribute attribute : attributes){
+			if(!(attribute.equals(attributesOfOther.get(attrCount)))){
+				return false;
+			}
+			attrCount++;
+		}
+
+		List<Instance> instancesOfOther = other.getInstances();
+		if(instances.size() != instancesOfOther.size()){
+			return false;
+		}
+
+		int instanceCount = 0;
+		for(Instance instance : instances){
+			Instance otherInst = instancesOfOther.get(instanceCount);
+			if(!(instance.equals(otherInst))){
+				return false;
+			}	
+			instanceCount++;
+		}
+		return true;
+	}
+
+	@Override
 	public double trainNeuralNetwork(MultilayerNeuralNetwork network,double learningRate, boolean isStochastic) {
 
 		List<NeuralNode> inputNodes = network.getInputNodes();
@@ -627,22 +988,94 @@ public class Instances extends IInstances {
 			// Batch gradient descent
 			for(int ins=0; ins<instances.size(); ins++){
 				Instance instance = instances.get(ins);
-				
-				if(ins == 1178){
-					System.out.println("WAIT HERE");
-				}
-				
-				System.out.println("Ins at index = " + ins  +  ": " + instance.toString());
-				
 				network.calculateOutputs(instance, inputNodes, hiddenLayers, outputNodes);
 				network.calculateError(instance, hiddenLayers, outputNodes, attributes);
 				network.updateWeight(hiddenLayers, outputNodes, learningRate, isStochastic);
 			}
 		}
-
-
 		return 0;
 	}
+	
 
+	@Override
+	public Impurity initializeImpurity(Attribute attribute, long partitionIndex, int impurityOrder) {
+		long numInstances = instances.size();
+		double sum = 0.0;
+		double squareSum = 0.0, variance = 0.0, stardDev = 0.0;
+		double numLeft = 0.0, numRight = 0.0;
+		double sumLeft = 0.0, sumRight = 0.0;
+		double squareSumLeft = 0.0, squareSumRight = 0.0;
+		int count = 0;
+		for(int i = 0; i < numInstances; i++){
+			Instance instance = instances.get((int)i);
+			Value value = instance.getValue(classIndex);			
+			if(value.getType() == Value.ValueType.MISSING){
+				continue;
+			}
+			count++;
+			Double val = value.getNumericValueAsDouble();
+			sum += val;
+			squareSum += val * val;
 
+			if(count > 1){
+				variance = Math.abs((squareSum - sum * sum/count)/count);
+				stardDev = Math.sqrt(variance);				
+			}
+			else {
+				variance = 0.0; 
+				stardDev = 0.0;
+			}
+
+			if(i < partitionIndex){
+				//numLeft = i;
+				numLeft++;
+				sumLeft = sum;
+				squareSumLeft = squareSum;
+			}
+			else{
+				//numRight = i - numLeft;
+				numRight++;
+				sumRight = sum - sumLeft;
+				squareSumRight = squareSum - squareSumLeft;
+			}
+		}
+		//numLeft++;
+		
+		Impurity impurity = new Impurity(attribute, impurityOrder, numInstances, numLeft, numRight, sumLeft, 
+				sumRight, squareSumLeft, squareSumRight, variance, stardDev);
+		return impurity;
+	}
+	
+	@Override
+	public Impurity updateImpurity(long startIndex, long endIndex, Impurity impurity){
+		
+		double maxImpurityValue = Double.MIN_VALUE;
+		Attribute attribute = impurity.getAttribute();
+		int attributeIndex = attributes.indexOf(attribute);		
+		
+		Impurity maxImpurity = null;
+		double impurityValue = Double.MIN_VALUE;
+		
+		for(long i = startIndex; i < endIndex; i++){
+			Instance instance = instances.get((int)i);
+			Double classValue = instance.getValue(classIndex).getNumericValueAsDouble();
+			impurityValue = impurity.updateNext(classValue);
+			
+			Value attrValue = instance.getValue(attributeIndex);
+			Instance nextInstance = instances.get((int)i + 1);			
+			Value attrValueNext = nextInstance.getValue(attributeIndex);
+			if(attrValue.equals(attrValueNext)){
+				continue;
+			}
+			
+			if(Double.compare(impurityValue, maxImpurityValue) > 0){
+				maxImpurityValue = impurityValue;
+				maxImpurity = impurity.clone();
+				double splitValue = (attrValue.getNumericValueAsDouble() + attrValueNext.getNumericValueAsDouble()) / 2.0;
+			    maxImpurity.setSplitValue(splitValue);
+			}
+		}
+		
+		return maxImpurity;
+	}	
 }

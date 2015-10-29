@@ -7,6 +7,7 @@ import java.util.Map;
 import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
 import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.Impurity;
 import com.inferneon.supervised.functions.MultilayerNeuralNetwork;
 
 public abstract class IInstances implements Serializable{
@@ -53,7 +54,25 @@ public abstract class IInstances implements Serializable{
 	public abstract Map<Value, Double> getTargetClassCounts();
 	public abstract FrequencyCounts getFrequencyCounts();
 	
-	//public abstract Long indexOfFirstInstanceWithMissingValueForAttribute(int attributeIndex);
+	/* Replaces any missing values for all attributes with the value that has the maximum occurrence for the attribute.
+	 * Takes the value counts of each attribute as argument. If null, is passed, the value counts are computed.
+	 */
+	public abstract IInstances insertMissingNominalValuesWithModes(Map<Attribute, Map<Value, Double>> attributesAndValueCounts);
+	
+	/**
+	 * Computes the mean based on the attribute that is passed. It is assumed that the attribute passed is 
+	 * continuous-valued, else behavior is undefined. The computation is limited to the instances in the range defined
+	 * by the start and end indexes.
+	 */
+	public abstract double mean(Attribute attribute, long startIndex, long endIndex);
+	
+	/**
+	 * Computes the standard deviation based on the attribute that is passed. It is assumed that the attribute passed is 
+	 * continuous-valued, else behavior is undefined. The computation is limited to the instances in the range defined
+	 * by the start and end indexes.
+	 */
+	public abstract double standardDeviation(Attribute attribute, long startIndex, long endIndex);
+	
 	
 	/** 
 	 * Splits the instances based on the attribute passed. If an instance does not have a value
@@ -68,6 +87,8 @@ public abstract class IInstances implements Serializable{
 	public abstract Value valueOfAttributeAtInstance(long index, int attributeIndex);
 	
 	public abstract void appendAll(IInstances other, double weightFactor);
+	
+	public abstract IInstances convertNominalToSyntheticBinaryAttributes();
 	
 	/**
 	 * This implementation should sort instances based on the values of the attribute passed. The attribute should be of numeric (or real) type. 
@@ -96,5 +117,16 @@ public abstract class IInstances implements Serializable{
 	public abstract IMatrix[] matrixAndClassVector(boolean regularize);
 
 	public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate, boolean isStochastic);
+	
+	/**
+	 * Computes simple statistical values like sum of values, sum of squared values, variance, standard deviation
+	 */
+	public abstract Impurity initializeImpurity(Attribute attribute, long partitionIndex, int impurityOrder);
+	
+	/**
+	 * Updates the impurity object that is passed as argument by iterating over the instances specified in the range for the given attribute
+	 */
+	
+	public abstract Impurity updateImpurity(long startIndex, long endIndex, Impurity impurity);
 
 }

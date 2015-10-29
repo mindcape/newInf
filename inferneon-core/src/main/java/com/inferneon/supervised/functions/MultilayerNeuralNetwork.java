@@ -12,9 +12,7 @@ import com.inferneon.core.Instance;
 import com.inferneon.supervised.functions.NeuralNode.TYPE;
 
 public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, NeuralConnnection>{
-	/**
-	 * 
-	 */
+	
 	private List<NeuralNode> rootNodes;
 	private List<List<NeuralNode>> hiddenLayers;
 	private List<NeuralNode> hiddenNodes;
@@ -23,30 +21,36 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 	public MultilayerNeuralNetwork(Class<? extends NeuralConnnection> neuralConnection) {
 		super(neuralConnection);
 	}
+	
 	public void setInputNodes(List<NeuralNode> inputNodes) {
 		this.rootNodes = inputNodes;
 		
 	}
+	
 	public List<NeuralNode> getInputNodes() {
 		return rootNodes;
-		
 	}
 	
 	public List<NeuralNode> getHiddenNodes() {
 		return hiddenNodes;
 	}
+	
 	public void setHiddenNodes(List<NeuralNode> hiddenNodes) {
 		this.hiddenNodes = hiddenNodes;
 	}
+	
 	public List<NeuralNode> getOutputNodes() {
 		return outputNodes;
 	}
+	
 	public void setOutputNodes(List<NeuralNode> outputNodes) {
 		this.outputNodes = outputNodes;
 	}
+	
 	public List<List<NeuralNode>> getHiddenLayers() {
 		return hiddenLayers;
 	}
+	
 	public void setHiddenLayers(List<List<NeuralNode>> hiddenLayers) {
 		this.hiddenLayers = hiddenLayers;
 	}
@@ -55,7 +59,6 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 		for(int i=0; i < rootNodes.size(); i++) {
 			emitTree(rootNodes.get(i));
 		}
-
 	}
 	
 	public void calculateOutputs(Instance instance,  List<NeuralNode> inputNodes,
@@ -350,8 +353,6 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 		}  
 		return value;
 	}
-
-
 	
 	private void emitTree(NeuralNode neuralNode) {		
 
@@ -381,7 +382,5 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 		for(NeuralNode child : children){
 			emitTree(child);
 		}		
-		
 	}
-
 }
