@@ -1,4 +1,4 @@
-package com.inferneon.supervised;
+package com.inferneon.supervised.linearregression;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +20,7 @@ import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.core.matrices.Matrix;
 import com.inferneon.core.utils.MathUtils;
+import com.inferneon.supervised.SupervisedLearningTest;
 import com.inferneon.supervised.linearregression.LinearRegression;
 
 

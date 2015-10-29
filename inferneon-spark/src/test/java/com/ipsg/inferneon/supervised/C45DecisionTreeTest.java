@@ -23,10 +23,10 @@ import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Method;
 import com.inferneon.supervised.utils.DecisionTreeUtils;
 import com.inferneon.supervised.utils.DescriptiveTree;
 
-@Ignore
+//@Ignore
 public class C45DecisionTreeTest extends SupervisedLearningTest{
 	
-	private static final String ROOT = "/TestResources";
+	private static final String ROOT = "/TestResources/C45";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 
 	static {
