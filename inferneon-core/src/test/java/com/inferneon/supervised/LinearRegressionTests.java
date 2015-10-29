@@ -20,6 +20,7 @@ import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.core.matrices.Matrix;
 import com.inferneon.core.utils.MathUtils;
+import com.inferneon.supervised.linearregression.LinearRegression;
 
 
 public class LinearRegressionTests extends SupervisedLearningTest {
