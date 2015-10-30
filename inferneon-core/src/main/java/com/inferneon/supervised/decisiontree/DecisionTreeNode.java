@@ -7,7 +7,7 @@ import com.inferneon.supervised.linearregression.LinearModel;
 
 public class DecisionTreeNode {
 	
-	private enum Type{ATTRIBUTE, VALUE, IMPURITY, LINEAR_MODEL};	
+	protected enum Type{ATTRIBUTE, VALUE, IMPURITY, LINEAR_MODEL};	
 	
 	private Type type;	
 	private Attribute attribute;
@@ -64,6 +64,10 @@ public class DecisionTreeNode {
 		return value;
 	}
 	
+	public LinearModel getLinearModel(){
+		return linearModel;
+	}
+	
 	public Double getNumInstances() {
 		return numInstances;
 	}
@@ -78,13 +82,17 @@ public class DecisionTreeNode {
 		}
 		else if(type == Type.VALUE || type == Type.LINEAR_MODEL){
 			// Is a leaf, also display the target class distribution
-			return value.getName();
+			if(type == Type.VALUE){
+				return value.getName();
+			}
+			else{
+				return linearModel.toString();
+			}
 		}
 		else if( type == Type.LINEAR_MODEL){
 			return linearModel.toString();
 		}
 		
-		return "UNKNOWN";
-		
+		return "UNKNOWN";		
 	}
 }

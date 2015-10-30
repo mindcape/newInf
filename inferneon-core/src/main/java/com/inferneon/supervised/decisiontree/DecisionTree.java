@@ -13,6 +13,8 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import com.inferneon.core.InstanceComparator;
 import com.inferneon.core.utils.MathUtils;
 import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.decisiontree.DecisionTreeNode.Type;
+import com.inferneon.supervised.linearregression.LinearModel;
 
 public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, DecisionTreeEdge>{
 
@@ -81,8 +83,7 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 				treeDesc.append(" " + edge);
 				if (target.isLeaf()) {
 					treeDesc.append(": ");
-					FrequencyCounts frequencyCounts = target.getFrequencyCounts();
-					treeDesc.append(target + " (" + frequencyCounts.getDistrbutionDesc() + ")");
+					
 				} else {
 					emitTree(target, level + 1, treeDesc);
 				}
@@ -93,5 +94,22 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 			FrequencyCounts frequencyCounts = node.getFrequencyCounts();
 			treeDesc.append(node + " (" + frequencyCounts.getDistrbutionDesc() + ")" + System.getProperty("line.separator"));
 		}
+	}
+	
+	private String emitLeafNodeDesc(DecisionTreeNode node){
+		String desc = "";
+		if(node.isLeaf()){
+			return desc;
+		}
+		
+		if(node.getType() == Type.VALUE){
+			FrequencyCounts frequencyCounts = node.getFrequencyCounts();
+			desc = node + " (" + frequencyCounts.getDistrbutionDesc() + ")";
+			return desc;
+		}		
+		
+		// Must be of type linear model
+		LinearModel linearModel = node.getLinearModel();
+		return linearModel.toString();
 	}
 }

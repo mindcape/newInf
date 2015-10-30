@@ -130,6 +130,6 @@ public class C45DecisionTreeTest extends SupervisedLearningTest{
 		DescriptiveTree expectedTree = DecisionTreeUtils.getDescriptiveTreeFromJSON(ROOT, jsonFormatFileExpected);
 		System.out.println("********** EXPECTED  TREE:");
 		expectedTree.emitTree();
-		check(expectedTree, dt);	
+		check(expectedTree, dt);
 	}	
 }
