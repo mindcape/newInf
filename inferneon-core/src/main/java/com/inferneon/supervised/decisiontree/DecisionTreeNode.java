@@ -1,23 +1,20 @@
 package com.inferneon.supervised.decisiontree;
 
-import java.util.Map;
-
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
-
 import com.inferneon.core.Attribute;
-import com.inferneon.core.Instances;
 import com.inferneon.core.Value;
 import com.inferneon.supervised.FrequencyCounts;
+import com.inferneon.supervised.linearregression.LinearModel;
 
 public class DecisionTreeNode {
 	
-	private enum Type{ATTRIBUTE, VALUE, IMPURITY};	
+	private enum Type{ATTRIBUTE, VALUE, IMPURITY, LINEAR_MODEL};	
 	
 	private Type type;	
 	private Attribute attribute;
 	private Value value;
+	private LinearModel linearModel;
 	private Impurity impurity;
-	private Double numInstances;	
+	private double numInstances;	
 	private FrequencyCounts frequencyCounts;
 
 	public DecisionTreeNode(FrequencyCounts frequencyCounts, Attribute attribute){
@@ -39,6 +36,12 @@ public class DecisionTreeNode {
 		this.attribute = attribute;
 		type = Type.IMPURITY;
 		this.numInstances = impurity.getNumInstances();
+	}
+	
+	public DecisionTreeNode(LinearModel linearModel){
+		this.linearModel = linearModel;
+		type = Type.LINEAR_MODEL;
+		this.numInstances = linearModel.getNumInstances();
 	}
 
 	public FrequencyCounts getFrequencyCounts() {
@@ -66,16 +69,19 @@ public class DecisionTreeNode {
 	}
 
 	public boolean isLeaf() {
-		return type == Type.VALUE;
+		return type == Type.VALUE || type == Type.LINEAR_MODEL;
 	}
 
 	public String toString(){
 		if(type == Type.ATTRIBUTE || type == Type.IMPURITY){
 			return attribute.getName();
 		}
-		else if(type == Type.VALUE){
+		else if(type == Type.VALUE || type == Type.LINEAR_MODEL){
 			// Is a leaf, also display the target class distribution
 			return value.getName();
+		}
+		else if( type == Type.LINEAR_MODEL){
+			return linearModel.toString();
 		}
 		
 		return "UNKNOWN";

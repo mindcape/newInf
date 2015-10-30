@@ -23,9 +23,9 @@ import com.inferneon.supervised.FrequencyCounts;
 import com.inferneon.supervised.decisiontree.DecisionTreeBuilder.Criterion;
 
 public class C45 {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(C45.class);
-	
+
 	private Criterion criteria;
 
 	private DecisionTree decisionTree;
@@ -39,7 +39,7 @@ public class C45 {
 
 	// Collapse the sub-tree if the collapsing does not increase the error in training
 	private boolean collapseTree;
-	
+
 	// Prune the tree
 	private boolean pruneTree;
 
@@ -85,7 +85,7 @@ public class C45 {
 			throws Exception{
 
 		LOG.debug(parentDecisionTreeNode == null && decisionTreeEdge == null ? "Training start at root" 
-						: "Training on node decisionTreeNode " + parentDecisionTreeNode + " on outgoing edge " + decisionTreeEdge);
+				: "Training on node decisionTreeNode " + parentDecisionTreeNode + " on outgoing edge " + decisionTreeEdge);
 
 		// Determine the distribution of these instances. If the instances are the original one that is input
 		// the code, use the one thats already computed
@@ -96,7 +96,7 @@ public class C45 {
 		else{
 			frequencyCounts = instances.getFrequencyCounts();
 		}
-	
+
 		// Get the best attribute (the one with the most info gain)
 		BestAttributeSearchResult bestAttributeSearchResult = searchForBestAttributeToSplitOn(instances, frequencyCounts);
 		if(bestAttributeSearchResult == null){
@@ -500,7 +500,7 @@ public class C45 {
 		decisionTree.addVertex(leafNode);
 		edge.setSource(parentNode); edge.setTarget(leafNode);
 		System.out.println("Adding edge " + edge + " between attributes " + parentNode + " and leaf node " + leafNode);	
-		
+
 		decisionTree.addDagEdge(parentNode, leafNode, edge);		
 	}
 
@@ -539,7 +539,7 @@ public class C45 {
 		instances.sort(attribute);
 
 		long firstInstanceWithMissingValueForAttribute = frequencyCounts.getNumInstances() - 
-							frequencyCounts.getMissingValueInstancesCountForAttribute(attribute);
+				frequencyCounts.getMissingValueInstancesCountForAttribute(attribute);
 
 		Double maxInfoGain = 0.0;
 		BestAttributeSearchResult bestAttributeSearchResultWithMaxInfoGain = null;
@@ -567,9 +567,9 @@ public class C45 {
 					continue;
 				}
 			}
-			
+
 			skip = false;
-			
+
 			if(sumOfWeightsBeforeThreshold <  minSplit){
 				splitPoint++;
 				continue;
@@ -727,10 +727,8 @@ public class C45 {
 			nodesToBeRemoved.add(decisionTreeNode);
 		}
 		else{
-			Set<DecisionTreeNode> childNodes = decisionTree.getChildNodes(decisionTreeNode);
-			Iterator<DecisionTreeNode> iterator = childNodes.iterator();
-			while(iterator.hasNext()){
-				DecisionTreeNode childNode = iterator.next();
+			List<DecisionTreeNode> childNodes = decisionTree.getChildNodes(decisionTreeNode);
+			for(DecisionTreeNode childNode : childNodes){
 				if(!childNode.isLeaf()){
 					collapseTree(childNode, nodesToBeRemoved);
 				}
@@ -755,10 +753,8 @@ public class C45 {
 		}
 
 		double errors = 0.0;
-		Set<DecisionTreeNode> childNodes = decisionTree.getChildNodes(node);
-		Iterator<DecisionTreeNode> iterator = childNodes.iterator();
-		while(iterator.hasNext()){
-			DecisionTreeNode childNode = iterator.next();
+		List<DecisionTreeNode> childNodes = decisionTree.getChildNodes(node);
+		for(DecisionTreeNode childNode : childNodes){
 			errors += getTrainingErrorOnTree(childNode);
 		}
 
@@ -767,7 +763,7 @@ public class C45 {
 
 	private void pruneDecisionTree(DecisionTreeNode node) throws CycleFoundException {
 		if(! node.isLeaf()){
-			Set<DecisionTreeNode> childNodes = decisionTree.getChildNodes(node);
+			List<DecisionTreeNode> childNodes = decisionTree.getChildNodes(node);
 			FrequencyCounts frequencyCounts = node.getFrequencyCounts();			
 			double estimatedErrorAtNode = getEstimatedError(node);
 			double totalInstancesAtNode = frequencyCounts.getSumOfWeights();			
@@ -804,21 +800,16 @@ public class C45 {
 	 * @param parentNode
 	 * @return
 	 */
-	private double getEstimatedError(Set<DecisionTreeNode> childNodes, double totalInstancesAtParentNode) {
+	private double getEstimatedError(List<DecisionTreeNode> childNodes, double totalInstancesAtParentNode) {
 		double estimatedError = 0.0;
-		Iterator<DecisionTreeNode> iterator = childNodes.iterator();
-
-		while(iterator.hasNext()){
-			DecisionTreeNode node = iterator.next();
+		for(DecisionTreeNode node : childNodes){
 			double totalInstances = node.getFrequencyCounts().getSumOfWeights(); 
 			if(Double.compare(totalInstances, 0.0) == 0){
 				continue;
 			}
-
 			double estimatedErrorAtNode = getEstimatedError(node);
 			estimatedError += estimatedErrorAtNode;
 		}
-
 		return estimatedError;
 	}
 

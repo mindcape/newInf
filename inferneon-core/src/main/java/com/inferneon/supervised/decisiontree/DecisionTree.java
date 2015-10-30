@@ -1,6 +1,7 @@
 package com.inferneon.supervised.decisiontree;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Stack;
 
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 
+import com.inferneon.core.InstanceComparator;
 import com.inferneon.core.utils.MathUtils;
 import com.inferneon.supervised.FrequencyCounts;
 
@@ -20,12 +22,13 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 		super(edgeClass);
 	}
 	
-	public Set<DecisionTreeNode> getChildNodes(DecisionTreeNode node) {
+	public List<DecisionTreeNode> getChildNodes(DecisionTreeNode node) {
 		Set<DecisionTreeEdge> outgoingEdges = outgoingEdgesOf(node);
-		Iterator<DecisionTreeEdge> iterator = outgoingEdges.iterator();
-		Set<DecisionTreeNode> childNodes = new HashSet<>();
-		while(iterator.hasNext()){
-			DecisionTreeEdge edge = iterator.next();
+		List<DecisionTreeEdge> edgesList = new ArrayList<>(outgoingEdges);
+		Collections.sort(edgesList, new DecisionTreeEdgeComparator());
+		
+		List<DecisionTreeNode> childNodes = new ArrayList<>();		
+		for(DecisionTreeEdge edge : edgesList){
 			childNodes.add((DecisionTreeNode)edge.getTarget());
 		}
 
@@ -59,43 +62,36 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 	}	
 	
 	public void emitTree(){
-		Stack<Integer> depthStack = new Stack<>();
-		depthStack.push(0);
-		
-		emitTree(decisionTreeRootNode, depthStack);
+		StringBuffer treeDesc = new StringBuffer();
+		emitTree(decisionTreeRootNode, 0, treeDesc);
+		System.out.println(treeDesc.toString());
 	}
 	
-	private void emitTree(DecisionTreeNode node, Stack<Integer> depthStack) {
-		if(node == null){
-			node = decisionTreeRootNode;
-		}		
-
-		Set<DecisionTreeEdge> outgoingEdges = outgoingEdgesOf(node);
-		if(outgoingEdges.size() == 0){
-			return;
-		}
-
-		System.out.println(node + ":");
-
-		Iterator<DecisionTreeEdge> edgesIterator = outgoingEdges.iterator();		
-		List<DecisionTreeNode> children = new ArrayList<>();		
-		while(edgesIterator.hasNext()){
-			DecisionTreeEdge edge = edgesIterator.next();
-			DecisionTreeNode target = (DecisionTreeNode)edge.getTarget();
-
-			String distDescription = "";
-			if(target.isLeaf()){
-				FrequencyCounts frequencyCounts = target.getFrequencyCounts();
-				distDescription += "(" + frequencyCounts.getDistrbutionDesc() + ")";
+	private void emitTree(DecisionTreeNode node, int level, StringBuffer treeDesc){
+		if(!node.isLeaf()){
+			List<DecisionTreeNode> childNodes = getChildNodes(node);	
+			for(DecisionTreeNode target : childNodes){
+				treeDesc.append(System.getProperty("line.separator"));
+				for (int j = 0; j < level; j++) {
+					treeDesc.append("|   ");
+				}
+				
+				treeDesc.append(node.toString());
+				DecisionTreeEdge edge = this.getEdge(node, target);
+				treeDesc.append(" " + edge);
+				if (target.isLeaf()) {
+					treeDesc.append(": ");
+					FrequencyCounts frequencyCounts = target.getFrequencyCounts();
+					treeDesc.append(target + " (" + frequencyCounts.getDistrbutionDesc() + ")");
+				} else {
+					emitTree(target, level + 1, treeDesc);
+				}
 			}
-
-			String childDesc = "	(" + edge + ") -> " + target  +  " " + distDescription;
-			System.out.println(childDesc.trim());
-			children.add(target);
 		}
-
-		for(DecisionTreeNode child : children){
-			emitTree(child, depthStack);
-		}		
+		else{
+			treeDesc.append(": ");
+			FrequencyCounts frequencyCounts = node.getFrequencyCounts();
+			treeDesc.append(node + " (" + frequencyCounts.getDistrbutionDesc() + ")" + System.getProperty("line.separator"));
+		}
 	}
 }

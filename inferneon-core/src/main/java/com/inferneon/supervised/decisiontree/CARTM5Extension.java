@@ -12,6 +12,7 @@ import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
 import com.inferneon.core.Value;
 import com.inferneon.supervised.Supervised;
+import com.inferneon.supervised.linearregression.LinearModel;
 
 public class CARTM5Extension extends Supervised {
 
@@ -69,9 +70,10 @@ public class CARTM5Extension extends Supervised {
 
 		BestAttributeSearchResult bestAttributeSearchResult = searchForBestAttributeToSplitOn(instances);
 		if(bestAttributeSearchResult == null){
-			// Could not find a suitable attribute to split on. Create leaf and return			
-			//createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge,  mostFrequentlyOccuringTargetValue, frequencyCounts);
-			//LOG.debug("No suitable attribute to split on, created leaf " + mostFrequentlyOccuringTargetValue);
+			// Could not find a suitable attribute to split on. Create leaf and return	
+			LinearModel linearModel = new LinearModel(instances.size(), instances.mean(classAttribute, 0, instances.size()));
+			createLeavesForAttribute(parentDecisionTreeNode, decisionTreeEdge, linearModel);
+			LOG.debug("No suitable attribute to split on, created leaf " + linearModel);
 
 			return;
 		}
@@ -191,13 +193,13 @@ public class CARTM5Extension extends Supervised {
 		return impurity;
 	}
 
-	private void createLeavesForAttribute(DecisionTreeNode parentNode, DecisionTreeEdge edge, Value targetValue, Impurity impurity) throws CycleFoundException {
-//		DecisionTreeNode leafNode = new DecisionTreeNode(impurity, targetValue);
-//		decisionTree.addVertex(leafNode);
-//		edge.setSource(parentNode); edge.setTarget(leafNode);
-//		System.out.println("Adding edge " + edge + " between attributes " + parentNode + " and leaf node " + leafNode);	
-//
-//		decisionTree.addDagEdge(parentNode, leafNode, edge);		
+	private void createLeavesForAttribute(DecisionTreeNode parentNode, DecisionTreeEdge edge, LinearModel linearModel) throws CycleFoundException {
+		
+		DecisionTreeNode leafNode = new DecisionTreeNode(linearModel);
+		decisionTree.addVertex(leafNode);
+		edge.setSource(parentNode); edge.setTarget(leafNode);
+		System.out.println("Adding edge " + edge + " between attributes " + parentNode + " and leaf node " + leafNode);	
+		decisionTree.addDagEdge(parentNode, leafNode, edge);		
 	}
 
 
