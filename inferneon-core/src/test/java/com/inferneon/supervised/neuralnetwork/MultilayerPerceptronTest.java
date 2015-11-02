@@ -181,7 +181,6 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 	public void testUpdateWeight() throws Exception {
 		
 		MultilayerNeuralNetwork network = test("test2.arff");
-		System.out.println("/n");
 		final List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
 		final List<NeuralNode> outputNodes = network.getOutputNodes();
 
@@ -217,7 +216,7 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 				}
 				System.out.println("/nnn");
 			}
-			System.out.println("/nnnn");
+			
 		}
 
 
