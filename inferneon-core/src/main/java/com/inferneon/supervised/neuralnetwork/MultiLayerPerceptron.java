@@ -20,18 +20,26 @@ public class MultiLayerPerceptron extends Supervised {
 	private IInstances instances;
 	private List<Attribute> attributes;
 	/** The number of attributes. */
-	private int m_numAttributes = 0;
+	private int numEpoch = 2;
+	//TODO get set
+
+	
+
+
 	private Random random;
 	private MultilayerNeuralNetwork network;
 	private double learningRate;
+	private double momentum;
 	private boolean isStochastic;
 
+	
 	private Integer[] hiddenLayersConfig;
 
-	public MultiLayerPerceptron(Integer[] hiddenLayersConfig,  double learningRate, boolean isStochastic){
+	public MultiLayerPerceptron(Integer[] hiddenLayersConfig,  double learningRate, double momentum ,boolean isStochastic){
 		this.hiddenLayersConfig = hiddenLayersConfig;
 		this.learningRate = learningRate;
 		this.isStochastic = isStochastic;
+		this.momentum = momentum;
 	}
 
 	@Override
@@ -84,7 +92,7 @@ public class MultiLayerPerceptron extends Supervised {
 
 	private void createNetwork(){
 
-		network = new MultilayerNeuralNetwork(NeuralConnnection.class);
+		network = new MultilayerNeuralNetwork(NeuralConnection.class);
 
 		// Create the input nodes
 		List<NeuralNode> inputNodes = new ArrayList<>();
@@ -137,7 +145,7 @@ public class MultiLayerPerceptron extends Supervised {
 					// First hidden layer
 					for(int k = 0; k < inputNodes.size(); k++) {
 						//	double weight = Math.random();
-						NeuralConnnection connection = new NeuralConnnection();
+						NeuralConnection connection = new NeuralConnection();
 						try {
 							connection.setSource(inputNodes.get(k));
 							connection.setTarget(hiddenNode);
@@ -157,7 +165,7 @@ public class MultiLayerPerceptron extends Supervised {
 					// Some inner hidden layer
 					for(int l = 0; l < prevHiddenNodes.size(); l++) {
 						//	double weight = Math.random();
-						NeuralConnnection connection = new NeuralConnnection();
+						NeuralConnection connection = new NeuralConnection();
 						try {
 							connection.setSource(prevHiddenNodes.get(l));
 							connection.setTarget(hiddenNode);
@@ -176,7 +184,7 @@ public class MultiLayerPerceptron extends Supervised {
 						// Last layer
 						for(int k = 0; k < outputNodes.size(); k++) {
 							//	double weight = Math.random();
-							NeuralConnnection connection = new NeuralConnnection();
+							NeuralConnection connection = new NeuralConnection();
 							try {
 								connection.setSource(hiddenNode);
 								connection.setTarget(outputNodes.get(k));
@@ -212,10 +220,17 @@ public class MultiLayerPerceptron extends Supervised {
 	}
 
 	private void trainNetwork() {
-		instances.trainNeuralNetwork(network, learningRate, isStochastic);
+		instances.trainNeuralNetwork(network , learningRate ,momentum ,numEpoch, isStochastic);
 
 	}
+	
+	public int getNumEpoch() {
+		return numEpoch;
+	}
 
+	public void setNumEpoch(int numEpoch) {
+		this.numEpoch = numEpoch;
+	}
 	@Override
 	public Value classify(Instance instance) {
 		// TODO Auto-generated method stub

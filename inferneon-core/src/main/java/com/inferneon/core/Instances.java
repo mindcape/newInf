@@ -972,7 +972,7 @@ public class Instances extends IInstances {
 	}
 
 	@Override
-	public double trainNeuralNetwork(MultilayerNeuralNetwork network,double learningRate, boolean isStochastic) {
+	public double trainNeuralNetwork(MultilayerNeuralNetwork network ,double learningRate ,double momentum ,int numEpoch, boolean isStochastic) {
 
 		List<NeuralNode> inputNodes = network.getInputNodes();
 		List<NeuralNode> outputNodes = network.getOutputNodes();
@@ -982,20 +982,25 @@ public class Instances extends IInstances {
 			Instance instance = instances.get(0);
 			network.calculateOutputs(instance, inputNodes, hiddenLayers, outputNodes);
 			network.calculateError(instance, hiddenLayers, outputNodes, attributes);
-			network.updateWeight(hiddenLayers, outputNodes, learningRate, isStochastic);
+			network.updateWeight(hiddenLayers, outputNodes, learningRate,momentum , isStochastic);
+			network.resetNetwork( inputNodes, hiddenLayers, outputNodes);
 		}
-		else{
+		else {
 			// Batch gradient descent
-			for(int ins=0; ins<instances.size(); ins++){
-				Instance instance = instances.get(ins);
-				network.calculateOutputs(instance, inputNodes, hiddenLayers, outputNodes);
-				network.calculateError(instance, hiddenLayers, outputNodes, attributes);
-				network.updateWeight(hiddenLayers, outputNodes, learningRate, isStochastic);
+			for(int currentepoch=1; currentepoch<=numEpoch;currentepoch++){
+				for(int ins=0; ins<instances.size(); ins++){
+					Instance instance = instances.get(ins);
+					network.calculateOutputs(instance, inputNodes, hiddenLayers, outputNodes);
+					network.calculateError(instance, hiddenLayers, outputNodes, attributes);
+					network.updateWeight(hiddenLayers, outputNodes, learningRate,momentum , isStochastic);
+					network.resetNetwork( inputNodes, hiddenLayers, outputNodes);
+				}
 			}
 		}
+		
 		return 0;
 	}
-	
+
 
 	@Override
 	public Impurity initializeImpurity(Attribute attribute, long partitionIndex, int impurityOrder) {
@@ -1040,42 +1045,42 @@ public class Instances extends IInstances {
 			}
 		}
 		//numLeft++;
-		
+
 		Impurity impurity = new Impurity(attribute, impurityOrder, numInstances, numLeft, numRight, sumLeft, 
 				sumRight, squareSumLeft, squareSumRight, variance, stardDev);
 		return impurity;
 	}
-	
+
 	@Override
 	public Impurity updateImpurity(long startIndex, long endIndex, Impurity impurity){
-		
+
 		double maxImpurityValue = Double.MIN_VALUE;
 		Attribute attribute = impurity.getAttribute();
 		int attributeIndex = attributes.indexOf(attribute);		
-		
+
 		Impurity maxImpurity = null;
 		double impurityValue = Double.MIN_VALUE;
-		
+
 		for(long i = startIndex; i < endIndex; i++){
 			Instance instance = instances.get((int)i);
 			Double classValue = instance.getValue(classIndex).getNumericValueAsDouble();
 			impurityValue = impurity.updateNext(classValue);
-			
+
 			Value attrValue = instance.getValue(attributeIndex);
 			Instance nextInstance = instances.get((int)i + 1);			
 			Value attrValueNext = nextInstance.getValue(attributeIndex);
 			if(attrValue.equals(attrValueNext)){
 				continue;
 			}
-			
+
 			if(Double.compare(impurityValue, maxImpurityValue) > 0){
 				maxImpurityValue = impurityValue;
 				maxImpurity = impurity.clone();
 				double splitValue = (attrValue.getNumericValueAsDouble() + attrValueNext.getNumericValueAsDouble()) / 2.0;
-			    maxImpurity.setSplitValue(splitValue);
+				maxImpurity.setSplitValue(splitValue);
 			}
 		}
-		
+
 		return maxImpurity;
 	}	
 }

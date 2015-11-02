@@ -126,7 +126,7 @@ public abstract class IInstances implements Serializable{
 	
 	public abstract IMatrix[] matrixAndClassVector(boolean regularize);
 
-	public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate, boolean isStochastic);
+	public abstract double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate, double momentum,int numEpoch, boolean isStochastic);
 	
 	/**
 	 * Computes simple statistical values like sum of values, sum of squared values, variance, standard deviation

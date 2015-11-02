@@ -49,7 +49,7 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 	@Test
 	public void testNumWeightsComputation() {
 		Integer [] hiddenNodeNConfig = new Integer[] {};
-		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3, false);
+		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3,1, false);
 		try{
 			int numWts = mlp.getNumWeights(3, hiddenNodeNConfig);
 		}
@@ -92,7 +92,7 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, inputFileName);		
 		List<Attribute> attributes = arffElements.getAttributes();	
 		Integer [] hiddenNodeNConfig = new Integer[] {2, 2};
-		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3, false);
+		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3,1, false);
 
 		String csvFilePath = getCreatedCSVFilePath(inputFileName, arffElements.getData(), APP_TEMP_FOLDER);
 		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 

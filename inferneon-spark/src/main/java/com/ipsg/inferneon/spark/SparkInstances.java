@@ -1144,7 +1144,7 @@ public class SparkInstances extends IInstances implements Serializable{
 	}
 
 	@Override
-	public double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate, boolean isStochastic) {
+	public double trainNeuralNetwork(MultilayerNeuralNetwork network, double learningRate, double momentum,int numEpoch, boolean isStochastic) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

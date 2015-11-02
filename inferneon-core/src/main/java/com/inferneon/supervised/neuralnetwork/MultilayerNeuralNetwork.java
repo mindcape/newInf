@@ -11,56 +11,56 @@ import com.inferneon.core.Attribute;
 import com.inferneon.core.Instance;
 import com.inferneon.supervised.neuralnetwork.NeuralNode.TYPE;
 
-public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, NeuralConnnection>{
-	
+public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, NeuralConnection>{
+
 	private List<NeuralNode> rootNodes;
 	private List<List<NeuralNode>> hiddenLayers;
 	private List<NeuralNode> hiddenNodes;
 	private List<NeuralNode> outputNodes;
-	
-	public MultilayerNeuralNetwork(Class<? extends NeuralConnnection> neuralConnection) {
+
+	public MultilayerNeuralNetwork(Class<? extends NeuralConnection> neuralConnection) {
 		super(neuralConnection);
 	}
-	
+
 	public void setInputNodes(List<NeuralNode> inputNodes) {
 		this.rootNodes = inputNodes;
-		
+
 	}
-	
+
 	public List<NeuralNode> getInputNodes() {
 		return rootNodes;
 	}
-	
+
 	public List<NeuralNode> getHiddenNodes() {
 		return hiddenNodes;
 	}
-	
+
 	public void setHiddenNodes(List<NeuralNode> hiddenNodes) {
 		this.hiddenNodes = hiddenNodes;
 	}
-	
+
 	public List<NeuralNode> getOutputNodes() {
 		return outputNodes;
 	}
-	
+
 	public void setOutputNodes(List<NeuralNode> outputNodes) {
 		this.outputNodes = outputNodes;
 	}
-	
+
 	public List<List<NeuralNode>> getHiddenLayers() {
 		return hiddenLayers;
 	}
-	
+
 	public void setHiddenLayers(List<List<NeuralNode>> hiddenLayers) {
 		this.hiddenLayers = hiddenLayers;
 	}
-	
+
 	public void emitTree() {
 		for(int i=0; i < rootNodes.size(); i++) {
 			emitTree(rootNodes.get(i));
 		}
 	}
-	
+
 	public void calculateOutputs(Instance instance,  List<NeuralNode> inputNodes,
 			List<List<NeuralNode>> hiddenLayers, List<NeuralNode> outputNodes) {
 
@@ -74,13 +74,13 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 			for( int j = 0; j < hiddenNodes.size(); j++){
 				//double totalOutput = 0d;
 				NeuralNode hiddenNode = hiddenNodes.get(j);
-				Set<NeuralConnnection> inputConnections = incomingEdgesOf(hiddenNode);
-				Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+				Set<NeuralConnection> inputConnections = incomingEdgesOf(hiddenNode);
+				Iterator<NeuralConnection> connectionIterator = inputConnections.iterator();
 				int c = 0;
 				List<Double> weights = hiddenNode.getWeights();
 				double value = weights.get(0);
 				while (connectionIterator.hasNext()){
-					NeuralConnnection connection = connectionIterator.next();
+					NeuralConnection connection = connectionIterator.next();
 					NeuralNode sourceNode = (NeuralNode) connection.getSource();
 					value += sourceNode.getOutput()*weights.get(c+1);
 					c++;
@@ -93,12 +93,12 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 
 		for(int op = 0; op < outputNodes.size(); op++) {
 			NeuralNode outputNode = outputNodes.get(op);
-			Set<NeuralConnnection> inputConnections = incomingEdgesOf(outputNode);
-			Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+			Set<NeuralConnection> inputConnections = incomingEdgesOf(outputNode);
+			Iterator<NeuralConnection> connectionIterator = inputConnections.iterator();
 			List<Double> weights = outputNode.getWeights();
 			double value = weights.get(0);
 			for (int c = 0; connectionIterator.hasNext(); c++){
-				NeuralConnnection connection = connectionIterator.next();
+				NeuralConnection connection = connectionIterator.next();
 				NeuralNode sourceNode = (NeuralNode) connection.getSource();
 				value += sourceNode.getOutput()*weights.get(c+1);
 			}
@@ -146,17 +146,17 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 				//double totalOutput = 0d;
 				NeuralNode hiddenNode = hiddenNodes.get(j);
 				double errorConnection = 0;
-				Set<NeuralConnnection> outputConnections = outgoingEdgesOf(hiddenNode);
-				Iterator<NeuralConnnection> connectionIterator = outputConnections.iterator();
-				int c = 0;
+				Set<NeuralConnection> outputConnections = outgoingEdgesOf(hiddenNode);
+				Iterator<NeuralConnection> connectionIterator = outputConnections.iterator();
+				int c = j;
 
 				while (connectionIterator.hasNext()){
 
-					NeuralConnnection connection = connectionIterator.next();
+					NeuralConnection connection = connectionIterator.next();
 					NeuralNode targetNode = (NeuralNode) connection.getTarget();
 					List<Double> weights = targetNode.getWeights();
 					errorConnection+= targetNode.getError()*weights.get(c+1);
-					c++;
+
 				}
 				error =  hiddenNode.getOutput()*( 1 - hiddenNode.getOutput() )*(errorConnection);
 				hiddenNode.setError(error);
@@ -177,68 +177,76 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 
 	}
 
-	public void updateWeight(List<List<NeuralNode>> hiddenLayers, List<NeuralNode> outputNodes, double learningRate,
-			boolean isStochastic) {
+	public void updateWeight(List<List<NeuralNode>> hiddenLayers, List<NeuralNode> outputNodes, double learningRate, double momentum,
+			boolean isStochastic ) {
 		if(isStochastic){
-			stochastiUpdateWeight(hiddenLayers, outputNodes, learningRate);
+			stochastiUpdateWeight(hiddenLayers, outputNodes, learningRate, momentum);
 			return;
 		}
-		
+
 		// Batch gradient descent weight update
 		for(int op = 0; op < outputNodes.size(); op++ ) {
 			NeuralNode outputNode = outputNodes.get(op);
-			Set<NeuralConnnection> inutConnections = incomingEdgesOf(outputNode);
-			Iterator<NeuralConnnection> connectionIterator = inutConnections.iterator();
+			Set<NeuralConnection> inutConnections = incomingEdgesOf(outputNode);
+			Iterator<NeuralConnection> connectionIterator = inutConnections.iterator();
 			List<Double> weights = outputNode.getWeights();
 			List<Double> cweights = outputNode.getChangeInweights();
 			List<Double> tempWeights = new ArrayList<>();
 			List<Double> tempCWeights = new ArrayList<>();
+			double learnTimesError = learningRate * outputNode.getError() ;
+			System.out.println("learn"+learnTimesError);
 			for (int c = 0; connectionIterator.hasNext(); c++){
-				NeuralConnnection connection = connectionIterator.next();
+				NeuralConnection connection = connectionIterator.next();
 				NeuralNode sourceNode = (NeuralNode) connection.getSource();
 				if(c==0){
-					double learnTimesError = learningRate * outputNode.getError();
-					double weightChange = cweights.get(c)+ (learnTimesError);
+					System.out.println("change weigth    :"+  cweights.get(c));
+					double weightChange = cweights.get(c) * momentum+ (learnTimesError);
 					tempWeights.add(weights.get(c) + weightChange);
 					tempCWeights.add(weightChange);
+					c++;
 				}
-				double weightChange = cweights.get(c+1)+ (sourceNode.getOutput()*(learningRate * outputNode.getError()));
-				tempWeights.add(weights.get(c+1) + weightChange);
-				tempCWeights.add(weightChange);
+				System.out.println("change weigth    :"+  cweights.get(c));
+					double weightChange = ((cweights.get(c) * momentum) + (sourceNode.getOutput()*(learnTimesError )));
+					tempWeights.add(weights.get(c) + weightChange);
+					tempCWeights.add(weightChange);
+					
 			}
 			outputNode.setWeights(tempWeights);
 			outputNode.setChangeInweights(tempCWeights);
 		}
-		
+
 		for(int i = hiddenLayers.size() - 1 ; i >= 0 ; i--) {
 			List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
 			for( int j = 0; j < hiddenNodes.size(); j++){
 				//double totalOutput = 0d;
 				NeuralNode hiddenNode = hiddenNodes.get(j);
-				Set<NeuralConnnection> inputConnections = incomingEdgesOf(hiddenNode);
-				Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+				Set<NeuralConnection> inputConnections = incomingEdgesOf(hiddenNode);
+				Iterator<NeuralConnection> connectionIterator = inputConnections.iterator();
 				int c = 0;
 				List<Double> weights = hiddenNode.getWeights();
 				List<Double> cweights = hiddenNode.getChangeInweights();
 				List<Double> tempWeights = new ArrayList<>();
 				List<Double> tempCWeights = new ArrayList<>();
+				double learnTimesError = learningRate * hiddenNode.getError() ;
+				System.out.println("learn"+ learnTimesError);
 				while (connectionIterator.hasNext()){
 
-					NeuralConnnection connection = connectionIterator.next();
+					NeuralConnection connection = connectionIterator.next();
 					NeuralNode sourceNode = (NeuralNode) connection.getSource();
-					//					   double learnTimesError = 0;
-					//					    learnTimesError = learningRate * hiddenNode.getError();
-					//					double count = learnTimesError + momentum * cWeights[0];
-					//***weights.set(c+1)***=weights.get(c+1) + ( sourceNode.getOutput()*hiddenNode.getError()*sourceNode.getLearningRate() );
 					if(c==0){
-						double weightChange = cweights.get(c)+ (learningRate * hiddenNode.getError());
+						System.out.println("change weigth    :"+  cweights.get(c));
+						double weightChange = ((cweights.get(c) * momentum) + (learnTimesError ));
+						System.out.println("wc    "+weightChange);
 						tempWeights.add(weights.get(c) + weightChange);
 						tempCWeights.add(weightChange);
+						c++;
 					}
-					double weightChange = cweights.get(c+1)+ (sourceNode.getOutput()*(learningRate * hiddenNode.getError()));
-					tempWeights.add(weights.get(c+1) + weightChange);
-					tempCWeights.add(weightChange);
-					c++;
+					System.out.println("change weigth    :"+  cweights.get(c)   +"     "+momentum);
+						double weightChange = cweights.get(c) * momentum + (sourceNode.getOutput()*(learnTimesError));
+						tempWeights.add(weights.get(c) + weightChange);
+						tempCWeights.add(weightChange);
+						c++;
+					
 				}
 				hiddenNode.setWeights(tempWeights);
 				hiddenNode.setChangeInweights(tempCWeights);
@@ -262,27 +270,28 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 
 	}
 
-	private void stochastiUpdateWeight(List<List<NeuralNode>> hiddenLayers, List<NeuralNode> outputNodes, double learningRate) {
-		
+
+	private void stochastiUpdateWeight(List<List<NeuralNode>> hiddenLayers, List<NeuralNode> outputNodes, double learningRate , double momentum) {
+
 		for(int op = 0; op < outputNodes.size(); op++ ) {
 			NeuralNode outputNode = outputNodes.get(op);
-			Set<NeuralConnnection> inutConnections = incomingEdgesOf(outputNode);
-			Iterator<NeuralConnnection> connectionIterator = inutConnections.iterator();
+			Set<NeuralConnection> inutConnections = incomingEdgesOf(outputNode);
+			Iterator<NeuralConnection> connectionIterator = inutConnections.iterator();
 			List<Double> weights = outputNode.getWeights();
 			//List<Double> cweights = outputNode.getChangeInweights();
 			List<Double> tempWeights = new ArrayList<>();
 			List<Double> tempCWeights = new ArrayList<>();
-			for (int c = 0; connectionIterator.hasNext(); c++){
-				NeuralConnnection connection = connectionIterator.next();
+			for (int c = 0; connectionIterator.hasNext(); c++) {
+				NeuralConnection connection = connectionIterator.next();
 				NeuralNode sourceNode = (NeuralNode) connection.getSource();
 				if(c==0){
-					double learnTimesError = learningRate * outputNode.getError();
+					double learnTimesError = learningRate * outputNode.getError() * momentum;
 					double weightChange =learnTimesError;
 					tempWeights.add(weights.get(c) + weightChange);
 					//double weightChange = cweights.get(c)+ (learnTimesError);
 					tempCWeights.add(weightChange);
 				}
-				double weightChange = (sourceNode.getOutput()*(learningRate * outputNode.getError()));
+				double weightChange = (sourceNode.getOutput()*(learningRate * outputNode.getError() * momentum));
 				tempWeights.add(weights.get(c+1) + weightChange);
 				tempCWeights.add(weightChange);
 			}
@@ -294,8 +303,8 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 			for( int j = 0; j < hiddenNodes.size(); j++){
 				//double totalOutput = 0d;
 				NeuralNode hiddenNode = hiddenNodes.get(j);
-				Set<NeuralConnnection> inputConnections = incomingEdgesOf(hiddenNode);
-				Iterator<NeuralConnnection> connectionIterator = inputConnections.iterator();
+				Set<NeuralConnection> inputConnections = incomingEdgesOf(hiddenNode);
+				Iterator<NeuralConnection> connectionIterator = inputConnections.iterator();
 				int c = 0;
 				List<Double> weights = hiddenNode.getWeights();
 				//List<Double> cweights = hiddenNode.getChangeInweights();
@@ -303,18 +312,18 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 				List<Double> tempCWeights = new ArrayList<>();
 				while (connectionIterator.hasNext()){
 
-					NeuralConnnection connection = connectionIterator.next();
+					NeuralConnection connection = connectionIterator.next();
 					NeuralNode sourceNode = (NeuralNode) connection.getSource();
 					//					   double learnTimesError = 0;
 					//					    learnTimesError = learningRate * hiddenNode.getError();
 					//					double count = learnTimesError + momentum * cWeights[0];
 					//***weights.set(c+1)***=weights.get(c+1) + ( sourceNode.getOutput()*hiddenNode.getError()*sourceNode.getLearningRate() );
 					if(c==0){
-						double weightChange = learningRate * hiddenNode.getError();
+						double weightChange = learningRate * hiddenNode.getError() * momentum;
 						tempWeights.add(weights.get(c) + weightChange);
 						tempCWeights.add(weightChange);
 					}
-					double weightChange = (sourceNode.getOutput()*(learningRate * hiddenNode.getError()));
+					double weightChange = (sourceNode.getOutput()*(learningRate * hiddenNode.getError() * momentum));
 					tempWeights.add(weights.get(c+1) + weightChange);
 					tempCWeights.add(weightChange);
 					c++;
@@ -340,7 +349,38 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 		}
 
 	}
+	public void resetNetwork( List<NeuralNode> inputNodes,
+			List<List<NeuralNode>> hiddenLayers, List<NeuralNode> outputNodes){
 
+		for(int inp = 0; inp < inputNodes.size(); inp++) {
+			double dblValue =Double.NaN;;
+			inputNodes.get(inp).setOutput(dblValue);
+			inputNodes.get(inp).setError(dblValue);
+		}
+
+		for(int i = 0; i < hiddenLayers.size(); i++) {
+			List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
+			for( int j = 0; j < hiddenNodes.size(); j++){
+				//double totalOutput = 0d;
+				NeuralNode hiddenNode = hiddenNodes.get(j);
+
+				double value =Double.NaN;;
+
+				value = convertToSigmoid(value);
+				hiddenNode.setOutput(value);
+				hiddenNode.setError(value);
+			}
+		}
+
+		for(int op = 0; op < outputNodes.size(); op++) {
+			NeuralNode outputNode = outputNodes.get(op);
+
+			double value = Double.NaN;
+
+			outputNode.setOutput(value);
+			outputNode.setError(value);
+		}
+	}
 	private double convertToSigmoid(double value) {
 		if (value < -45) {
 			value = 0;
@@ -353,20 +393,20 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 		}  
 		return value;
 	}
-	
+
 	private void emitTree(NeuralNode neuralNode) {		
 
-		Set<NeuralConnnection> outgoingConnections = outgoingEdgesOf(neuralNode);
+		Set<NeuralConnection> outgoingConnections = outgoingEdgesOf(neuralNode);
 		if(outgoingConnections.size() == 0){
 			return;
 		}
 
 		System.out.println(neuralNode.getName() + ":");
 
-		Iterator<NeuralConnnection> connectionsIterator = outgoingConnections.iterator();		
+		Iterator<NeuralConnection> connectionsIterator = outgoingConnections.iterator();		
 		List<NeuralNode> children = new ArrayList<>();		
 		while(connectionsIterator.hasNext()){
-			NeuralConnnection connection = connectionsIterator.next();
+			NeuralConnection connection = connectionsIterator.next();
 			NeuralNode target = (NeuralNode)connection.getTarget();
 
 			String distDescription = "";
