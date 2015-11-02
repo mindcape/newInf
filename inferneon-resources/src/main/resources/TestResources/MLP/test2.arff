@@ -1,0 +1,8 @@
+@relation mlpTest
+
+@attribute rtt numeric
+@attribute ql numeric
+@attribute ttr numeric
+
+@data
+118,1,42.8
