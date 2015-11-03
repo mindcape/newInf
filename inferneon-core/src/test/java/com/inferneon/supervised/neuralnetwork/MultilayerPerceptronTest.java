@@ -2,32 +2,30 @@ package com.inferneon.supervised.neuralnetwork;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.junit.After;
 import org.junit.Test;
 
 import com.inferneon.core.Attribute;
+import com.inferneon.core.CommonTestUtils;
 import com.inferneon.core.IInstances;
 import com.inferneon.core.Instance;
+import com.inferneon.core.Instances;
 import com.inferneon.core.InstancesFactory;
 import com.inferneon.core.arffparser.ArffElements;
 import com.inferneon.core.arffparser.ParserUtils;
 import com.inferneon.supervised.SupervisedLearningTest;
-import com.inferneon.supervised.neuralnetwork.MultiLayerPerceptron;
 
 public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 
 	private static final String ROOT = "/TestResources/MLP";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
-
+	private MultiLayerPerceptron mlp ;
+	
 	static {
 		try {
 			Class.forName("com.inferneon.core.Instances");
@@ -49,9 +47,13 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 	@Test
 	public void testNumWeightsComputation() {
 		Integer [] hiddenNodeNConfig = new Integer[] {};
-		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3,1, false);
+		MultiLayerPerceptron mlp = new MultiLayerPerceptron();
+		mlp.setHiddenLayersConfig(hiddenNodeNConfig);
+		mlp.setLearningRate(0.3);
+		mlp.setStochastic(false);
+		mlp.setMomentum(1);
 		try{
-			int numWts = mlp.getNumWeights(3, hiddenNodeNConfig);
+			mlp.getNumWeights(3, hiddenNodeNConfig);
 		}
 		catch(IllegalArgumentException e){
 			Assert.assertTrue(e.getMessage().equals("MLP must have at least one hidden layer."));
@@ -84,28 +86,45 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 
 	@Test
 	public void createNetwork() throws Exception {
-		test("testing.arff");	
+		testNetwork("testing.arff");	
 	}
-
-	private MultilayerNeuralNetwork test(String inputFileName) throws Exception{
+	
+	private MultilayerNeuralNetwork testNetwork(String inputFileName) throws Exception{
 
 		ArffElements arffElements = ParserUtils.getArffElements(ROOT, inputFileName);		
 		List<Attribute> attributes = arffElements.getAttributes();	
 		Integer [] hiddenNodeNConfig = new Integer[] {2, 2};
-		MultiLayerPerceptron mlp = new MultiLayerPerceptron(hiddenNodeNConfig, 0.3,1, false);
-
 		String csvFilePath = getCreatedCSVFilePath(inputFileName, arffElements.getData(), APP_TEMP_FOLDER);
 		IInstances instances = InstancesFactory.getInstance().createInstances("STAND_ALONE", 
 				attributes, attributes.size() -1, csvFilePath);
-
-		mlp.train(instances);
+		
+		mlp = new MultiLayerPerceptron();
+		mlp.setHiddenLayersConfig(hiddenNodeNConfig);
+		mlp.setLearningRate(0.3);
+		mlp.setStochastic(false);
+		mlp.setMomentum(1);
+		mlp.setNumEpoch(2);
+		mlp.setInstances(instances);
+		mlp.setAttributes(attributes);
+		mlp.createNetwork();
 		return mlp.getNetwork();
 	}	
 
 	@Test
 	public void testCalculateOutput() throws Exception{
-		MultilayerNeuralNetwork network = test("test2.arff");
+
+		
+		MultilayerNeuralNetwork network = testNetwork("test2.arff");
 		List<NeuralNode> inputNodes = network.getInputNodes();
+		List<NeuralNode> outputNodes = network.getOutputNodes();
+		List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
+	
+		Instances instances = (Instances)  CommonTestUtils.createInstancesFromArffFile(ROOT, "test2.arff");
+		List<Instance> insts= instances.getInstances();
+//		for(int ins=0; ins<insts.size(); ins++){
+			Instance instance = insts.get(0);
+		network.calculateOutputs(instance, inputNodes, hiddenLayers, outputNodes);
+//		}
 		for(int inp = 0; inp < inputNodes.size(); inp++) {
 			double output = inputNodes.get(inp).getOutput();
 
@@ -116,7 +135,6 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 				Assert.assertTrue(output == 1);
 			}
 		}
-		List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
 		for(int i = 0; i < hiddenLayers.size(); i++) {
 			List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
 			for( int j = 0; j < hiddenNodes.size(); j++){
@@ -137,7 +155,6 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 				}
 			}
 		}
-		List<NeuralNode> outputNodes = network.getOutputNodes();
 		NeuralNode outputNode = outputNodes.get(0);
 		double output = outputNode.getOutput();
 		Assert.assertTrue(output == 0.20547591895941328);
@@ -148,8 +165,16 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 	@Test
 	public void testCalculateErrors() throws Exception { 
 
-		MultilayerNeuralNetwork network = test("test2.arff");
+		MultilayerNeuralNetwork network = testNetwork("test2.arff");
+		List<NeuralNode> outputNodes = network.getOutputNodes();
 		List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
+		List<NeuralNode> inputNodes = network.getInputNodes();	
+		Instances instances = (Instances)  CommonTestUtils.createInstancesFromArffFile(ROOT, "test2.arff");
+		List<Instance> insts= instances.getInstances();
+//		for(int ins=0; ins<insts.size(); ins++){
+			Instance instance = insts.get(0);
+			network.calculateOutputs(instance, inputNodes, hiddenLayers, outputNodes);
+		network.calculateError(instance, hiddenLayers, outputNodes, instances.getAttributes());
 		for(int i = 0; i < hiddenLayers.size(); i++) {
 			List<NeuralNode> hiddenNodes = hiddenLayers.get(i);
 			for( int j = 0; j < hiddenNodes.size(); j++){
@@ -170,7 +195,6 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 				}
 			}
 		}
-		List<NeuralNode> outputNodes = network.getOutputNodes();
 		NeuralNode outputNode = outputNodes.get(0);
 		double error = outputNode.getError();
 		Assert.assertTrue(error == 42.59452408104058);
@@ -180,7 +204,7 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 	@Test
 	public void testUpdateWeight() throws Exception {
 		
-		MultilayerNeuralNetwork network = test("test2.arff");
+		MultilayerNeuralNetwork network = testNetwork("test2.arff");
 		final List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
 		final List<NeuralNode> outputNodes = network.getOutputNodes();
 

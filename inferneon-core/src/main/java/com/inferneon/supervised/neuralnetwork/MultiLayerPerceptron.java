@@ -20,7 +20,7 @@ public class MultiLayerPerceptron extends Supervised {
 	private IInstances instances;
 	private List<Attribute> attributes;
 	/** The number of attributes. */
-	private int numEpoch = 2;
+	private int numEpoch = 1;
 	//TODO get set
 
 	
@@ -35,11 +35,11 @@ public class MultiLayerPerceptron extends Supervised {
 	
 	private Integer[] hiddenLayersConfig;
 
-	public MultiLayerPerceptron(Integer[] hiddenLayersConfig,  double learningRate, double momentum ,boolean isStochastic){
-		this.hiddenLayersConfig = hiddenLayersConfig;
-		this.learningRate = learningRate;
-		this.isStochastic = isStochastic;
-		this.momentum = momentum;
+	public MultiLayerPerceptron(){
+//		this.hiddenLayersConfig = hiddenLayersConfig;
+//		this.learningRate = learningRate;
+//		this.isStochastic = isStochastic;
+//		this.momentum = momentum;
 	}
 
 	@Override
@@ -50,13 +50,35 @@ public class MultiLayerPerceptron extends Supervised {
 		this.instances = instances;
 		attributes = instances.getAttributes();
 
-		int numWeights = getNumWeights(attributes.size(), hiddenLayersConfig);
+	//	int numWeights = getNumWeights(attributes.size(), hiddenLayersConfig);
 
 		// Create the network
 		createNetwork();
 
 		// Train the network
 		trainNetwork();			
+	}
+
+	
+
+	public void setAttributes(List<Attribute> attributes) {
+		this.attributes = attributes;
+	}
+
+	public void setLearningRate(double learningRate) {
+		this.learningRate = learningRate;
+	}
+
+	public void setMomentum(double momentum) {
+		this.momentum = momentum;
+	}
+
+	public void setStochastic(boolean isStochastic) {
+		this.isStochastic = isStochastic;
+	}
+
+	public void setHiddenLayersConfig(Integer[] hiddenLayersConfig) {
+		this.hiddenLayersConfig = hiddenLayersConfig;
 	}
 
 	protected int getNumWeights(int numAttributes, Integer[] hiddenLayersConfig) {
@@ -90,7 +112,7 @@ public class MultiLayerPerceptron extends Supervised {
 		return sum;
 	}
 
-	private void createNetwork(){
+	public void createNetwork(){
 
 		network = new MultilayerNeuralNetwork(NeuralConnection.class);
 
@@ -219,10 +241,11 @@ public class MultiLayerPerceptron extends Supervised {
 		return network;		
 	}
 
-	private void trainNetwork() {
+	public void trainNetwork() {
 		instances.trainNeuralNetwork(network , learningRate ,momentum ,numEpoch, isStochastic);
 
 	}
+	
 	
 	public int getNumEpoch() {
 		return numEpoch;
@@ -230,6 +253,13 @@ public class MultiLayerPerceptron extends Supervised {
 
 	public void setNumEpoch(int numEpoch) {
 		this.numEpoch = numEpoch;
+	}
+	public IInstances getInstances() {
+		return instances;
+	}
+
+	public void setInstances(IInstances instances) {
+		this.instances = instances;
 	}
 	@Override
 	public Value classify(Instance instance) {
