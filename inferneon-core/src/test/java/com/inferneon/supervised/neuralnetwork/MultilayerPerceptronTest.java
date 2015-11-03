@@ -184,8 +184,6 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 		final List<List<NeuralNode>> hiddenLayers = network.getHiddenLayers();
 		final List<NeuralNode> outputNodes = network.getOutputNodes();
 
-		network.updateWeight(hiddenLayers, outputNodes, 0.3, false);
-
 		for(int op = 0; op < outputNodes.size(); op++ ) {
 			NeuralNode outputNode = outputNodes.get(op);		
 			//Set<NeuralConnnection> outincommingEdges = network.incomingEdgesOf(outputNode);
@@ -197,7 +195,6 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 				//Assert.assertTrue(seeWeight == 12.778357224312174);
 				b++;
 			}
-			System.out.println("/nn");
 
 		}
 
@@ -214,7 +211,6 @@ public class MultilayerPerceptronTest  extends SupervisedLearningTest{
 					//Assert.assertTrue(seeWeight == 12.778357224312174);
 					a++;
 				}
-				System.out.println("/nnn");
 			}
 			
 		}
