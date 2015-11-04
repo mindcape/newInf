@@ -1,18 +1,23 @@
 package com.ipsg.inferneon.app.init;
 
 
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Attr;
 
+import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.Project;
 import com.ipsg.inferneon.app.model.User;
-
-import javax.persistence.EntityManagerFactory;
-import java.sql.Time;
-import java.util.Date;
 
 /**
  *
@@ -36,25 +41,23 @@ public class TestDataInitializer {
         Transaction transaction = session.beginTransaction();
 
         User user = new User("test123", "$2a$10$x9vXeDsSC2109FZfIJz.pOZ4dJ056xBpbesuMJg3jZ.ThQkV119tS", "test@email.com", 1000L);
-
+        Attribute empId = new Attribute("EmployeeId",null,null,0);
+        Attribute empName = new Attribute("EmployeeName",null,null,1);
+        Attribute gender = new Attribute("Gender",null,"Male,Female",2);
+        Attribute empSal = new Attribute("EmployeeSalary",null,null,3);	
+        Set<Attribute> empAttr = new HashSet<Attribute>();
+        Project project = new Project();
+        project.setProjectName("Employees");
+        project.setAttributes(empAttr);
+        project.setUser(user);
+        
+        session.persist(empId);
+        session.persist(empName);
+        session.persist(gender);
+        session.persist(empSal);
         session.persist(user);
+        session.persist(project);
 
-        session.persist(new Project(user, new Date(115, 0, 1), new Time(12, 0, 0), "1 - Mitraillette", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 1), new Time(19, 0, 0), "1 - Eggplant Parmesan", 1000L));
-        session.persist(new Project(user, new Date(115, 0, 2), new Time(12, 0, 0), "2 -  Chickpea with roasted cauliflower", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 2), new Time(19, 0, 0), "2 - Chicken Stew with Turnips & Mushrooms", 1000L));
-        session.persist(new Project(user, new Date(115, 0, 3), new Time(12, 0, 0), "3 - Rosemary Lentils & Greens on Toasted Bread", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 3), new Time(19, 0, 0), "3 - Salmon Cakes with Olives, Lemon & Dill", 1000L));
-        session.persist(new Project(user, new Date(115, 0, 4), new Time(12, 0, 0), "4 - Cowboy Beef & Bean Chili", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 4), new Time(19, 0, 0), "4 -  Duck Chiles Rellenos", 1000L));
-        session.persist(new Project(user, new Date(115, 0, 5), new Time(12, 0, 0), "5 - Brussels Sprout & Potato Hash", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 5), new Time(19, 0, 0), "5 -  Creamy Green Chile Chicken Soup", 1000L));
-        session.persist(new Project(user, new Date(115, 0, 6), new Time(12, 0, 0), "6 -  Duck Chiles Rellenos", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 6), new Time(19, 0, 0), "6 -  Apricot-Chile Glazed Salmon", 1000L));
-        session.persist(new Project(user, new Date(115, 0, 7), new Time(12, 0, 0), "7 -  Creamy Mustard Chicken", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 7), new Time(19, 0, 0), "7 -   Grape Chutney", 1000L));
-        session.persist(new Project(user, new Date(115, 0, 8), new Time(12, 0, 0), "8 -  Broccoli Rabe", 2000L));
-        session.persist(new Project(user, new Date(115, 0, 8), new Time(19, 0, 0), "8 -  Moules Frites", 1000L));
 
         transaction.commit();
     }

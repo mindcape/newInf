@@ -40,7 +40,7 @@ public class ProjectRepository {
      * @param toTime - search to this time, including
      * @return -  a list of matching projects, or an empty collection if no match found
      */
-    public Long countProjectsByDateTime(String username, Date fromDate, Date toDate, Time fromTime, Time toTime) {
+    public Long countProjectsByUser(String username) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
@@ -48,7 +48,7 @@ public class ProjectRepository {
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<Project> countRoot = cq.from(Project.class);
         cq.select((cb.count(countRoot)));
-        cq.where(getCommonWhereCondition(cb, username, countRoot, fromDate, toDate, fromTime, toTime));
+        cq.where(getCommonWhereCondition(cb, username, countRoot));
         Long resultsCount = em.createQuery(cq).getSingleResult();
 
         LOGGER.info("Found " + resultsCount + " results.");
@@ -67,8 +67,7 @@ public class ProjectRepository {
      * @param toTime - search to this time, including
      * @return -  a list of matching projects, or an empty collection if no match found
      */
-    public List<Project> findProjectsByDateTime(String username, Date fromDate, Date toDate,
-                                          Time fromTime, Time toTime, int pageNumber) {
+    public List<Project> findProjectsByUser(String username, int pageNumber) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
@@ -76,16 +75,14 @@ public class ProjectRepository {
         CriteriaQuery<Project> searchQuery = cb.createQuery(Project.class);
         Root<Project> searchRoot = searchQuery.from(Project.class);
         searchQuery.select(searchRoot);
-        searchQuery.where(getCommonWhereCondition(cb, username, searchRoot, fromDate, toDate, fromTime, toTime));
+        searchQuery.where(getCommonWhereCondition(cb, username, searchRoot));
 
-        List<Order> orderList = new ArrayList();
-        orderList.add(cb.desc(searchRoot.get("date")));
-        orderList.add(cb.asc(searchRoot.get("time")));
-        searchQuery.orderBy(orderList);
-
-        TypedQuery<Project> filterQuery = em.createQuery(searchQuery)
-                .setFirstResult((pageNumber - 1) * 10)
-                .setMaxResults(10);
+//        List<Order> orderList = new ArrayList();
+//        orderList.add(cb.desc(searchRoot.get("date")));
+//        orderList.add(cb.asc(searchRoot.get("time")));
+//        searchQuery.orderBy(orderList);
+        
+        TypedQuery<Project> filterQuery = em.createQuery(searchQuery);
 
         return filterQuery.getResultList();
     }
@@ -119,26 +116,25 @@ public class ProjectRepository {
     }
 
 
-    private Predicate[] getCommonWhereCondition(CriteriaBuilder cb, String username, Root<Project> searchRoot, Date fromDate, Date toDate,
-                                                Time fromTime, Time toTime) {
+    private Predicate[] getCommonWhereCondition(CriteriaBuilder cb, String username, Root<Project> searchRoot) {
 
         List<Predicate> predicates = new ArrayList<>();
         Join<Project, User> user = searchRoot.join("user");
 
         predicates.add(cb.equal(user.<String>get("username"), username));
-        predicates.add(cb.greaterThanOrEqualTo(searchRoot.<Date>get("date"), fromDate));
+       
 
-        if (toDate != null) {
-            predicates.add(cb.lessThanOrEqualTo(searchRoot.<Date>get("date"), toDate));
-        }
-
-        if (fromTime != null) {
-            predicates.add(cb.greaterThanOrEqualTo(searchRoot.<Date>get("time"), fromTime));
-        }
-
-        if (toTime != null) {
-            predicates.add(cb.lessThanOrEqualTo(searchRoot.<Date>get("time"), toTime));
-        }
+//        if (toDate != null) {
+//            predicates.add(cb.lessThanOrEqualTo(searchRoot.<Date>get("date"), toDate));
+//        }
+//
+//        if (fromTime != null) {
+//            predicates.add(cb.greaterThanOrEqualTo(searchRoot.<Date>get("time"), fromTime));
+//        }
+//
+//        if (toTime != null) {
+//            predicates.add(cb.lessThanOrEqualTo(searchRoot.<Date>get("time"), toTime));
+//        }
 
         return predicates.toArray(new Predicate[]{});
     }

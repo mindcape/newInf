@@ -44,7 +44,7 @@ public class UserService {
         User user = userRepository.findUserByUsername(username);
 
         if (user != null) {
-            user.setMaxNoOfProjectsPerDay(newMaxNoOfProjects);
+            user.setMaxNoOfProjectsPerPage(newMaxNoOfProjects);
         } else {
             LOGGER.info("User with username " + username + " could not have the max noOfProjects updated.");
         }
@@ -83,8 +83,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Long findTodaysNoOfProjectsForUser(String username) {
-        return userRepository.findTodaysNoOfProjectsForUser(username);
+    public Long findUserProjects(String username) {
+        return userRepository.findUserProjects(username);
     }
 
 }

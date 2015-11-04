@@ -6,44 +6,54 @@
 
 require.config({
     paths: {
-        angular: '../bower_components/angular/angular',
-        angularMessages: '../bower_components/angular-messages/angular-messages',
-        csrfInterceptor: '../bower_components/spring-security-csrf-token-interceptor/dist/spring-security-csrf-token-interceptor.min',
-        lodash: "../bower_components/lodash/dist/lodash",
-        bootstrap: "../bower_components/bootstrap/dist/js/bootstrap",
-        jQuery: "./datetimepicker/jquery", // needed only by the date time picker
-        datetimepicker: './datetimepicker/jquery.datetimepicker',
-        editableTableWidgets: '../public/js/editable-table-widgets',
-        frontendServices: 'frontend-services',
-        inferneonApp: "inferneon-app"
+        'angular': '../bower_components/angular/angular',
+        'angularMessages': '../bower_components/angular-messages/angular-messages',
+        'angularRoute': '../bower_components/angular-route/angular-route',
+        'ui.bootstrap.tpls': '../bower_components/angular-bootstrap/ui-bootstrap-tpls.min',
+        'csrfInterceptor': '../bower_components/spring-security-csrf-token-interceptor/dist/spring-security-csrf-token-interceptor.min',
+        'lodash': '../bower_components/lodash/dist/lodash',
+        'bootstrap': '../bower_components/bootstrap/dist/js/bootstrap',
+        'jQuery': "../bower_components/jquery/dist/jquery.min", // needed only by the date time picker
+        'editableTableWidgets': '../public/js/editable-table-widgets',
+        'frontendServices': 'frontend-services',
+        'inferneonApp': "inferneon-app",
+         'commonServices' : 'common-services'
     },
     shim: {
-        jQuery: {
+        'jQuery': {
             exports: "jQuery"
         },
-        angular: {
+        'angular': {
             exports: "angular"
         },
-        csrfInterceptor: {
+        'csrfInterceptor': {
             deps: ['angular']
         },
-        datetimepicker: {
-            deps: ['jQuery']
-        },
-        angularMessages: {
+        
+        'angularMessages': {
             deps: ['angular']
         },
-        editableTableWidgets: {
-            deps: ['angular', 'lodash', 'datetimepicker', 'jQuery']
+        'angularRoute': {
+            deps: ['angular']
         },
-        frontendServices: {
+        
+        'editableTableWidgets': {
+            deps: ['angular', 'lodash']
+        },
+        'commonServices': {
             deps: ['angular', 'lodash', 'csrfInterceptor']
         },
-        bootstrap :{
-        	deps: ['jQuery']
+        'frontendServices': {
+            deps: ['commonServices']
         },
-        inferneonApp: {
-            deps: [ 'lodash', 'angular', 'angularMessages', 'editableTableWidgets' , 'frontendServices','bootstrap']
+        'ui.bootstrap.tpls': {
+        	deps: ['angular']
+        },
+        'projects': {
+        	deps: ['angular']
+        },
+        'inferneonApp': {
+            deps: [ 'jQuery', 'lodash', 'angular','angularMessages','angularRoute','ui.bootstrap.tpls','editableTableWidgets' , 'frontendServices', 'commonServices']
         }
     }
 });

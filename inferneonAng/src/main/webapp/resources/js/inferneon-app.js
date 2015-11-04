@@ -1,58 +1,175 @@
-angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spring-security-csrf-token-interceptor'])
-    .filter('excludeDeleted', function () {
-        return function (input) {
-            return _.filter(input, function (item) {
-                return item.deleted == undefined || !item.deleted;
-            });
-        }
-    })
-    .controller('InferneonCtrl', ['$scope' , 'ProjectService', 'UserService', '$timeout',
-        function ($scope, ProjectService, UserService, $timeout) {
+'use strict';
 
-            $scope.vm = {
-                maxNoOfProjectsPerDay: 2000,
-                currentPage: 1,
-                totalPages: 0,
-                originalProjects: [],
-                projects: [],
-                isSelectionEmpty: true,
-                errorMessages: [],
-                infoMessages: [],
-            	projectsList: []
-            };
+var inferneonApp = angular.module('inferneonApp', ['ngRoute', 'ui.bootstrap','editableTableWidgets', 'frontendServices', 'commonServices','spring-security-csrf-token-interceptor'])
 
-            updateUserInfo();
-            loadProjectData(null, null, null, null, 1);
-            loadProjectsList();
-            
+inferneonApp.filter('excludeDeleted', function () {
+    return function (input) {
+        return _.filter(input, function (item) {
+            return item.deleted == undefined || !item.deleted;
+        });
+    }
+})	
+	// configure our routes
+	inferneonApp.config(function($routeProvider) {
+		$routeProvider
+
+			// route for the home page
+			.when('/', {
+				templateUrl : '/resources/pages/home.html',
+				controller  : 'InferneonCtrl'
+			})
+
+			
+	});
+
+
+
+inferneonApp.controller('ProjectController', [ '$scope','$compile','$http', '$uibModalInstance', 'ProjectService', 'MessageService', '$rootScope', 
+                                          function ($scope, $compile, $http, $uibModalInstance, ProjectService, MessageService, $rootScope, InferneonCtrl ) {
+	
+	 $scope.vm = {
+	            maxNoOfProjectsPerDay: 2000,
+	            currentPage: 1,
+	            totalPages: 0,
+	            originalProjects: [],
+	            projects: [],
+	            isSelectionEmpty: true,
+	            errorMessages: [],
+	            infoMessages: [],
+	        	projectsList: []
+	        };
+	
+	 $scope.vm.projects = {
+		 projectName: '',
+		 attributes: []
+	 };
+	$scope.addNumeric = function() {
+		 var div = $("<div id= 'div"+id+"'/>");
+		 
+	        div.html(GetDynamicTextBox(""));
+	        var temp = $compile(div)($scope);
+	        angular.element(document.getElementById('TextBoxContainer')).append(temp);
+	        //$("#TextBoxContainer").append(div);
+	}
+	
+	$scope.addNominal = function() {
+	   var div = $("<div id= 'div"+id+"'/>");
+       div.html(GetDynamicButton(""));
+       var temp = $compile(div)($scope);
+       angular.element(document.getElementById('TextBoxContainer')).append(temp);
+ 	}
+	
+	var id=0;
+	function GetDynamicTextBox(value) {
+		id++;
+		$scope.vm.projects.attributes.push({'attKey': id, 'attName':'', 'attType':'att'})
+	    return '<input ng-model = "vm.projects.attName'+id+'" type="text" />&nbsp;' +
+	    '<input type="button" value="x" class="remove" ng-click="removeDynamicRow(this)"/>'
+	}
+	function GetDynamicButton(value) {
+		id++;
+		$scope.vm.projects.attributes.push({'attKey': id, 'attName':'','attValues':'', 'attType':'attNValues'})
+	    return  '<input ng-model = "vm.projects.attName'+id+'" type="text" />&nbsp;' + '<input ng-model = "vm.projects.attValues'+id+'" type="text" />&nbsp;' +
+	    '<input type="button" value="x" class="remove" ng-click="removeDynamicRow(this)" />'
+	}
+	
+	$scope.removeDynamicRow = function($event) {
+		$(event.target).parent().remove();
+	}
+	
+	
+	  $scope.saveProject = function() {
+		  console.log('Saving Data');
+		  console.log($scope.projectName);
+		  
+		  var postData = {
+				  projectName: $scope.vm.projects.projectName,
+				  attributes: $scope.vm.projects.attributes
+	            };
+		  ProjectService.saveProjects(postData).then(function (data) {
+			  console.log("Changes saved successfully"+ JSON.stringify(data));
+			 $scope.vm.projectsListData =  data;
+			 $uibModalInstance.close();
+			 window.location.reload();
+          },
+          function (errorMessage) {
+        	  MessageService.showErrorMessage(errorMessage);
+          });
+	  }
+	  
+	  $scope.cancelProject = function(){
+		  $uibModalInstance.dismiss('cancel');
+		  console.log('Cancel creation of Project');
+       }
+}]);
+
+
+	
+inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http', '$rootScope', 'ProjectService', 'UserService', 'MessageService','$timeout', '$uibModal',
+        function ($scope, $http, $rootScope, ProjectService, UserService, MessageService, $timeout, $uibModal) {
+	
+	    $scope.vm = {
+	            maxNoOfProjectsPerDay: 2000,
+	            currentPage: 1,
+	            totalPages: 0,
+	            originalProjects: [],
+	            projects: [],
+	            isSelectionEmpty: true,
+	            errorMessages: [],
+	            infoMessages: [],
+	        	projectsListData: []
+	        };
+	    updateUserInfo();
+	    loadProjectsList();
+		
+	    
+	
+			/** Model New Project */
+		    $scope.openContactForm = function() {
+		    	var modalInstance = $uibModal.open({
+		            templateUrl: '/resources/pages/newProject.html',
+		            controller: 'ProjectController',
+		            backdrop: false,
+		           
+		        });
+		    	modalInstance.result.then(function() {
+		        	console.log('Clicked on Save');
+		        }, function() {
+		            console.log('Clicked on Cancel');
+		        });
+		    };
+		    
             function loadProjectsList() {
-            	clearMessages();
-            	$scope.vm.projectsList.push({description: "Project 1"});
-            	$scope.vm.projectsList.push({description: "Project 2"});
-            	$scope.vm.projectsList.push({description: "Project 3"});
-            	$scope.vm.projectsList.push({description: "Project 4"});
-            	$scope.vm.projectsList.push({description: "Project 5"});
-            	$scope.vm.projectsList.push({description: "Project 6"});
-            	$scope.vm.projectsList.push({description: "Project 7"});
+            	ProjectService.searchProjects(1).then(function(data){
+            		$scope.vm.errorMessages = [];
+            		$scope.vm.projectsListData = data;//_.cloneDeep($scope.vm.originalProjects);
+                    markAppAsInitialized();
+                    if ($scope.vm.projectsListData && $scope.vm.projectsListData.length == 0) {
+                        showInfoMessage("No results found.");
+                    }
+            	},
+            	 function (errorMessage) {
+                	MessageService.showErrorMessage(errorMessage);
+                    markAppAsInitialized();
+            		
+                });
             	
             }
 
 
-            function showErrorMessage(errorMessage) {
+           /* function showErrorMessage(errorMessage) {
                 clearMessages();
                 $scope.vm.errorMessages.push({description: errorMessage});
-            }
+            }*/
 
             function updateUserInfo() {
                 UserService.getUserInfo()
                     .then(function (userInfo) {
                         $scope.vm.userName = userInfo.userName;
                         $scope.vm.maxNoOfProjectsPerDay = userInfo.maxNoOfProjectsPerDay;
-                        $scope.vm.todaysNoOfProjects = userInfo.todaysNoOfProjects ? userInfo.todaysNoOfProjects : 'None';
-                        updateNoOfProjectsCounterStatus();
                     },
                     function (errorMessage) {
-                        showErrorMessage(errorMessage);
+                    	MessageService.showErrorMessage(errorMessage);
                     });
             }
 
@@ -62,41 +179,12 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
                 }
             }
 
-            function loadProjectData(fromDate, fromTime, toDate, toTime, pageNumber) {
-                ProjectService.searchProjects(fromDate, fromTime, toDate, toTime, pageNumber)
-                    .then(function (data) {
+            
 
-                        $scope.vm.errorMessages = [];
-                        $scope.vm.currentPage = data.currentPage;
-                        $scope.vm.totalPages = data.totalPages;
-
-                        $scope.vm.originalProjects = _.map(data.projects, function (project) {
-                            project.datetime = project.date + ' ' + project.time;
-                            return project;
-                        });
-
-                        $scope.vm.projects = _.cloneDeep($scope.vm.originalProjects);
-
-                        _.each($scope.vm.projects, function (project) {
-                            project.selected = false;
-                        });
-
-                        markAppAsInitialized();
-
-                        if ($scope.vm.projects && $scope.vm.projects.length == 0) {
-                            showInfoMessage("No results found.");
-                        }
-                    },
-                    function (errorMessage) {
-                        showErrorMessage(errorMessage);
-                        markAppAsInitialized();
-                    });
-            }
-
-            function clearMessages() {
+           function clearMessages() {
                 $scope.vm.errorMessages = [];
                 $scope.vm.infoMessages = [];
-                $scope.vm.projectsList = [];
+                $scope.vm.projectsListData = [];
             }
 
             function updateNoOfProjectsCounterStatus() {
@@ -104,14 +192,7 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
                 $scope.vm.noOfProjectsStatusStyle = isNoOfProjectsOK ? 'cal-limit-ok' : 'cal-limit-nok';
             }
 
-            function showInfoMessage(infoMessage) {
-                $scope.vm.infoMessages = [];
-                $scope.vm.infoMessages.push({description: infoMessage});
-                $timeout(function () {
-                    $scope.vm.infoMessages = [];
-                }, 1000);
-            }
-
+         
             $scope.updateMaxNoOfProjectsPerDay = function () {
                 $timeout(function () {
 
@@ -123,7 +204,7 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
                         .then(function () {
                         },
                         function (errorMessage) {
-                            showErrorMessage(errorMessage);
+                        	MessageService.showErrorMessage(errorMessage);
                         });
                     updateNoOfProjectsCounterStatus();
                 });
@@ -148,25 +229,8 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
 
                 var errorsFound = false;
 
-                if ($scope.vm.fromDate && !$scope.vm.toDate || !$scope.vm.fromDate && $scope.vm.toDate) {
-                    showErrorMessage("Both from and to dates are needed");
-                    errorsFound = true;
-                    return;
-                }
-
-                if (fromDate > toDate) {
-                    showErrorMessage("From date cannot be larger than to date");
-                    errorsFound = true;
-                }
-
-                if (fromDate.getTime() == toDate.getTime() && $scope.vm.fromTime &&
-                    $scope.vm.toTime && $scope.vm.fromTime > $scope.vm.toTime) {
-                    showErrorMessage("Inside same day, from time cannot be larger than to time");
-                    errorsFound = true;
-                }
-
                 if (!errorsFound) {
-                    loadProjectData($scope.vm.fromDate, $scope.vm.fromTime, $scope.vm.toDate, $scope.vm.toTime, page == undefined ? 1 : page);
+                    loadProjectData(page == undefined ? 1 : page);
                 }
 
             };
@@ -174,33 +238,27 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
             $scope.previous = function () {
                 if ($scope.vm.currentPage > 1) {
                     $scope.vm.currentPage-= 1;
-                    loadProjectData($scope.vm.fromDate, $scope.vm.fromTime,
-                        $scope.vm.toDate, $scope.vm.toTime, $scope.vm.currentPage);
+                    loadProjectData($scope.vm.currentPage);
                 }
             };
 
             $scope.next = function () {
                 if ($scope.vm.currentPage < $scope.vm.totalPages) {
                     $scope.vm.currentPage += 1;
-                    loadProjectData($scope.vm.fromDate, $scope.vm.fromTime,
-                        $scope.vm.toDate, $scope.vm.toTime, $scope.vm.currentPage);
+                    loadProjectData($scope.vm.currentPage);
                 }
             };
 
             $scope.goToPage = function (pageNumber) {
                 if (pageNumber > 0 && pageNumber <= $scope.vm.totalPages) {
                     $scope.vm.currentPage = pageNumber;
-                    loadProjectData($scope.vm.fromDate, $scope.vm.fromTime, $scope.vm.toDate, $scope.vm.toTime, pageNumber);
+                    loadProjectData(pageNumber);
                 }
             };
 
             $scope.add = function () {
                 $scope.vm.projects.unshift({
-                    id: null,
-                    datetime: null,
-                    description: null,
-                    noOfProjects: null,
-                    selected: false,
+                	selected: false,
                     new: true
                 });
             };
@@ -217,7 +275,7 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
 
                 ProjectService.deleteProjects(deletedProjectIds)
                     .then(function () {
-                        clearMessages();
+                    	MessageService.clearMessages();
                         showInfoMessage("deletion successful.");
 
                         _.remove($scope.vm.projects, function(project) {
@@ -229,7 +287,7 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
 
                     },
                     function () {
-                        clearMessages();
+                    	MessageService.clearMessages();
                         $scope.vm.errorMessages.push({description: "deletion failed."});
                     });
             };
@@ -248,21 +306,11 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
 
             function prepareProjectsDto(projects) {
                 return  _.chain(projects)
-                    .each(function (project) {
-                        if (project.datetime) {
-                            var dt = project.datetime.split(" ");
-                            project.date = dt[0];
-                            project.time = dt[1];
-                        }
-                    })
                     .map(function (project) {
                         return {
                             id: project.id,
-                            date: project.date,
-                            time: project.time,
-                            description: project.description,
-                            noOfProjects: project.noOfProjects,
-                            version: project.version
+                            projectName: project.projectName,
+                            createdTS: project.createdTS                           
                         }
                     })
                     .value();
@@ -284,8 +332,8 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
                         originalProject = originalProject[0];
                     }
 
-                    return originalProject && ( originalProject.date != project.date ||
-                        originalProject.time != project.time || originalProject.description != project.description ||
+                    return originalProject && ( originalProject.createdTS != project.createdTS ||
+                        originalProject.projectName != project.projectName ||
                         originalProject.noOfProjects != project.noOfProjects)
                 });
 
@@ -305,7 +353,7 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
                         updateUserInfo();
                     },
                     function (errorMessage) {
-                        showErrorMessage(errorMessage);
+                    	MessageService.showErrorMessage(errorMessage);
                     });
 
             };
@@ -316,4 +364,4 @@ angular.module('inferneonApp', ['editableTableWidgets', 'frontendServices', 'spr
 
 
         }]);
-
+    

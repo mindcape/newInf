@@ -1,21 +1,10 @@
-
-
-angular.module('frontendServices', [])
-    .service('ProjectService', ['$http', '$q', function($http, $q) {
+angular.module('frontendServices', ['commonServices'])
+    .service('ProjectService', ['$http', '$q',  'MessageService', function($http, $q, MessageService) {
         return {
-            searchProjects: function(fromDate, fromTime, toDate, toTime, pageNumber) {
+            searchProjects: function(pageNumber) {
                 var deferred = $q.defer();
-
-                function prepareTime(time) {
-                    return time ? '1970/01/01 ' + time : null;
-                }
-
                 $http.get('/project/',{
                     params: {
-                        fromDate: fromDate,
-                        toDate: toDate,
-                        fromTime: prepareTime(fromTime),
-                        toTime: prepareTime(toTime),
                         pageNumber: pageNumber
                     }
                 })
@@ -53,30 +42,34 @@ angular.module('frontendServices', [])
 
                 return deferred.promise;
             },
-
-            saveProjects: function(dirtyProjects) {
-                var deferred = $q.defer();
-
-                $http({
+            
+            saveProjects: function(postData) {
+              var deferred = $q.defer();
+      		  console.log('Saving Data');
+      		
+      		  
+      		  $http({
                     method: 'POST',
                     url: '/project',
-                    data: dirtyProjects,
+                    data: postData,
                     headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "text/plain, application/json"
+                        "Content-Type": "application/json"                  
                     }
-                })
-                .then(function (response) {
+                }).then(function (response) {
+              	  	console.log('reponse : '+response.data);
                     if (response.status == 200) {
-                        deferred.resolve();
-                    }
-                    else {
-                    deferred.reject("Error saving projects: " + response.data);
+                    	 deferred.resolve(response.data);
+                    	 MessageService.assignResponseData(response.data);
+                    
+                    } else {
+                    	 deferred.reject("Error saving projects: " + response.data);
                     }
                 });
+                
+      		return deferred.promise;
+      		 
+      	  }
 
-                return deferred.promise;
-            }
         }
     }])
     .service('UserService', ['$http','$q', function($http, $q) {

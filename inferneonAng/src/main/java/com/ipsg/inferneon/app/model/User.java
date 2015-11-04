@@ -19,30 +19,30 @@ import javax.persistence.Table;
                 query = "select u from User u where username = :username"
         ),
         @NamedQuery(
-                name = User.COUNT_TODAYS_NO_OF_PROJECTS,
-                query = "select sum(m.noOfProjects) from Project m where m.user.username = :username and m.date = CURRENT_DATE"
+                name = User.USER_PROJECTS,
+                query = "select count(m.projectName) from Project m where m.user.username = :username"
         )
 })
 public class User extends AbstractEntity {
 
     public static final String FIND_BY_USERNAME = "user.findByUserName";
-    public static final String COUNT_TODAYS_NO_OF_PROJECTS = "user.todaysNoOfProjects";
+    public static final String USER_PROJECTS = "user.userProjects";
 
     private String username;
     private String passwordDigest;
     private String email;
-    private Long maxNoOfProjectsPerDay;
+    private Long maxNoOfProjectsPerPage;
 
 
     public User() {
 
     }
 
-    public User(String username, String passwordDigest, String email, Long maxNoOfProjectsPerDay) {
+    public User(String username, String passwordDigest, String email, Long maxNoOfProjectsPerPage) {
         this.username = username;
         this.passwordDigest = passwordDigest;
         this.email = email;
-        this.maxNoOfProjectsPerDay = maxNoOfProjectsPerDay;
+        this.maxNoOfProjectsPerPage = maxNoOfProjectsPerPage;
     }
 
     public String getUsername() {
@@ -69,20 +69,20 @@ public class User extends AbstractEntity {
         this.email = email;
     }
 
-    public Long getMaxNoOfProjectsPerDay() {
-        return maxNoOfProjectsPerDay;
-    }
+    public Long getMaxNoOfProjectsPerPage() {
+		return maxNoOfProjectsPerPage;
+	}
 
-    public void setMaxNoOfProjectsPerDay(Long maxNoOfProjectsPerDay) {
-        this.maxNoOfProjectsPerDay = maxNoOfProjectsPerDay;
-    }
+	public void setMaxNoOfProjectsPerPage(Long maxNoOfProjectsPerPage) {
+		this.maxNoOfProjectsPerPage = maxNoOfProjectsPerPage;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return "User{" +
                 "username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", maxNoOfProjectsPerDay=" + maxNoOfProjectsPerDay +
+                ", maxNoOfProjectsPerPage=" + maxNoOfProjectsPerPage +
                 '}';
     }
 }

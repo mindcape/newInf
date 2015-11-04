@@ -30,8 +30,12 @@
 
     </div>
     <div class="pure-u-lg-1-2 pure-u-1 utilities">
+    	<div class="header-element">
+        	<a href="#/">Home</a>
+           <!--  <button type="submit" class="btn btn-lg rounded btn-primary" ng-click="add()">Create new project</button>  -->           
+        </div>
         <div class="header-element">
-            <button type="submit" class="btn btn-lg rounded btn-primary" ng-click="add()">Create new project</button>            
+        	<button ng-click="openContactForm()" class ="btn btn-lg rounded btn-primary">new project</button>
         </div>
         <div class="header-element username">
             <div class="username-placeholder" ng-hide="vm.userName"></div>
@@ -52,75 +56,8 @@
             <div ng-repeat="info in vm.infoMessages">{{info.description}}</div>
         </div>
     </div>
-	<div class="container content">
-				
-				
-				<!-- Projects List iterate here -->
- 				<div class="row margin-bottom-40">
-                   <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 1</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div>
-                    <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 2</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div>
-                    <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 3</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div>
-                    <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 4</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div> 
-                  <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 5</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div>
-                    <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 6</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div> 
-                    <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 7</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div> 
-                    <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 8</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div> 
-                    <div class="col-md-3">
-                       <div class="bg-light">        
-                           <h4><i class="fa fa-align-justify"></i> Project 9</h4>
-                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non libero magna. Sed et quam lacus</p>
-                           <button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
-                       </div>
-                   </div>                                                                                                     
-               </div>
+	<div id="main" class="container content">
+		<div ng-view></div>		
 	</div>
 </main>
 <script type="text/javascript" data-main="/resources/js/inferneon-load"

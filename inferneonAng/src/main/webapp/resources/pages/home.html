@@ -1,0 +1,17 @@
+<div class="jumbotron text-center">
+	<!-- Projects List iterate here -->
+	<div class="row margin-bottom-40">
+		<div ng-repeat="project in vm.projectsListData">
+			<div class="col-md-3">
+				<div class="bg-light">
+					<h4>
+						<i class="fa fa-align-justify"></i> {{project.projectName}}
+					</h4>
+					{{project.description}}
+					<button class="btn btn-sm rounded btn-primary" type="button">View Details</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>

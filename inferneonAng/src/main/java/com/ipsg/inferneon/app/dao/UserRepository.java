@@ -42,8 +42,8 @@ public class UserRepository {
      * @param username
      * @return the total number of noOfProjects for the user for today
      */
-    public Long findTodaysNoOfProjectsForUser(String username) {
-        return (Long) em.createNamedQuery(User.COUNT_TODAYS_NO_OF_PROJECTS).setParameter("username", username).getSingleResult();
+    public Long findUserProjects(String username) {
+        return (Long) em.createNamedQuery(User.USER_PROJECTS).setParameter("username", username).getSingleResult();
     }
 
     /**

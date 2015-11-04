@@ -1,11 +1,16 @@
 package com.ipsg.inferneon.app.model;
 
 
+import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.sql.Time;
-import java.util.Date;
 
 /**
  *
@@ -13,67 +18,103 @@ import java.util.Date;
  *
  */
 @Entity
-@Table(name = "PROJECTS")
+@Table(name = "PROJECT")
 public class Project extends AbstractEntity {
 
-    @ManyToOne
+    @Column(name = "PROJECT_NAME" , unique = true, nullable = false, length = 30)
+	private String projectName;
+    
+	@ManyToOne
     private User user;
-
-    private Date date;
-    private Time time;
-    private String description;
-    private Long noOfProjects;
+	
+    @Column(name = "CREATED_TS")
+    private Timestamp createdTS;
+    
+    @Column(name = "UPDATED_TS")
+    private Timestamp updatedTS;
+    
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project",cascade = { javax.persistence.CascadeType.ALL })
+    private Set<Attribute> attributes = new HashSet<Attribute>();
+    
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
+    private Set<File> files = new HashSet<>();
 
     public Project() {
 
     }
 
-    public Project(User user, Date date, Time time, String description, Long noOfProjects) {
+    public Project(String projectName, User user, Set<Attribute> attributes) {
+        this.projectName = projectName;
         this.user = user;
-        this.date = date;
-        this.time = time;
-        this.description = description;
-        this.noOfProjects = noOfProjects;
+        this.attributes = attributes;
     }
+    
+    public Set<Attribute> getAttributes() {
+		return attributes;
+	}
 
 
-    public Date getDate() {
-        return date;
-    }
+	public void setAttributes(Set<Attribute> attributes) {
+		this.attributes = attributes;
+	}
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
+	public String getProjectName() {
+		return projectName;
+	}
 
-    public Time getTime() {
-        return time;
-    }
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
 
-    public void setTime(Time time) {
-        this.time = time;
-    }
+	
+	
+	public Timestamp getCreatedTS() {
+		return createdTS;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public void setCreatedTS(Timestamp createdTS) {
+		this.createdTS = createdTS;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public Timestamp getUpdatedTS() {
+		return updatedTS;
+	}
 
-    public Long getNoOfProjects() {
-        return noOfProjects;
-    }
+	public void setUpdatedTS(Timestamp updatedTS) {
+		this.updatedTS = updatedTS;
+	}
 
-    public void setNoOfProjects(Long noOfProjects) {
-        this.noOfProjects = noOfProjects;
-    }
+	public Set<File> getFiles() {
+		return files;
+	}
 
-    public User getUser() {
+	public void setFiles(Set<File> files) {
+		this.files = files;
+	}
+
+	public User getUser() {
         return user;
     }
 
     public void setUser(User user) {
         this.user = user;
     }
+
+	@Override
+	public String toString() {
+		return "Project [projectName=" + projectName + ", user=" + user + ", createdTS=" + createdTS + ", updatedTS="
+				+ updatedTS + ", attributes=" + attributes + ", files=" + files + "]";
+	}
+    
+    @Override
+    public boolean equals(Object o) {
+    	Project newProj = (Project)o;
+    	return this.projectName.equals(newProj.getProjectName());    	
+    }
+    
+    
+    @Override
+    public int hashCode() {
+    	return projectName.hashCode();
+    }    
 }

@@ -1,5 +1,12 @@
 package com.ipsg.inferneon.app.dto;
 
+import java.util.HashSet;
+import java.util.Set;
+
+
+
+import com.ipsg.inferneon.app.model.Project;
+
 /**
  *
  * JSON-serializable DTO containing user data
@@ -10,6 +17,8 @@ public class UserInfoDTO {
     private String userName;
     private Long maxNoOfProjectsPerDay;
     private Long todaysNoOfProjects;
+    
+    private Set<Project> projects = new HashSet<Project>();
 
     public UserInfoDTO(String userName, Long maxNoOfProjectsPerDay, Long todaysNoOfProjects) {
         this.userName = userName;

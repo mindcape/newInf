@@ -36,9 +36,9 @@ public class UserController {
     public UserInfoDTO getUserInfo(Principal principal) {
 
         User user = userService.findUserByUsername(principal.getName());
-        Long todaysNoOfProjects = userService.findTodaysNoOfProjectsForUser(principal.getName());
+        Long totalProjects = userService.findUserProjects(principal.getName());
 
-        return user != null ? new UserInfoDTO(user.getUsername(), user.getMaxNoOfProjectsPerDay(), todaysNoOfProjects) : null;
+        return user != null ? new UserInfoDTO(user.getUsername(), user.getMaxNoOfProjectsPerPage(), totalProjects) : null;
     }
 
     @ResponseBody

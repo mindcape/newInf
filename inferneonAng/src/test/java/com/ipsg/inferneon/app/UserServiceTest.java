@@ -39,8 +39,8 @@ public class UserServiceTest {
         userService.updateUserMaxNoOfProjectsPerDay("test123", 300L);
 
         User user = findUserByUsername(USERNAME);
-        assertTrue("The user noOfProjects where not updated: " + user.getMaxNoOfProjectsPerDay(),
-                user.getMaxNoOfProjectsPerDay() == 300L);
+        assertTrue("The user noOfProjects where not updated: " + user.getMaxNoOfProjectsPerPage(),
+                user.getMaxNoOfProjectsPerPage() == 300L);
     }
 
     @Test

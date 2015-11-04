@@ -38,35 +38,34 @@ public class ProjectServiceTest {
 
     @Test
     public void testFindProjectsByDate() {
-        SearchResult<Project> result = projectService.findProjects(UserServiceTest.USERNAME, date(2015,1,1), date(2015,1,2), null ,null, 1);
-        assertTrue("results not expected, total " + result.getResultsCount(), result.getResultsCount() == 4);
+        List<Project> result = projectService.findProjects(UserServiceTest.USERNAME,  1);
+        assertTrue("results not expected, total " + result.size(), result.size() == 4);
     }
 
     @Test
     public void testFindProjectsByDateTime() {
-        SearchResult<Project> result = projectService.findProjects(UserServiceTest.USERNAME, date(2015,1,1), date(2015,1,2),
-                time("11:00") ,time("14:00"), 1);
-        assertTrue("results not expected, total " + result.getResultsCount(), result.getResultsCount() == 2);
+        List<Project> result = projectService.findProjects(UserServiceTest.USERNAME,  1);
+        assertTrue("results not expected, total " + result.size(), result.size() == 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fromDateAfterToDate() {
-        projectService.findProjects(UserServiceTest.USERNAME, date(2015,1,2), date(2015,1,1), null ,null, 1);
+        projectService.findProjects(UserServiceTest.USERNAME,  1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fromTimeAfterToTime() {
-        projectService.findProjects(UserServiceTest.USERNAME, date(2015,1,2), date(2015,1,1), time("12:00") ,time("11:00"), 1);
+        projectService.findProjects(UserServiceTest.USERNAME,  1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fromDateNull() {
-        projectService.findProjects(UserServiceTest.USERNAME, null, date(2015,1,1), time("12:00") ,time("11:00"), 1);
+        projectService.findProjects(UserServiceTest.USERNAME, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void toDateNull() {
-        projectService.findProjects(UserServiceTest.USERNAME, date(2015,1,1), null, time("12:00") ,time("11:00"), 1);
+        projectService.findProjects(UserServiceTest.USERNAME,  1);
     }
 
     @Test
@@ -82,23 +81,21 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void saveProjects() {
+    public void saveProject() {
         ProjectDTO project1 = mapFromProjectEntity(em.find(Project.class, 1L));
         ProjectDTO project2 = mapFromProjectEntity(em.find(Project.class, 2L));
 
-        project1.setDescription("test1");
-        project2.setNoOfProjects(10L);
-
+        
         List<ProjectDTO> projects = Arrays.asList(project1, project2);
 
-        projectService.saveProjects(UserServiceTest.USERNAME, projects);
+//        projectService.saveProjects(UserServiceTest.USERNAME, projects);
 
 
         Project m1 = em.find(Project.class, 1L);
-        assertTrue("description not as expected: " + m1.getDescription(), "test1".equals(m1.getDescription()));
+        assertTrue("description not as expected: " + m1.getProjectName(), "test1".equals(m1.getProjectName()));
 
-        Project m2 = em.find(Project.class, 2L);
-        assertTrue("noOfProjects not as expected: " + m2.getNoOfProjects(), m2.getNoOfProjects() == 10L);
+        
+        
     }
 
 

@@ -1,17 +1,15 @@
 package com.ipsg.inferneon.app.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.ipsg.inferneon.app.dto.serialization.CustomTimeDeserializer;
-import com.ipsg.inferneon.app.dto.serialization.CustomTimeSerializer;
-import com.ipsg.inferneon.app.model.Project;
-
-import java.sql.Time;
-import java.util.Date;
+import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ipsg.inferneon.app.model.Attribute;
+import com.ipsg.inferneon.app.model.Project;
 
 /**
  *
@@ -23,29 +21,22 @@ public class ProjectDTO {
     private Long id;
 
     @JsonFormat(pattern = "yyyy/MM/dd", timezone = "CET")
-    private Date date;
-
-    @JsonSerialize(using = CustomTimeSerializer.class)
-    @JsonDeserialize(using = CustomTimeDeserializer.class)
-    private Time time;
-
-    private String description;
-    private Long noOfProjects;
+    private Timestamp createTS;
+    
+    private String projectName;
+    private Set<Attribute> attributes = new HashSet<Attribute>();
 
     public ProjectDTO() {
     }
 
-    public ProjectDTO(Long id, Date date, Time time, String description, Long noOfProjects) {
+    public ProjectDTO(Long id, Timestamp createTS, String projectName) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.description = description;
-        this.noOfProjects = noOfProjects;
+        this.createTS = createTS;
+        this.projectName = projectName;
     }
 
     public static ProjectDTO mapFromProjectEntity(Project project) {
-        return new ProjectDTO(project.getId(), project.getDate(), project.getTime(),
-                project.getDescription(), project.getNoOfProjects());
+        return new ProjectDTO(project.getId(), project.getCreatedTS(),project.getProjectName());
     }
 
     public static List<ProjectDTO> mapFromProjectsEntities(List<Project> projects) {
@@ -60,36 +51,32 @@ public class ProjectDTO {
         this.id = id;
     }
 
-    public Date getDate() {
-        return date;
-    }
+	public Timestamp getCreateTS() {
+		return createTS;
+	}
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
+	public void setCreateTS(Timestamp createTS) {
+		this.createTS = createTS;
+	}
 
-    public Time getTime() {
-        return time;
-    }
+	public String getProjectName() {
+		return projectName;
+	}
 
-    public void setTime(Time time) {
-        this.time = time;
-    }
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public Set<Attribute> getAttributes() {
+		return attributes;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setAttributes(Set<Attribute> attributes) {
+		this.attributes = attributes;
+	}
 
-    public Long getNoOfProjects() {
-        return noOfProjects;
-    }
+    
 
-    public void setNoOfProjects(Long noOfProjects) {
-        this.noOfProjects = noOfProjects;
-    }
+
 
 }

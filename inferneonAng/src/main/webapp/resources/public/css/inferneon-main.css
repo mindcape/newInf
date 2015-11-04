@@ -50,7 +50,7 @@ header a {
 }
 
 a.logout {
-    color: #eee;
+    color: #0000FF;
     text-decoration: underline;
     cursor: pointer;
     margin-right: 1em;

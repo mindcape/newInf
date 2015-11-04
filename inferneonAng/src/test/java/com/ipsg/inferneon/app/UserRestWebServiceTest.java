@@ -57,7 +57,7 @@ public class UserRestWebServiceTest {
                 .andExpect(status().isOk());
 
         User user = userRepository.findUserByUsername(UserServiceTest.USERNAME);
-        assertTrue("max noOfProjects not updated" + user.getMaxNoOfProjectsPerDay(), user.getMaxNoOfProjectsPerDay() == 200);
+        assertTrue("max noOfProjects not updated" + user.getMaxNoOfProjectsPerPage(), user.getMaxNoOfProjectsPerPage() == 200);
     }
 
     @Test
