@@ -285,15 +285,15 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 				NeuralConnection connection = connectionIterator.next();
 				NeuralNode sourceNode = (NeuralNode) connection.getSource();
 				if(c==0){
-					double learnTimesError = learningRate * outputNode.getError() * momentum;
+					double learnTimesError = learningRate * outputNode.getError();
 					double weightChange =learnTimesError;
-					tempWeights.add(weights.get(c) + weightChange);
+					tempWeights.add( weights.get(c) + weightChange );
 					//double weightChange = cweights.get(c)+ (learnTimesError);
-					tempCWeights.add(weightChange);
+					tempCWeights.add( weightChange );
 				}
-				double weightChange = (sourceNode.getOutput()*(learningRate * outputNode.getError() * momentum));
-				tempWeights.add(weights.get(c+1) + weightChange);
-				tempCWeights.add(weightChange);
+				double weightChange = ( sourceNode.getOutput() * ( learningRate * outputNode.getError() ));
+				tempWeights.add( weights.get(c+1) + weightChange );
+				tempCWeights.add( weightChange );
 			}
 			outputNode.setWeights(tempWeights);
 			outputNode.setChangeInweights(tempCWeights);
@@ -319,12 +319,12 @@ public class MultilayerNeuralNetwork extends DirectedAcyclicGraph<NeuralNode, Ne
 					//					double count = learnTimesError + momentum * cWeights[0];
 					//***weights.set(c+1)***=weights.get(c+1) + ( sourceNode.getOutput()*hiddenNode.getError()*sourceNode.getLearningRate() );
 					if(c==0){
-						double weightChange = learningRate * hiddenNode.getError() * momentum;
-						tempWeights.add(weights.get(c) + weightChange);
+						double weightChange = learningRate * hiddenNode.getError();
+						tempWeights.add( weights.get(c) + weightChange );
 						tempCWeights.add(weightChange);
 					}
-					double weightChange = (sourceNode.getOutput()*(learningRate * hiddenNode.getError() * momentum));
-					tempWeights.add(weights.get(c+1) + weightChange);
+					double weightChange = (sourceNode.getOutput()*(learningRate * hiddenNode.getError()));
+					tempWeights.add( weights.get(c+1) + weightChange );
 					tempCWeights.add(weightChange);
 					c++;
 				}

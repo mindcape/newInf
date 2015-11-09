@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Instance implements Serializable{
-
+	private double[] m_AttValues;
 	// Values for this instance. Matches with corresponding attributes
 	private List<Value> values;
 
@@ -13,6 +13,13 @@ public class Instance implements Serializable{
 
 	public Instance(List<Value> values){
 		this.values = values;
+	}
+
+	public Instance(int numAttributes){
+		m_AttValues = new double[numAttributes];
+		for (int i = 0; i < m_AttValues.length; i++) {
+			m_AttValues[i] = Double.NaN;;
+		}
 	}
 
 	public Value getValue(int i){
@@ -25,6 +32,13 @@ public class Instance implements Serializable{
 
 	public void setWeight(double weight){
 		this.weight = weight;
+	}
+
+	public void setValue(int attIndex, double value) {
+		 double[] newValues = new double[m_AttValues.length];
+	    System.arraycopy(m_AttValues, 0, newValues, 0, m_AttValues.length);
+		m_AttValues = newValues;
+		m_AttValues[attIndex] = value;
 	}
 
 	public double getWeight(){
@@ -69,19 +83,19 @@ public class Instance implements Serializable{
 		}
 		return false;
 	}	
-	
+
 	@Override
 	public boolean equals(Object obj){
 		if(!(obj instanceof Instance)){
 			return false;
 		}
-		
+
 		Instance other = (Instance) obj;
 		List<Value> valuesOfOther = other.getValues();
 		if(values.size() != valuesOfOther.size()){
 			return false;
 		}
-		
+
 		int valueCount = 0;
 		for(Value value : values){
 			Value valOfOther = valuesOfOther.get(valueCount);
@@ -90,7 +104,8 @@ public class Instance implements Serializable{
 			}
 			valueCount++;
 		}
-		
+
 		return true;
-	}		
+	}
+
 }
