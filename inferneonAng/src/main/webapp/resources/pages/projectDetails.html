@@ -1,0 +1,20 @@
+<div class="jumbotron" >
+	<!-- Projects List iterate here -->
+<form name="editForm" class="form-horizontal" ng-submit="saveEditProject()">
+	<div class="row margin-bottom-40">
+		<div class="col-md-8"><span class=".label-primary">{{vm.projectData.projectName}}</span></div>
+		<div class="col-md-4"><a href="" ng-click= "openNewProjectForm(vm.projectData.id)" class="glyphicon glyphicon-edit" aria-hidden="true"></a></div>
+		<hr>
+			<!-- <span class=".form-horizontal .control-label">Project Name :</span> 
+			<span class=".label-primary">{{vm.projectData.projectName}}</span> -->
+			<!-- <a href="#" class="glyphicon glyphicon-edit" aria-hidden="true"></a> -->
+			<!-- <div>{{vm.projectData.createTS}}</div>	 -->
+		   <!--  <div class="form-actions">
+		        <input class="btn btn-success" ng-click="saveEditProject()" value="Save"/>
+		    </div> -->
+	</div>
+	<div class="row margin-bottom-40">
+		<div><hr/></div>
+	</div>
+</form>
+</div>

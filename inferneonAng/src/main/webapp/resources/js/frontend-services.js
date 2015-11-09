@@ -1,6 +1,9 @@
-angular.module('frontendServices', ['commonServices'])
-    .service('ProjectService', ['$http', '$q',  'MessageService', function($http, $q, MessageService) {
+angular.module('frontendServices', ['commonServices','ngResource'])
+    .service('ProjectService', ['$http', '$q',  'MessageService',  '$resource', function($http, $q, $resource, MessageService) {
         return {
+        	/**
+        	 * Load project service or Search project Service
+        	 */
             searchProjects: function(pageNumber) {
                 var deferred = $q.defer();
                 $http.get('/project/',{
@@ -19,7 +22,32 @@ angular.module('frontendServices', ['commonServices'])
 
                 return deferred.promise;
             },
+            
+            /**
+        	 * Load project service or Search project Service
+        	 */
+            loadProject: function(projectId) {
+                var deferred = $q.defer();
+                $http.get('/project/loadProjectById/',{
+                    params: {
+                        projectId: projectId
+                    }
+                })
+                .then(function (response) {
+                    if (response.status == 200) {
+                        deferred.resolve(response.data);
+                    }
+                    else {
+                        deferred.reject('Error retrieving list of projects');
+                    }
+                });
 
+                return deferred.promise;
+            },
+            /**
+             * Delete project Service 
+             * This is future purpose added this function in services
+             */
             deleteProjects: function(deletedProjectIds) {
                 var deferred = $q.defer();
 
@@ -42,7 +70,9 @@ angular.module('frontendServices', ['commonServices'])
 
                 return deferred.promise;
             },
-            
+            /**
+             * Save Project Service
+             */
             saveProjects: function(postData) {
               var deferred = $q.defer();
       		  console.log('Saving Data');
@@ -59,8 +89,6 @@ angular.module('frontendServices', ['commonServices'])
               	  	console.log('reponse : '+response.data);
                     if (response.status == 200) {
                     	 deferred.resolve(response.data);
-                    	 MessageService.assignResponseData(response.data);
-                    
                     } else {
                     	 deferred.reject("Error saving projects: " + response.data);
                     }
@@ -74,6 +102,7 @@ angular.module('frontendServices', ['commonServices'])
     }])
     .service('UserService', ['$http','$q', function($http, $q) {
         return {
+        	// Get User Info Service
             getUserInfo: function() {
                 var deferred = $q.defer();
 
@@ -89,21 +118,7 @@ angular.module('frontendServices', ['commonServices'])
 
                 return deferred.promise;
             },
-            updateMaxNoOfProjectsPerDay: function(maxNoOfProjectsPerDay) {
-                var deferred = $q.defer();
-
-                $http.put('/user', maxNoOfProjectsPerDay)
-                    .then(function (response) {
-                        if (response.status == 200) {
-                            deferred.resolve();
-                        }
-                        else {
-                            deferred.reject('Error saving max noOfProjects per day');
-                        }
-                    });
-
-                return deferred.promise;
-            },
+            // Logout Service 
             logout: function () {
                 $http({
                     method: 'POST',

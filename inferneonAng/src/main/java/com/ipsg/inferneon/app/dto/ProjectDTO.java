@@ -20,7 +20,7 @@ public class ProjectDTO {
 
     private Long id;
 
-    @JsonFormat(pattern = "yyyy/MM/dd", timezone = "CET")
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "CET")
     private Timestamp createTS;
     
     private String projectName;
@@ -29,14 +29,15 @@ public class ProjectDTO {
     public ProjectDTO() {
     }
 
-    public ProjectDTO(Long id, Timestamp createTS, String projectName) {
+    public ProjectDTO(Long id, Timestamp createTS, String projectName, Set<Attribute> attributes) {
         this.id = id;
         this.createTS = createTS;
         this.projectName = projectName;
+        this.attributes = attributes;
     }
 
     public static ProjectDTO mapFromProjectEntity(Project project) {
-        return new ProjectDTO(project.getId(), project.getCreatedTS(),project.getProjectName());
+        return new ProjectDTO(project.getId(), project.getCreatedTS(),project.getProjectName(), project.getAttributes());
     }
 
     public static List<ProjectDTO> mapFromProjectsEntities(List<Project> projects) {

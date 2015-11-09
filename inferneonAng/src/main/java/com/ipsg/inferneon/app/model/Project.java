@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 /**
  *
  * The Project JPA entity
@@ -21,7 +23,7 @@ import javax.persistence.Table;
 @Table(name = "PROJECT")
 public class Project extends AbstractEntity {
 
-    @Column(name = "PROJECT_NAME" , unique = true, nullable = false, length = 30)
+    @Column(name = "PROJECT_NAME" , nullable = false, length = 30)
 	private String projectName;
     
 	@ManyToOne
@@ -33,7 +35,8 @@ public class Project extends AbstractEntity {
     @Column(name = "UPDATED_TS")
     private Timestamp updatedTS;
     
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project",cascade = { javax.persistence.CascadeType.ALL })
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "project", cascade = { javax.persistence.CascadeType.PERSIST })
+    @JsonManagedReference
     private Set<Attribute> attributes = new HashSet<Attribute>();
     
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")

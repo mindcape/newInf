@@ -5,6 +5,10 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+
+
 
 /**
  * Attribute jpa entity
@@ -23,8 +27,8 @@ public class Attribute extends AbstractEntity{
     @Column(name = "ATT_VALID_VALUES", nullable = true, length = 250)
 	private String attValidValues;
 	
-	@ManyToOne
-	
+	@ManyToOne(optional=false)
+	@JsonBackReference
 	private Project project;
 	
     @Column(name = "ATT_ORDER")
@@ -81,6 +85,12 @@ public class Attribute extends AbstractEntity{
 
 	public void setAttOrder(int attOrder) {
 		this.attOrder = attOrder;
+	}
+
+	@Override
+	public String toString() {
+		return "Attribute [attName=" + attName + ", attType=" + attType + ", attValidValues=" + attValidValues
+				+ " attOrder=" + attOrder + "]";
 	}
 
 

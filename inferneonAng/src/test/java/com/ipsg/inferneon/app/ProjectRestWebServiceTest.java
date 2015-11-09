@@ -82,7 +82,7 @@ public class ProjectRestWebServiceTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        Project project = projectRepository.findProjectById(14L);
+        Project project = projectRepository.findProjectById(UserServiceTest.USERNAME,14L);
         assertNull("project no deleted", project);
     }
 

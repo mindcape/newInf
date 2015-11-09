@@ -9,6 +9,7 @@ require.config({
         'angular': '../bower_components/angular/angular',
         'angularMessages': '../bower_components/angular-messages/angular-messages',
         'angularRoute': '../bower_components/angular-route/angular-route',
+        'angularResource': '../bower_components/angular-resource/angular-resource',
         'ui.bootstrap.tpls': '../bower_components/angular-bootstrap/ui-bootstrap-tpls.min',
         'csrfInterceptor': '../bower_components/spring-security-csrf-token-interceptor/dist/spring-security-csrf-token-interceptor.min',
         'lodash': '../bower_components/lodash/dist/lodash',
@@ -36,6 +37,9 @@ require.config({
         'angularRoute': {
             deps: ['angular']
         },
+        'angularResource': {
+            deps: ['angular']
+        },
         
         'editableTableWidgets': {
             deps: ['angular', 'lodash']
@@ -44,7 +48,7 @@ require.config({
             deps: ['angular', 'lodash', 'csrfInterceptor']
         },
         'frontendServices': {
-            deps: ['commonServices']
+            deps: ['commonServices', 'angularResource']
         },
         'ui.bootstrap.tpls': {
         	deps: ['angular']
@@ -53,7 +57,7 @@ require.config({
         	deps: ['angular']
         },
         'inferneonApp': {
-            deps: [ 'jQuery', 'lodash', 'angular','angularMessages','angularRoute','ui.bootstrap.tpls','editableTableWidgets' , 'frontendServices', 'commonServices']
+            deps: [ 'jQuery', 'lodash', 'angular','angularMessages','angularRoute','angularResource','ui.bootstrap.tpls','editableTableWidgets' , 'frontendServices', 'commonServices']
         }
     }
 });

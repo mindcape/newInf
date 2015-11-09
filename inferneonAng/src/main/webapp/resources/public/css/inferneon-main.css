@@ -350,3 +350,9 @@ a.logout:hover {
     background: #C6E0DE;
     border: solid 1px #e5e5e5;
 }
+
+hr {
+       border-top: 3px solid #428bca !important;
+       margin-bottom:5px !important; 
+       margin-top:3px !important;
+   }

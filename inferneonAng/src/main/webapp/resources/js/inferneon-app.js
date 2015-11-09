@@ -2,134 +2,185 @@
 
 var inferneonApp = angular.module('inferneonApp', ['ngRoute', 'ui.bootstrap','editableTableWidgets', 'frontendServices', 'commonServices','spring-security-csrf-token-interceptor'])
 
-inferneonApp.filter('excludeDeleted', function () {
-    return function (input) {
-        return _.filter(input, function (item) {
-            return item.deleted == undefined || !item.deleted;
-        });
-    }
-})	
-	// configure our routes
-	inferneonApp.config(function($routeProvider) {
-		$routeProvider
+/**
+ * Configure Routes
+ */
+inferneonApp.config(function($routeProvider) {
+	$routeProvider
 
-			// route for the home page
-			.when('/', {
-				templateUrl : '/resources/pages/home.html',
-				controller  : 'InferneonCtrl'
-			})
-
+		/**
+		 * Route to the home page after login this page will load in to the body of index page as part of angular router
+		 */
+		.when('/', {
+			templateUrl : '/resources/pages/home.html',
+			controller  : 'InferneonCtrl'
+		}).when('/projectEdit/:projectEditId', {
+			templateUrl : '/resources/pages/projectDetails.html',	
+			controller : 'ProjectEditController'
 			
-	});
+		})
+});
 
+/**
+ * Factory for passing or broadcast data among controllers
+ */
+inferneonApp.factory("MessageBus", function($rootScope) {
+	return {
+		broadcast : function(event, data) {
+			$rootScope.$broadcast(event, data);
+		}
+	};
+});
 
-
-inferneonApp.controller('ProjectController', [ '$scope','$compile','$http', '$uibModalInstance', 'ProjectService', 'MessageService', '$rootScope', 
-                                          function ($scope, $compile, $http, $uibModalInstance, ProjectService, MessageService, $rootScope, InferneonCtrl ) {
-	
-	 $scope.vm = {
-	            maxNoOfProjectsPerDay: 2000,
-	            currentPage: 1,
-	            totalPages: 0,
-	            originalProjects: [],
-	            projects: [],
-	            isSelectionEmpty: true,
-	            errorMessages: [],
-	            infoMessages: [],
-	        	projectsList: []
-	        };
-	
+/**
+ * New Project Controller
+ */
+inferneonApp.controller('ProjectController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', 'MessageBus','$rootScope', 'editProjectId', 
+                                          function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService,MessageBus, $rootScope, editProjectId ) {
+	 $scope.vm.editProjectId = editProjectId;
+	 if($scope.vm.editProjectId) {
+		 loadEditProjectDeatils($scope.vm.editProjectId);
+	 }
 	 $scope.vm.projects = {
+	     id : '',
 		 projectName: '',
 		 attributes: []
 	 };
-	$scope.addNumeric = function() {
-		 var div = $("<div id= 'div"+id+"'/>");
-		 
-	        div.html(GetDynamicTextBox(""));
-	        var temp = $compile(div)($scope);
-	        angular.element(document.getElementById('TextBoxContainer')).append(temp);
-	        //$("#TextBoxContainer").append(div);
+	
+	$scope.addNumericAtt = function() {
+		$scope.vm.projects.attributes.push({ 'attName':'', 'attType':'ATT'})
 	}
 	
-	$scope.addNominal = function() {
-	   var div = $("<div id= 'div"+id+"'/>");
-       div.html(GetDynamicButton(""));
-       var temp = $compile(div)($scope);
-       angular.element(document.getElementById('TextBoxContainer')).append(temp);
+	$scope.addNominalAtt = function() {
+		$scope.vm.projects.attributes.push({ 'attName':'','attValidValues':'', 'attType':'ATTV'})
  	}
 	
-	var id=0;
-	function GetDynamicTextBox(value) {
-		id++;
-		$scope.vm.projects.attributes.push({'attKey': id, 'attName':'', 'attType':'att'})
-	    return '<input ng-model = "vm.projects.attName'+id+'" type="text" />&nbsp;' +
-	    '<input type="button" value="x" class="remove" ng-click="removeDynamicRow(this)"/>'
-	}
-	function GetDynamicButton(value) {
-		id++;
-		$scope.vm.projects.attributes.push({'attKey': id, 'attName':'','attValues':'', 'attType':'attNValues'})
-	    return  '<input ng-model = "vm.projects.attName'+id+'" type="text" />&nbsp;' + '<input ng-model = "vm.projects.attValues'+id+'" type="text" />&nbsp;' +
-	    '<input type="button" value="x" class="remove" ng-click="removeDynamicRow(this)" />'
-	}
-	
-	$scope.removeDynamicRow = function($event) {
-		$(event.target).parent().remove();
-	}
 	
 	
 	  $scope.saveProject = function() {
 		  console.log('Saving Data');
 		  console.log($scope.projectName);
-		  
+		  MessageService.clearMessages();
 		  var postData = {
+				  id : $scope.vm.projects.id,
 				  projectName: $scope.vm.projects.projectName,
 				  attributes: $scope.vm.projects.attributes
 	            };
 		  ProjectService.saveProjects(postData).then(function (data) {
-			  console.log("Changes saved successfully"+ JSON.stringify(data));
-			 $scope.vm.projectsListData =  data;
+			 console.log("Changes saved successfully"+ JSON.stringify(data));
+			 MessageBus.broadcast("dataHasCome", data);
 			 $uibModalInstance.close();
-			 window.location.reload();
           },
           function (errorMessage) {
         	  MessageService.showErrorMessage(errorMessage);
           });
 	  }
-	  
+	  /**
+	   * Cancel New Project
+	   */
 	  $scope.cancelProject = function(){
 		  $uibModalInstance.dismiss('cancel');
 		  console.log('Cancel creation of Project');
        }
+	  
+	  function loadEditProjectDeatils (projectId) {
+	     	ProjectService.loadProject(projectId).then(function(data){
+	     		 console.log("Get the project details successfully"+ JSON.stringify(data));
+	     		MessageService.clearMessages();
+	     		 if (data && data.length == 0) {
+		             	MessageService.showInfoMessage("No results found.");
+		             } else {
+		            	 $scope.vm.projects.id = data.id;
+		            	 $scope.vm.projects.projectName = data.projectName;
+		            	 $scope.vm.projects.attributes = data.attributes;
+		             }
+	     	},
+	     	 function (errorMessage) {
+	         	MessageService.showErrorMessage(errorMessage);
+	             markAppAsInitialized();
+	     		
+	         });
+	     	
+	     }
+	  
+	 
+}]);
+
+inferneonApp.controller('ProjectEditController',['$scope' ,'$http','$location', 'ProjectService', 'MessageService','$rootScope', '$routeParams','$uibModal',  
+                                                 function ($scope, $http, $location, ProjectService, MessageService, $rootScope, $routeParams,$uibModal){
+	$scope.prjId = '';
+	$scope.vm.projectData = [];
+	
+	if ($routeParams.projectEditId) {
+		$scope.prjId=$routeParams.projectEditId;
+		loadProjectDeatils($scope.prjId);
+    } else {
+      alert("false value" );
+	}
+	
+	/*$scope.saveEditProject = function() {
+		alert("Save : "+ $scope.prjId);
+	}*/
+	
+	
+	 function loadProjectDeatils (projectId) {
+     	ProjectService.loadProject(projectId).then(function(data){
+     		 console.log("Get the project details successfully"+ JSON.stringify(data));
+     		MessageService.clearMessages();
+     		$scope.vm.projectData  = data;
+            if ($scope.vm.projectData && $scope.vm.projectData.length == 0) {
+             	MessageService.showInfoMessage("No results found.");
+             }
+     	},
+     	 function (errorMessage) {
+         	MessageService.showErrorMessage(errorMessage);
+            // markAppAsInitialized();
+     		
+         });
+     	
+     }
+	 
 }]);
 
 
+
+/**
+ * Main Application Controller
+ */
 	
-inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http', '$rootScope', 'ProjectService', 'UserService', 'MessageService','$timeout', '$uibModal',
-        function ($scope, $http, $rootScope, ProjectService, UserService, MessageService, $timeout, $uibModal) {
-	
-	    $scope.vm = {
-	            maxNoOfProjectsPerDay: 2000,
-	            currentPage: 1,
-	            totalPages: 0,
-	            originalProjects: [],
-	            projects: [],
-	            isSelectionEmpty: true,
-	            errorMessages: [],
-	            infoMessages: [],
-	        	projectsListData: []
-	        };
-	    updateUserInfo();
-	    loadProjectsList();
+inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootScope', 'ProjectService', 'UserService', 'MessageService','$timeout', '$uibModal',
+        function ($scope, $http,$location, $rootScope, ProjectService, UserService, MessageService, $timeout, $uibModal) {
 		
-	    
+			$scope.vm.data = [];
+			$scope.vm = {
+		            projects: [],
+		            errorMessages: [],
+		            infoMessages: [],
+		        	projectsListData: []
+		        };
+			/**
+			 * this $on method will receive the data from the broad cast factory
+			 */
+			$scope.$on("dataHasCome", function(event, data){
+		        console.log(event.name);
+		        console.log(data);
+		        $scope.vm.data = data;
+		    })
+			    
+		    updateUserInfo();
+		    loadProjectsList();
 	
-			/** Model New Project */
-		    $scope.openContactForm = function() {
+			/** New Project Modal open function */
+		    $scope.openNewProjectForm = function(projectId) {
 		    	var modalInstance = $uibModal.open({
 		            templateUrl: '/resources/pages/newProject.html',
 		            controller: 'ProjectController',
 		            backdrop: false,
+		            resolve: {
+		                editProjectId: function () {
+		                  return projectId;
+		                }
+		              }
 		           
 		        });
 		    	modalInstance.result.then(function() {
@@ -139,13 +190,21 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http', '$rootScope', 'Proj
 		        });
 		    };
 		    
+		    
+		    $scope.editProject = function (projectId) {
+		    	$location.path('/projectEdit/'+projectId);
+		    }
+		    
+		    /**
+		     * function to load the project list 
+		     */
             function loadProjectsList() {
             	ProjectService.searchProjects(1).then(function(data){
-            		$scope.vm.errorMessages = [];
-            		$scope.vm.projectsListData = data;//_.cloneDeep($scope.vm.originalProjects);
+            		MessageService.clearMessages();
+            		$scope.vm.data  = data;
                     markAppAsInitialized();
-                    if ($scope.vm.projectsListData && $scope.vm.projectsListData.length == 0) {
-                        showInfoMessage("No results found.");
+                    if ($scope.vm.data && $scope.vm.data.length == 0) {
+                    	MessageService.showInfoMessage("No results found.");
                     }
             	},
             	 function (errorMessage) {
@@ -155,213 +214,33 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http', '$rootScope', 'Proj
                 });
             	
             }
-
-
-           /* function showErrorMessage(errorMessage) {
-                clearMessages();
-                $scope.vm.errorMessages.push({description: errorMessage});
-            }*/
+            /**
+             * Update the User information to display in home page.
+             */
 
             function updateUserInfo() {
                 UserService.getUserInfo()
                     .then(function (userInfo) {
                         $scope.vm.userName = userInfo.userName;
-                        $scope.vm.maxNoOfProjectsPerDay = userInfo.maxNoOfProjectsPerDay;
                     },
                     function (errorMessage) {
                     	MessageService.showErrorMessage(errorMessage);
                     });
             }
-
+            /**
+             * Application initialization method.
+             */
             function markAppAsInitialized() {
                 if ($scope.vm.appReady == undefined) {
                     $scope.vm.appReady = true;
                 }
             }
 
-            
-
-           function clearMessages() {
-                $scope.vm.errorMessages = [];
-                $scope.vm.infoMessages = [];
-                $scope.vm.projectsListData = [];
-            }
-
-            function updateNoOfProjectsCounterStatus() {
-                var isNoOfProjectsOK = $scope.vm.todaysNoOfProjects == 'None' || ($scope.vm.todaysNoOfProjects <= $scope.vm.maxNoOfProjectsPerDay);
-                $scope.vm.noOfProjectsStatusStyle = isNoOfProjectsOK ? 'cal-limit-ok' : 'cal-limit-nok';
-            }
-
-         
-            $scope.updateMaxNoOfProjectsPerDay = function () {
-                $timeout(function () {
-
-                    if ($scope.vm.maxNoOfProjectsPerDay < 0) {
-                        return;
-                    }
-
-                    UserService.updateMaxNoOfProjectsPerDay($scope.vm.maxNoOfProjectsPerDay)
-                        .then(function () {
-                        },
-                        function (errorMessage) {
-                        	MessageService.showErrorMessage(errorMessage);
-                        });
-                    updateNoOfProjectsCounterStatus();
-                });
-            };
-
-            $scope.selectionChanged = function () {
-                $scope.vm.isSelectionEmpty = !_.any($scope.vm.projects, function (project) {
-                    return project.selected && !project.deleted;
-                });
-            };
-
-            $scope.pages = function () {
-                return _.range(1, $scope.vm.totalPages + 1);
-            };
-
-            $scope.search = function (page) {
-
-                var fromDate = new Date($scope.vm.fromDate);
-                var toDate = new Date($scope.vm.toDate);
-
-                console.log('search from ' + $scope.vm.fromDate + ' ' + $scope.vm.fromTime + ' to ' + $scope.vm.toDate + ' ' + $scope.vm.toTime);
-
-                var errorsFound = false;
-
-                if (!errorsFound) {
-                    loadProjectData(page == undefined ? 1 : page);
-                }
-
-            };
-
-            $scope.previous = function () {
-                if ($scope.vm.currentPage > 1) {
-                    $scope.vm.currentPage-= 1;
-                    loadProjectData($scope.vm.currentPage);
-                }
-            };
-
-            $scope.next = function () {
-                if ($scope.vm.currentPage < $scope.vm.totalPages) {
-                    $scope.vm.currentPage += 1;
-                    loadProjectData($scope.vm.currentPage);
-                }
-            };
-
-            $scope.goToPage = function (pageNumber) {
-                if (pageNumber > 0 && pageNumber <= $scope.vm.totalPages) {
-                    $scope.vm.currentPage = pageNumber;
-                    loadProjectData(pageNumber);
-                }
-            };
-
-            $scope.add = function () {
-                $scope.vm.projects.unshift({
-                	selected: false,
-                    new: true
-                });
-            };
-
-            $scope.delete = function () {
-                var deletedProjectIds = _.chain($scope.vm.projects)
-                    .filter(function (project) {
-                        return project.selected && !project.new;
-                    })
-                    .map(function (project) {
-                        return project.id;
-                    })
-                    .value();
-
-                ProjectService.deleteProjects(deletedProjectIds)
-                    .then(function () {
-                    	MessageService.clearMessages();
-                        showInfoMessage("deletion successful.");
-
-                        _.remove($scope.vm.projects, function(project) {
-                            return project.selected;
-                        });
-
-                        $scope.selectionChanged();
-                        updateUserInfo();
-
-                    },
-                    function () {
-                    	MessageService.clearMessages();
-                        $scope.vm.errorMessages.push({description: "deletion failed."});
-                    });
-            };
-
-            $scope.reset = function () {
-                $scope.vm.projects = $scope.vm.originalProjects;
-            };
-
-            function getNotNew(projects) {
-                return  _.chain(projects)
-                    .filter(function (project) {
-                        return !project.new;
-                    })
-                    .value();
-            }
-
-            function prepareProjectsDto(projects) {
-                return  _.chain(projects)
-                    .map(function (project) {
-                        return {
-                            id: project.id,
-                            projectName: project.projectName,
-                            createdTS: project.createdTS                           
-                        }
-                    })
-                    .value();
-            }
-
-            $scope.save = function () {
-
-                var maybeDirty = prepareProjectsDto(getNotNew($scope.vm.projects));
-
-                var original = prepareProjectsDto(getNotNew($scope.vm.originalProjects));
-
-                var dirty = _.filter(maybeDirty).filter(function (project) {
-
-                    var originalProject = _.filter(original, function (orig) {
-                        return orig.id === project.id;
-                    });
-
-                    if (originalProject.length == 1) {
-                        originalProject = originalProject[0];
-                    }
-
-                    return originalProject && ( originalProject.createdTS != project.createdTS ||
-                        originalProject.projectName != project.projectName ||
-                        originalProject.noOfProjects != project.noOfProjects)
-                });
-
-                var newItems = _.filter($scope.vm.projects, function (project) {
-                    return project.new;
-                });
-
-                var saveAll = prepareProjectsDto(newItems);
-                saveAll = saveAll.concat(dirty);
-
-                $scope.vm.errorMessages = [];
-
-                // save all new items plus the ones that where modified
-                ProjectService.saveProjects(saveAll).then(function () {
-                        $scope.search($scope.vm.currentPage);
-                        showInfoMessage("Changes saved successfully");
-                        updateUserInfo();
-                    },
-                    function (errorMessage) {
-                    	MessageService.showErrorMessage(errorMessage);
-                    });
-
-            };
-
-            $scope.logout = function () {
-                UserService.logout();
-            }
-
-
+           /**
+            * Log out function
+            */
+           $scope.logout = function () {
+               UserService.logout();
+           }
         }]);
     

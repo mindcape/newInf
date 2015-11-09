@@ -4,6 +4,7 @@ package com.ipsg.inferneon.app.dao;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
+import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.Project;
 import com.ipsg.inferneon.app.model.User;
 
@@ -12,9 +13,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -102,7 +106,7 @@ public class ProjectRepository {
      * finds a project given its id
      *
      */
-    public Project findProjectById(Long id) {
+    public Project findProjectById(String userName, Long id) {
         return em.find(Project.class, id);
     }
 
@@ -112,6 +116,13 @@ public class ProjectRepository {
      *
      */
     public Project save(Project project) {
+    	project.setCreatedTS(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+    	
+    	Set<Attribute> attributes = project.getAttributes();
+    	for(Attribute att: attributes){
+    		att.setProject(project);
+    		System.out.println(att.toString());
+    	}
         return em.merge(project);
     }
 

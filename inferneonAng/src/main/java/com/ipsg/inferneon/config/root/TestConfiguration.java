@@ -41,10 +41,10 @@ public class TestConfiguration {
     @Bean(name = "datasource")
     public DriverManagerDataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(org.hsqldb.jdbcDriver.class.getName());
-        dataSource.setUrl("jdbc:hsqldb:mem:mydb");
-        dataSource.setUsername("sa");
-        dataSource.setPassword("jdbc:hsqldb:mem:mydb");
+        dataSource.setDriverClassName(org.h2.Driver.class.getName());
+        dataSource.setUrl("jdbc:h2:tcp://localhost/~/inferneon");
+        dataSource.setUsername("test");
+        dataSource.setPassword("test");
         return dataSource;
     }
 
@@ -62,6 +62,7 @@ public class TestConfiguration {
         jpaProperties.put("hibernate.show_sql", "true");
         jpaProperties.put("hibernate.format_sql", "true");
         jpaProperties.put("hibernate.use_sql_comments", "true");
+        jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         entityManagerFactoryBean.setJpaPropertyMap(jpaProperties);
 
         return entityManagerFactoryBean;

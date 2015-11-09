@@ -11,6 +11,7 @@ import javax.persistence.EntityManagerFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.type.TimestampType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Attr;
@@ -46,15 +47,22 @@ public class TestDataInitializer {
         Attribute gender = new Attribute("Gender",null,"Male,Female",2);
         Attribute empSal = new Attribute("EmployeeSalary",null,null,3);	
         Set<Attribute> empAttr = new HashSet<Attribute>();
+        empAttr.add(empId);
+        empAttr.add(empName);
+        empAttr.add(empSal);
         Project project = new Project();
         project.setProjectName("Employees");
         project.setAttributes(empAttr);
+        project.setCreatedTS(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         project.setUser(user);
-        
-        session.persist(empId);
+        empId.setProject(project);
+        empName.setProject(project);
+        gender.setProject(project);
+        empSal.setProject(project);
+       /* session.persist(empId);
         session.persist(empName);
         session.persist(gender);
-        session.persist(empSal);
+        session.persist(empSal);*/
         session.persist(user);
         session.persist(project);
 

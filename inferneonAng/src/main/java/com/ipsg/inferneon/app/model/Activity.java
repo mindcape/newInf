@@ -21,6 +21,9 @@ public class Activity extends AbstractEntity {
 	@ManyToOne
 	private Algorithm algorithm;
 	
+	//Date
+	//Enumeration like Running Algorithm, Uploading a file
+	
     @Column(name = "STATUS")
 	private String status;
 	

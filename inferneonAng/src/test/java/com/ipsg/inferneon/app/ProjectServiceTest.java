@@ -47,6 +47,12 @@ public class ProjectServiceTest {
         List<Project> result = projectService.findProjects(UserServiceTest.USERNAME,  1);
         assertTrue("results not expected, total " + result.size(), result.size() == 2);
     }
+    
+    @Test
+    public void testfindProjectById() {
+        Project result = projectService.findProjectById(UserServiceTest.USERNAME,  1L);
+        assertTrue("results expected,", result.getId() == 1 );
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void fromDateAfterToDate() {
