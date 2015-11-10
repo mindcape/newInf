@@ -1,25 +1,29 @@
 package com.ipsg.inferneon.app.controllers;
 
 
+import java.security.Principal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.ipsg.inferneon.app.dto.ProjectDTO;
-import com.ipsg.inferneon.app.dto.ProjectsDTO;
+import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.Project;
-import com.ipsg.inferneon.app.model.SearchResult;
 import com.ipsg.inferneon.app.services.ProjectService;
-
-import java.security.Principal;
-import java.sql.Time;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -102,8 +106,14 @@ public class ProjectController {
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.POST)
     public List<ProjectDTO> saveProject(Principal principal, @RequestBody ProjectDTO project) {
+    	
+    	Set<Attribute> newAtts = new HashSet<Attribute>();
+    	for(Attribute att:project.getAttributes()){
+    		newAtts.add(new Attribute(att.getAttName(),att.getAttType(),att.getAttValidValues(),att.getAttOrder()));   
+    		System.out.println(att.toString());
+    	}
 
-        projectService.saveProject(principal.getName(), project.getId(), project.getProjectName(), project.getAttributes());
+        projectService.saveProject(principal.getName(), project.getId(), project.getProjectName(), newAtts);
 
         List<Project> allProjects = projectService.findProjects(principal.getName(), 1);
         return allProjects.stream()

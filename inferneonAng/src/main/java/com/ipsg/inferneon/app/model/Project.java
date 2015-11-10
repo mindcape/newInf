@@ -5,11 +5,13 @@ import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -35,11 +37,12 @@ public class Project extends AbstractEntity {
     @Column(name = "UPDATED_TS")
     private Timestamp updatedTS;
     
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "project", cascade = { javax.persistence.CascadeType.PERSIST })
+    @OneToMany(mappedBy = "project",cascade = CascadeType.ALL,fetch = FetchType.EAGER, orphanRemoval=true)
     @JsonManagedReference
     private Set<Attribute> attributes = new HashSet<Attribute>();
     
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
+    @OneToMany(mappedBy = "project", fetch=FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Set<File> files = new HashSet<>();
 
     public Project() {
@@ -58,7 +61,8 @@ public class Project extends AbstractEntity {
 
 
 	public void setAttributes(Set<Attribute> attributes) {
-		this.attributes = attributes;
+		this.attributes.clear();
+		this.attributes.addAll(attributes);
 	}
 
 	public String getProjectName() {

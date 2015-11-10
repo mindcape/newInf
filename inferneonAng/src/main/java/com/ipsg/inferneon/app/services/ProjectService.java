@@ -8,6 +8,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,11 +99,16 @@ public class ProjectService {
         assertNotBlank(username, "username cannot be blank");
         notNull(projectName, "project name is mandatory");
         
-        Project project = new Project();
+        Project project = null;
         if (id != null) {
-            project.setId(id);
+          project =  findProjectById(username, id);
+        } else {
+        	project = new Project();
         }
         project.setProjectName(projectName);
+        for(Attribute att: attributes) {
+    		att.setProject(project);
+    	} 
         project.setAttributes(attributes);
          
         User user = userRepository.findUserByUsername(username);

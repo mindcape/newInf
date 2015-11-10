@@ -35,110 +35,131 @@ inferneonApp.factory("MessageBus", function($rootScope) {
 /**
  * New Project Controller
  */
-inferneonApp.controller('ProjectController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', 'MessageBus','$rootScope', 'editProjectId', 
-                                          function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService,MessageBus, $rootScope, editProjectId ) {
-	 $scope.vm.editProjectId = editProjectId;
-	 if($scope.vm.editProjectId) {
-		 loadEditProjectDeatils($scope.vm.editProjectId);
-	 }
-	 $scope.vm.projects = {
-	     id : '',
-		 projectName: '',
-		 attributes: []
-	 };
-	
-	$scope.addNumericAtt = function() {
-		$scope.vm.projects.attributes.push({ 'attName':'', 'attType':'ATT'})
-	}
-	
-	$scope.addNominalAtt = function() {
-		$scope.vm.projects.attributes.push({ 'attName':'','attValidValues':'', 'attType':'ATTV'})
- 	}
-	
-	
-	
-	  $scope.saveProject = function() {
-		  console.log('Saving Data');
-		  console.log($scope.projectName);
-		  MessageService.clearMessages();
-		  var postData = {
-				  id : $scope.vm.projects.id,
-				  projectName: $scope.vm.projects.projectName,
-				  attributes: $scope.vm.projects.attributes
-	            };
-		  ProjectService.saveProjects(postData).then(function (data) {
-			 console.log("Changes saved successfully"+ JSON.stringify(data));
-			 MessageBus.broadcast("dataHasCome", data);
-			 $uibModalInstance.close();
-          },
-          function (errorMessage) {
-        	  MessageService.showErrorMessage(errorMessage);
-          });
-	  }
-	  /**
-	   * Cancel New Project
-	   */
-	  $scope.cancelProject = function(){
-		  $uibModalInstance.dismiss('cancel');
-		  console.log('Cancel creation of Project');
-       }
-	  
-	  function loadEditProjectDeatils (projectId) {
-	     	ProjectService.loadProject(projectId).then(function(data){
-	     		 console.log("Get the project details successfully"+ JSON.stringify(data));
-	     		MessageService.clearMessages();
-	     		 if (data && data.length == 0) {
-		             	MessageService.showInfoMessage("No results found.");
-		             } else {
-		            	 $scope.vm.projects.id = data.id;
-		            	 $scope.vm.projects.projectName = data.projectName;
-		            	 $scope.vm.projects.attributes = data.attributes;
-		             }
-	     	},
-	     	 function (errorMessage) {
-	         	MessageService.showErrorMessage(errorMessage);
-	             markAppAsInitialized();
-	     		
-	         });
-	     	
-	     }
-	  
+inferneonApp.controller('ProjectController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', 'MessageBus','$rootScope', 'editProjectId',
+                                          function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService,MessageBus, $rootScope,editProjectId  ) {
+		 $scope.vm.editProjectId = editProjectId;
+		 if($scope.vm.editProjectId) {
+			 loadEditProjectDeatils($scope.vm.editProjectId);
+		 }
+			$scope.vm.projects = {
+				id : '',
+				projectName : '',
+				attributes : [],
+				newAttrs:[]
+			};
+
+			$scope.addNumericAtt = function() {
+				$scope.vm.projects.attributes.push({
+					'attName' : '',
+					'attType' : 'ATT',
+					'attOrder':''
+				});
+			}
+
+			$scope.addNominalAtt = function() {
+				$scope.vm.projects.attributes.push({
+					'attName' : '',
+					'attValidValues' : '',
+					'attType' : 'ATTV',
+					'attOrder':''
+				});
+			}
+
+			$scope.removeDynamicRow = function($event) {
+				$(event.target).parent().remove();
+			}
+
+			$scope.vm.postProjects = {
+				projectName : '',
+				attributes : []
+			}
+			$scope.saveProject = function() {
+				console.log('Saving Data');
+				console.log($scope.projectName);
+				MessageService.clearMessages();
+				var postData = {
+					id : $scope.vm.projects.id,
+					projectName : $scope.vm.projects.projectName,
+					attributes : $scope.vm.projects.attributes
+				};
+				ProjectService.saveProjects(postData).then(
+						function(data) {
+							console.log("Changes saved successfully"+ JSON.stringify(data));
+							MessageBus.broadcast("dataHasCome", data);
+							$uibModalInstance.close();
+						}, function(errorMessage) {
+							MessageService.showErrorMessage(errorMessage);
+						});
+			}
+			/**
+			 * Cancel New Project
+			 */
+			$scope.cancelProject = function() {
+				$uibModalInstance.dismiss('cancel');
+				console.log('Cancel Project Save');
+			}
+			
+			function loadEditProjectDeatils (projectId) {
+		     	ProjectService.loadProject(projectId).then(function(data){
+		     		 console.log("Get the project details successfully"+ JSON.stringify(data));
+		     		MessageService.clearMessages();
+		     		 if (data && data.length == 0) {
+			             	MessageService.showInfoMessage("No results found.");
+			             } else {
+			            	 $scope.vm.projects.id = data.id;
+			            	 $scope.vm.projects.projectName = data.projectName;
+			            	 $scope.vm.projects.attributes = data.attributes;
+			             }
+		     	},
+		     	 function (errorMessage) {
+		         	MessageService.showErrorMessage(errorMessage);
+		         	MessageService.markAppAsInitialized();
+		     		
+		         });
+		     	
+			}
 	 
 }]);
 
 inferneonApp.controller('ProjectEditController',['$scope' ,'$http','$location', 'ProjectService', 'MessageService','$rootScope', '$routeParams','$uibModal',  
-                                                 function ($scope, $http, $location, ProjectService, MessageService, $rootScope, $routeParams,$uibModal){
-	$scope.prjId = '';
-	$scope.vm.projectData = [];
-	
-	if ($routeParams.projectEditId) {
-		$scope.prjId=$routeParams.projectEditId;
-		loadProjectDeatils($scope.prjId);
-    } else {
-      alert("false value" );
-	}
-	
-	/*$scope.saveEditProject = function() {
-		alert("Save : "+ $scope.prjId);
-	}*/
-	
-	
-	 function loadProjectDeatils (projectId) {
-     	ProjectService.loadProject(projectId).then(function(data){
-     		 console.log("Get the project details successfully"+ JSON.stringify(data));
-     		MessageService.clearMessages();
-     		$scope.vm.projectData  = data;
-            if ($scope.vm.projectData && $scope.vm.projectData.length == 0) {
-             	MessageService.showInfoMessage("No results found.");
-             }
-     	},
-     	 function (errorMessage) {
-         	MessageService.showErrorMessage(errorMessage);
-            // markAppAsInitialized();
-     		
-         });
-     	
-     }
+                                                 function ($scope, $http, $location, ProjectService, MessageService, $rootScope, $routeParams, $uibModal){
+			$scope.prjId = '';
+			$scope.vm.projectData = [];
+
+			if ($routeParams.projectEditId) {
+				$scope.prjId = $routeParams.projectEditId;
+				loadProjectDeatils($scope.prjId);
+			} else {
+				alert("false value");
+			}
+
+			$scope.saveEditProject = function() {
+				alert("Save : " + $scope.prjId);
+			}
+
+			function loadProjectDeatils(projectId) {
+				ProjectService.loadProject(projectId).then(
+						function(data) {
+							console.log("Get the project details successfully"
+									+ JSON.stringify(data));
+							MessageService.clearMessages();
+							$scope.vm.projectData = data;
+							$scope.vm.projects.projectName = data.projectName;
+							$scope.vm.projects.attributes = data.attributes;
+							
+							// markAppAsInitialized();
+							if ($scope.vm.projectData
+									&& $scope.vm.projectData.length == 0) {
+								MessageService
+										.showInfoMessage("No results found.");
+							}
+						}, function(errorMessage) {
+							MessageService.showErrorMessage(errorMessage);
+							MessageService.markAppAsInitialized();
+
+						});
+
+			}
 	 
 }]);
 
@@ -181,7 +202,6 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
 		                  return projectId;
 		                }
 		              }
-		           
 		        });
 		    	modalInstance.result.then(function() {
 		        	console.log('Clicked on Save');

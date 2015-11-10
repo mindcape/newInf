@@ -173,11 +173,13 @@
             <artifactId>hsqldb</artifactId>
             <version>2.3.2</version>
         </dependency>
+
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.184</version>
+			<version>1.4.190</version>
 		</dependency>
+
     </dependencies>
 
     <build>
