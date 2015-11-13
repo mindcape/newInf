@@ -1,46 +1,73 @@
 <div class="modal-dialog">
-	<h4 class="modal-title" id="myModalLabel"><div ng-if ="vm.editProjectId != ''">Edit Project</div> <div ng-if ="vm.editProjectId == ''">New Project</h4>
+	<h4 class="modal-title" id="myModalLabel">
+		<div ng-if="vm.editProjectId != ''">Edit Project</div>
+		<div ng-if="vm.editProjectId == ''">New Project
+	</h4>
+
 	<form name="newProject">
-			<div class="modal-body">
-				<input placeholder='Project Name'  type="text" name="vm.projects.projectName" ng-model="vm.projects.projectName" required>
-				<input type="hidden" name="vm.projects.id" />	
-					<br></br>
-				<input id="btnAdd" type="button" value="Add Numeric" ng-click ="addNumericAtt()"/> 
-				<input id="btn2Add" type="button" value="Add Nominal" ng-click ="addNominalAtt()"/> <br /> <br />
-				<div id="TextBoxContainer">
-					<!--Textboxes will be added here -->
-					
-					  <div ng-repeat="attribute in vm.projects.attributes" class="row" style="padding-top: 5px;">
-					  	<div ng-if="attribute.attType == 'ATT'">
-					  		<div class="col-sm-5">
-					  			<input ng-model="attribute.attName" type="text" required>
-					  			<input type="hidden" name="attribute.attType" ng-value="ATT" />
-					  			<span ng-hide="true"><input type="text" ng-model="attribute.attOrder" ng-init="attribute.attOrder = $index"></span>
-					  			<span class="glyphicons glyphicons-circle-remove">
-					  				<input type="button" value="x" class="remove" ng-click="vm.projects.attributes.splice($index, 1)"/>
-					  			</span>
-					  		</div>
-					  	</div>					  	
-						<div ng-if="attribute.attType == 'ATTV'" >
-							<div class="col-sm-10">
-						  		<input ng-model="attribute.attName" type="text"  required>
-						  		<input type="hidden" name="attribute.attType" ng-value="ATTV" />
-						  		<span ng-hide="true"><input type="text" ng-model="attribute.attOrder" ng-init="attribute.attOrder = $index"></span>
-						  		<input ng-model="attribute.attValidValues" type="text" required>
-					  			<input type="button" value="x" class="remove" ng-click="vm.projects.attributes.splice($index, 1)"/>
-					  		</div>
-					  	</div>					  						    
-					  </div>
-					
+		<div class="modal-body">
+			<input placeholder='Project Name' type="text"
+				name="vm.projects.projectName" ng-model="vm.projects.projectName"
+				required unique-name> <input type="hidden"
+				name="vm.projects.id" /> <span
+				ng-show="newProject.projectName.$error.uniqueName">Name is
+				not unique.</span> <br></br> <input id="btnAdd" type="button"
+				value="Add Numeric" ng-click="addNumericAtt()" /> <input
+				id="btn2Add" type="button" value="Add Nominal"
+				ng-click="addNominalAtt()" /> <br /> <br />
+			<div id="TextBoxContainer">
+				<!--Textboxes will be added here -->
+
+				<div ng-repeat="attribute in vm.projects.attributes" class="row"
+					style="padding-top: 5px;">
+					<div ng-if="attribute.attType == 'ATT'">
+						<div class="col-sm-5">
+							<input name="numeric" ng-model="attribute.attName" type="text"
+								required> <input type="hidden" name="attribute.attType"
+								ng-value="ATT" /> <span ng-hide="true"><input
+								type="text" ng-model="attribute.attOrder"
+								ng-init="attribute.attOrder = $index"></span> <span
+								class="glyphicons glyphicons-circle-remove"> <input
+								type="button" value="x" class="remove"
+								ng-click="vm.projects.attributes.splice($index, 1)" />
+							</span>
+						</div>
+					</div>
+					<div ng-if="attribute.attType == 'ATTV'">
+						<div class="col-sm-10">
+							<input ng-model="attribute.attName" type="text" name="Nominal"
+								required> <input type="hidden" name="attribute.attType"
+								ng-value="ATTV" /> <span ng-hide="true"><input
+								type="text" ng-model="attribute.attOrder"
+								ng-init="attribute.attOrder = $index"></span> <input
+								ng-model="attribute.attValidValues" type="text"
+								name="Nominal_values" ng-pattern="/^\w+(,\w+)*$/" required>
+							<input type="button" value="x" class="remove" ng-click="vm.projects.attributes.splice($index, 1)"/>
+					  	 <span ng-show="newProject.Nominal_values.$error.pattern"
+								style="position: fixed; left: 420px; color: red;">Not
+								valid missplaced ' , '</span>
+						</div>
+					</div>
 				</div>
-				
-				
-				<div class="modal-footer">
-				 <button type="button" class="pure-button pure-input-1 pure-button-primary"  ng-click="saveProject()">Save</button>
-            	<button type="button" class="btn btn-warning" ng-click="cancelProject()" class="btn">Cancel</button>
-			<!-- </form> -->
-				</div>
+
 			</div>
-		</form>
+			<!-- <span  ng-show="newProject.Nominal_values.$dirty">
+                       <span ng-show="newProject.Nominal_values.$error.pattern">please enter atleast two values.</span>
+
+                    </span> -->
+
+			<div class="modal-footer">
+				<button type="button"
+					class="pure-button pure-input-1 pure-button-primary"
+					ng-click="saveProject()"
+					ng-disabled="newProject.$invalid ||
+    				newProject.Numeric.length==0 || newProject.Nominal.length==0 ||
+					    newProject.Nominal_values.length==0">Save</button>
+				<button type="button" class="btn btn-warning"
+					ng-click="cancelProject()" class="btn">Cancel</button>
+				<!-- </form> -->
+			</div>
+		</div>
+	</form>
 
 </div>

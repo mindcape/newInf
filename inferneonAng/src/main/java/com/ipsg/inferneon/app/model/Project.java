@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Table(name = "PROJECT")
 public class Project extends AbstractEntity {
 
-    @Column(name = "PROJECT_NAME" , nullable = false, length = 30)
+    @Column(name = "PROJECT_NAME" ,unique=true, nullable = false, length = 30)
 	private String projectName;
     
 	@ManyToOne
