@@ -1164,20 +1164,24 @@ public class SparkInstances extends IInstances implements Serializable{
 	}
 
 	@Override
-	public double meanSquareError(double[] parameters, int z) {
+	public double partialDerivativeOfCostFunctionForLinearRegression(
+			double[] parameters, int featureIndex) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public Instance getInstance(int index) {
+	public double[] gradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public double[] updateParams(Instance instance, double[] Params, Double stepSize) {
+	public double[] stochasticGradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

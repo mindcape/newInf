@@ -91,11 +91,6 @@ public class Instances extends IInstances {
 	}
 	
 	@Override
-	public Instance getInstance(int index) {
-		return instances.get(index);
-	}
-
-	@Override
 	public IInstances removeAttribute(Attribute attribute) {
 		Instances newInstances = new Instances(context);
 
@@ -1090,7 +1085,7 @@ public class Instances extends IInstances {
 	}
 
 	@Override
-	public double meanSquareError(double[] parameters, int z) {
+	public double partialDerivativeOfCostFunctionForLinearRegression(double[] parameters, int featureIndex) {
 
 		int numAttributes = attributes.size();
 		
@@ -1101,31 +1096,38 @@ public class Instances extends IInstances {
 
 			double sum = 0.0;
 			sum = inst.dotProd(inst, numAttributes, parameters, classIndex);
-			System.out.println("Sum : " +sum);
-			double error = (sum - actualValue) * inst.getValue(z).getNumericValueAsDouble();
-			System.out.println("error : " +error);
+			double error = (sum - actualValue) * inst.getValue(featureIndex).getNumericValueAsDouble();
 			mse += error;
 		}
 		
 		return mse / instances.size();
 	}
 
-	public double[] updateParams(Instance instance, double[] initialParams, Double stepSize) {
-		double prod = instance.dotProd(instance, attributes.size(), initialParams, classIndex);
-		double yReal = instance.getValue(classIndex).getNumericValueAsDouble();
-		double z = yReal - prod;
-		double factor = stepSize * z;
+	@Override
+	public double[] gradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize) {
 		
-		 // Update coefficients for attributes
-        int n = instance.getValues().size();
-        for (int w = 0; w < n; w++) {
-          if (w != classIndex) {
-        	  initialParams[w] += factor * instance.getValue(w).getNumericValueAsDouble();
-        	  System.out.println("updation of weights initialParams[w]->"+w +"->"+initialParams[w]);
-          }
-        }
-		return initialParams;
-		
+		double[] tempParams = new double[linearRegressionParams.length];
+		for(int i = 0; i < numIterations; i++){
+
+			for(int j = 0; j < linearRegressionParams.length; j++){
+
+				tempParams[j] = linearRegressionParams[j] - stepSize * partialDerivativeOfCostFunctionForLinearRegression(linearRegressionParams, j);
+			}
+			linearRegressionParams = tempParams;
+		}
+		return linearRegressionParams;
+	}
+
+	@Override
+	public double[] stochasticGradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize) {
+		for(int i = 0; i < numIterations; i++){
+			for (int j = 0; j < instances.size(); j++) {
+				linearRegressionParams = updateParams(instances.get(j), linearRegressionParams, stepSize);
+		      }
+		}
+		return linearRegressionParams;
 	}
 
 }

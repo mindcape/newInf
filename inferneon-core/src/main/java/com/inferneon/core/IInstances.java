@@ -139,10 +139,35 @@ public abstract class IInstances implements Serializable{
 	
 	public abstract Impurity updateImpurity(long startIndex, long endIndex, Impurity impurity);
 
-	public abstract double meanSquareError(double[] parameters, int z);
+	public abstract double partialDerivativeOfCostFunctionForLinearRegression(double[] parameters, int featureIndex);
 	
-	public abstract Instance getInstance(int index);
+	public abstract double[] gradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize);
 
-	public abstract double[] updateParams(Instance instance, double[] Params, Double stepSize);
-
+	public abstract double[] stochasticGradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize); 
+	
+	/*
+	 * updates the parameters for each instance in StochasticGradientDescent.
+	 * It can be used for both stand-alone and spark.
+	 */
+	public double[] updateParams(Instance instance, double[] linearRegressionParams, Double stepSize) {
+		classIndex = getClassIndex();
+		double prod = instance.dotProd(instance, attributes.size(), linearRegressionParams, classIndex);
+		double yReal = instance.getValue(classIndex).getNumericValueAsDouble();
+		double z = yReal - prod;
+		double factor = stepSize * z;
+		
+		 // Update coefficients for attributes
+        int n = instance.getValues().size();
+        for (int w = 0; w < n; w++) {
+          if (w != classIndex) {
+        	  linearRegressionParams[w] += factor * instance.getValue(w).getNumericValueAsDouble();
+        	  System.out.println("updation of weights initialParams[w]->"+w +"->"+linearRegressionParams[w]);
+          }
+        }
+		return linearRegressionParams;
+		
+	}
+	
 }

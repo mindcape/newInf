@@ -128,7 +128,7 @@ public class LinearRegressionTests extends SupervisedLearningTest {
 		LinearRegression linearRegression = new LinearRegression(0.01, 500, false);
 		IInstances instances = loadInstances("Gradient.arff");
 		linearRegression.train(instances);
-		double[] parameters = linearRegression.getInitialParams();
+		double[] parameters = linearRegression.getLinearRegressionParams();
 		double[] expectedParameters = new double[parameters.length];
 		expectedParameters[0] = 7.160844908286279;
 		expectedParameters[1] = 3.6295147381292714;

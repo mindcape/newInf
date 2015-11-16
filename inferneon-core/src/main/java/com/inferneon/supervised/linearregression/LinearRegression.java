@@ -35,7 +35,7 @@ public class LinearRegression extends Supervised {
 	private int numIterations;
 	private Boolean isStochastic = false;
 	
-	private double[] initialParams;
+	private double[] linearRegressionParams;
 	
 	public LinearRegression(){
 		method = Method.SIMPLE_LINEAR_REGRESSION;
@@ -207,7 +207,7 @@ public class LinearRegression extends Supervised {
 				return new Value(predicted);
 			}
 			else if(method == Method.GRADIENT_DESCENT ){
-				return new Value(instance.dotProd(instance, instance.getValues().size(), initialParams, instance.getValues().size()-1));
+				return new Value(instance.dotProd(instance, instance.getValues().size(), linearRegressionParams, instance.getValues().size()-1));
 				
 			}
 		} catch (IncompatibleMatrixOperation | MatrixElementIndexOutOfBounds e) {
@@ -222,37 +222,20 @@ public class LinearRegression extends Supervised {
 	
 	private void gradientDescent(IInstances instances) {
 		this.trainingInstances = instances;
-		initialParams = new double[instances.getAttributes().size()-1];
-		double[] tempParams = new double[initialParams.length];
-		for(int i = 0; i < numIterations; i++){
-
-			for(int j = 0; j < initialParams.length; j++){
-
-				tempParams[j] = initialParams[j] - stepSize * deriveParam(trainingInstances, initialParams, j);
-			}
-			initialParams = tempParams;
-		}
-
-	}
-
-	private Double deriveParam(IInstances trainingInstances, double[] params, int z) {
-		double mse = trainingInstances.meanSquareError(params, z);
+		linearRegressionParams = new double[instances.getAttributes().size()-1];
+		linearRegressionParams = trainingInstances.gradientDescentForLinearRegression(linearRegressionParams, numIterations, stepSize);
 		
-		return mse;
 	}
-	
+
 	private void stochasticGradientDescent(IInstances instances) {
 		this.trainingInstances = instances;
-		initialParams = new double[instances.getAttributes().size()-1];
-		for(int i = 0; i < numIterations; i++){
-			for (int j = 0; j < instances.size(); j++) {
-				initialParams = trainingInstances.updateParams(instances.getInstance(j), initialParams, stepSize);
-		      }
-		}
+		linearRegressionParams = new double[instances.getAttributes().size()-1];
+		linearRegressionParams = trainingInstances.stochasticGradientDescentForLinearRegression(linearRegressionParams, numIterations, stepSize);
+		
 	}
 	
-	public double[] getInitialParams(){
-		return initialParams;
+	public double[] getLinearRegressionParams(){
+		return linearRegressionParams;
 	}
 	
 }
