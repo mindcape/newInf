@@ -139,4 +139,10 @@ public abstract class IInstances implements Serializable{
 	
 	public abstract Impurity updateImpurity(long startIndex, long endIndex, Impurity impurity);
 
+	public abstract double meanSquareError(double[] parameters, int z);
+	
+	public abstract Instance getInstance(int index);
+
+	public abstract double[] updateParams(Instance instance, double[] Params, Double stepSize);
+
 }

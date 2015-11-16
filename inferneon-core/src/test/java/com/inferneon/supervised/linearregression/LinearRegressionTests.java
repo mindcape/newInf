@@ -3,6 +3,7 @@ package com.inferneon.supervised.linearregression;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -120,6 +121,34 @@ public class LinearRegressionTests extends SupervisedLearningTest {
 				attributes, attributes.size() -1, csvFilePath);
 		
 		return instances;
+	}
+	
+	@Test
+	public void gradientDescent() throws Exception {
+		LinearRegression linearRegression = new LinearRegression(0.01, 500, false);
+		IInstances instances = loadInstances("Gradient.arff");
+		linearRegression.train(instances);
+		double[] parameters = linearRegression.getInitialParams();
+		double[] expectedParameters = new double[parameters.length];
+		expectedParameters[0] = 7.160844908286279;
+		expectedParameters[1] = 3.6295147381292714;
+		Assert.assertTrue(Arrays.equals(parameters, expectedParameters));
+		
+		List<Value> values = new ArrayList<Value>(); 
+		values.add(new Value(1.0)); values.add(new Value(0.3203146));
+		values.add(new Value()); 
+		Instance testInstance = new Instance(values);
+		Value predicted = linearRegression.classify(testInstance);
+		Assert.assertNotNull(predicted);
+		double predictedVal = MathUtils.roundDouble(predicted.getNumericValueAsDouble().doubleValue(), 3);
+		Assert.assertTrue(Double.compare(predictedVal, 8.323) == 0);
+	}
+	
+	@Test
+	public void stochasticGradientDescent() throws Exception {
+		LinearRegression linearRegression = new LinearRegression(0.01, 1, true);
+		IInstances instances = loadInstances("Gradient.arff");
+		linearRegression.train(instances);
 	}
 	
 	@After

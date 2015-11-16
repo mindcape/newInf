@@ -1162,4 +1162,22 @@ public class SparkInstances extends IInstances implements Serializable{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public double meanSquareError(double[] parameters, int z) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Instance getInstance(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] updateParams(Instance instance, double[] Params, Double stepSize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

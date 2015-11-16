@@ -21,7 +21,9 @@ public class LinearRegression extends Supervised {
 	public enum Method {
 		SIMPLE_LINEAR_REGRESSION,
 		RIDGE,
-		FORWARD_STAGEWISE_REGRESSION
+		FORWARD_STAGEWISE_REGRESSION,
+		GRADIENT_DESCENT,
+		STOCHASTIC_GRADIENT_DESCENT
 	}
 
 	private Method method;	
@@ -31,7 +33,10 @@ public class LinearRegression extends Supervised {
 	private Double ridgeConstant;
 	private Double stepSize;
 	private int numIterations;
-
+	private Boolean isStochastic = false;
+	
+	private double[] initialParams;
+	
 	public LinearRegression(){
 		method = Method.SIMPLE_LINEAR_REGRESSION;
 	}
@@ -47,6 +52,17 @@ public class LinearRegression extends Supervised {
 		this.numIterations = numIterations;
 	}
 
+	public LinearRegression(double stepSize, int numIterations, boolean isStochastic){
+		this.isStochastic = isStochastic;
+		if(isStochastic == true){
+			method = Method.STOCHASTIC_GRADIENT_DESCENT;
+		}else {
+			method = Method.GRADIENT_DESCENT;
+		}
+		this.stepSize = stepSize;
+		this.numIterations = numIterations;
+	}
+	
 	@Override
 	public void train(IInstances instances) throws Exception {
 		this.trainingInstances = instances;
@@ -55,6 +71,12 @@ public class LinearRegression extends Supervised {
 		}		
 		else if(method == Method.FORWARD_STAGEWISE_REGRESSION){
 			forwardStagewiseRegression(instances);
+		}
+		else if(method == Method.GRADIENT_DESCENT){
+			gradientDescent(instances);
+		}
+		else if(method == Method.STOCHASTIC_GRADIENT_DESCENT){
+			stochasticGradientDescent(instances);
 		}
 		else{
 			// Default to simple linear regression using normal equation
@@ -184,6 +206,10 @@ public class LinearRegression extends Supervised {
 				double predicted = yEst.getElement(0, 0);
 				return new Value(predicted);
 			}
+			else if(method == Method.GRADIENT_DESCENT ){
+				return new Value(instance.dotProd(instance, instance.getValues().size(), initialParams, instance.getValues().size()-1));
+				
+			}
 		} catch (IncompatibleMatrixOperation | MatrixElementIndexOutOfBounds e) {
 			Assert.assertTrue(false);
 		}
@@ -193,4 +219,40 @@ public class LinearRegression extends Supervised {
 	public IMatrix getParameters(){
 		return parameters;
 	}
+	
+	private void gradientDescent(IInstances instances) {
+		this.trainingInstances = instances;
+		initialParams = new double[instances.getAttributes().size()-1];
+		double[] tempParams = new double[initialParams.length];
+		for(int i = 0; i < numIterations; i++){
+
+			for(int j = 0; j < initialParams.length; j++){
+
+				tempParams[j] = initialParams[j] - stepSize * deriveParam(trainingInstances, initialParams, j);
+			}
+			initialParams = tempParams;
+		}
+
+	}
+
+	private Double deriveParam(IInstances trainingInstances, double[] params, int z) {
+		double mse = trainingInstances.meanSquareError(params, z);
+		
+		return mse;
+	}
+	
+	private void stochasticGradientDescent(IInstances instances) {
+		this.trainingInstances = instances;
+		initialParams = new double[instances.getAttributes().size()-1];
+		for(int i = 0; i < numIterations; i++){
+			for (int j = 0; j < instances.size(); j++) {
+				initialParams = trainingInstances.updateParams(instances.getInstance(j), initialParams, stepSize);
+		      }
+		}
+	}
+	
+	public double[] getInitialParams(){
+		return initialParams;
+	}
+	
 }

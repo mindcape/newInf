@@ -89,6 +89,11 @@ public class Instances extends IInstances {
 		Attribute classAttribute = attributes.get(classIndex);
 		return classAttribute.getNumValues();
 	}
+	
+	@Override
+	public Instance getInstance(int index) {
+		return instances.get(index);
+	}
 
 	@Override
 	public IInstances removeAttribute(Attribute attribute) {
@@ -1082,5 +1087,45 @@ public class Instances extends IInstances {
 		}
 
 		return maxImpurity;
-	}	
+	}
+
+	@Override
+	public double meanSquareError(double[] parameters, int z) {
+
+		int numAttributes = attributes.size();
+		
+		double mse = 0.0;
+		for(int j=0; j < instances.size(); j++ ){
+			Instance inst = instances.get(j);
+			double actualValue = inst.getValue(classIndex).getNumericValueAsDouble();
+
+			double sum = 0.0;
+			sum = inst.dotProd(inst, numAttributes, parameters, classIndex);
+			System.out.println("Sum : " +sum);
+			double error = (sum - actualValue) * inst.getValue(z).getNumericValueAsDouble();
+			System.out.println("error : " +error);
+			mse += error;
+		}
+		
+		return mse / instances.size();
+	}
+
+	public double[] updateParams(Instance instance, double[] initialParams, Double stepSize) {
+		double prod = instance.dotProd(instance, attributes.size(), initialParams, classIndex);
+		double yReal = instance.getValue(classIndex).getNumericValueAsDouble();
+		double z = yReal - prod;
+		double factor = stepSize * z;
+		
+		 // Update coefficients for attributes
+        int n = instance.getValues().size();
+        for (int w = 0; w < n; w++) {
+          if (w != classIndex) {
+        	  initialParams[w] += factor * instance.getValue(w).getNumericValueAsDouble();
+        	  System.out.println("updation of weights initialParams[w]->"+w +"->"+initialParams[w]);
+          }
+        }
+		return initialParams;
+		
+	}
+
 }
