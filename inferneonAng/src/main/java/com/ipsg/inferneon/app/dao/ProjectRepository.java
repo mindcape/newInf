@@ -80,7 +80,7 @@ public class ProjectRepository {
         Root<Project> searchRoot = searchQuery.from(Project.class);
         searchQuery.select(searchRoot);
         searchQuery.where(getCommonWhereCondition(cb, username, searchRoot));
-
+        searchQuery.orderBy(cb.desc(searchRoot.get("id")));
 //        List<Order> orderList = new ArrayList();
 //        orderList.add(cb.desc(searchRoot.get("date")));
 //        orderList.add(cb.asc(searchRoot.get("time")));
