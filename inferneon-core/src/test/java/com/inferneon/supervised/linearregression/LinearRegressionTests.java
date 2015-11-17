@@ -10,6 +10,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.inferneon.core.Attribute;
 import com.inferneon.core.IInstances;
@@ -22,11 +24,11 @@ import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.core.matrices.Matrix;
 import com.inferneon.core.utils.MathUtils;
 import com.inferneon.supervised.SupervisedLearningTest;
-import com.inferneon.supervised.linearregression.LinearRegression;
 
 
 public class LinearRegressionTests extends SupervisedLearningTest {
 
+	private static final Logger LOG = LoggerFactory.getLogger(LinearRegressionTests.class);
 	private static final String ROOT = "/TestResources/LinearRegression";
 	private static final String APP_TEMP_FOLDER = "Inferneon";
 	
@@ -46,7 +48,7 @@ public class LinearRegressionTests extends SupervisedLearningTest {
 		linearRegression.train(instances);
 		
 		IMatrix parameters = (IMatrix) linearRegression.getParameters();
-		System.out.println(parameters);		
+		LOG.info("parameters : {}", parameters);		
 		parameters.roundDoubleValues(3);
 		
 		Matrix expectedParameters = new Matrix(new double[][] {{3.00774324}, {1.69532264}});
@@ -70,7 +72,7 @@ public class LinearRegressionTests extends SupervisedLearningTest {
 		linearRegression.train(instances);
 		
 		IMatrix parameters = (IMatrix) linearRegression.getParameters();
-		System.out.println(parameters);		
+		LOG.info("parameters : {}", parameters);		
 		parameters.roundDoubleValues(6);
 		
 		Matrix expectedParameters = new Matrix(new double[][] {{ 0.0},{ 0.14474926}});
@@ -94,7 +96,7 @@ public class LinearRegressionTests extends SupervisedLearningTest {
 		linearRegression.train(instances);
 		
 		IMatrix parameters = (IMatrix) linearRegression.getParameters();
-		System.out.println(parameters);		
+		LOG.info("parameters : {}", parameters);		
 		parameters.roundDoubleValues(2);
 		
 		Matrix expectedParameters = new Matrix(new double[][] {{ 0.05},  {0.0}, {0.09},  {0.03},  {0.31}, {-0.64},  {0.0},    {0.36}});

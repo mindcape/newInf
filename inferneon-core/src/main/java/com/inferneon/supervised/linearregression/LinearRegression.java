@@ -3,6 +3,9 @@ package com.inferneon.supervised.linearregression;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import junit.framework.Assert;
 
 import com.inferneon.core.IInstances;
@@ -18,6 +21,7 @@ import com.inferneon.supervised.Supervised;
 
 public class LinearRegression extends Supervised {
 
+	private static final Logger LOG = LoggerFactory.getLogger(LinearRegression.class);
 	public enum Method {
 		SIMPLE_LINEAR_REGRESSION,
 		RIDGE,
@@ -121,7 +125,7 @@ public class LinearRegression extends Supervised {
 		try{
 			for(int i = 0; i < numIterations; i++){
 				double lowestError = Double.MAX_VALUE;
-				System.out.println("Params: " + parameters);
+				LOG.debug("Params: {}" + parameters);
 				for(int j = 0; j < numColumns; j++){
 
 					// Increase the weight
@@ -207,7 +211,7 @@ public class LinearRegression extends Supervised {
 				return new Value(predicted);
 			}
 			else if(method == Method.GRADIENT_DESCENT ){
-				return new Value(instance.dotProd(instance, instance.getValues().size(), linearRegressionParams, instance.getValues().size()-1));
+				return new Value(instance.dotProd(instance.getValues().size(), linearRegressionParams, instance.getValues().size()-1));
 				
 			}
 		} catch (IncompatibleMatrixOperation | MatrixElementIndexOutOfBounds e) {
@@ -224,14 +228,12 @@ public class LinearRegression extends Supervised {
 		this.trainingInstances = instances;
 		linearRegressionParams = new double[instances.getAttributes().size()-1];
 		linearRegressionParams = trainingInstances.gradientDescentForLinearRegression(linearRegressionParams, numIterations, stepSize);
-		
 	}
 
 	private void stochasticGradientDescent(IInstances instances) {
 		this.trainingInstances = instances;
 		linearRegressionParams = new double[instances.getAttributes().size()-1];
 		linearRegressionParams = trainingInstances.stochasticGradientDescentForLinearRegression(linearRegressionParams, numIterations, stepSize);
-		
 	}
 	
 	public double[] getLinearRegressionParams(){

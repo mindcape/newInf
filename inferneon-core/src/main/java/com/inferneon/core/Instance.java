@@ -108,13 +108,13 @@ public class Instance implements Serializable{
 		return true;
 	}
 	
-	public double dotProd(Instance inst, int numAttributes, double[] parameters, int classIndex) {
+	public double dotProd(int numAttributes, double[] parameters, int classIndex) {
 		double prod = 0.0;
 		for (int k=0; k <= numAttributes-1; k++){
 			if(k == classIndex){
 				continue;
 			}
-			prod += parameters[k] * inst.getValue(k).getNumericValueAsDouble(); 
+			prod += parameters[k] * getValue(k).getNumericValueAsDouble(); 
 		}
 		return prod;
 	}

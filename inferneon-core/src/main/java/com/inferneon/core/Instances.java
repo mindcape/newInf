@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import au.com.bytecode.opencsv.CSVReader;
 
 import com.inferneon.core.Attribute.NumericType;
@@ -31,6 +34,7 @@ import com.inferneon.supervised.neuralnetwork.NeuralNode;
 
 public class Instances extends IInstances {
 
+	private static final Logger LOG = LoggerFactory.getLogger(Instances.class);
 	// Register this class with the factory
 	static
 	{
@@ -512,7 +516,7 @@ public class Instances extends IInstances {
 					valueCounts.put(value, instance.getWeight());
 
 					if(attribute.getName().equals("motor") && value.toString().equals("E")){
-						System.out.println("First update for E: " + 1);
+						LOG.debug("First update for E: " + 1);
 					}
 
 					attributeAndValueCounts.put(attribute, valueCounts);
@@ -532,7 +536,7 @@ public class Instances extends IInstances {
 
 
 						if(attribute.getName().equals("motor") && value.toString().equals("E")){
-							System.out.println("Second update for E: " + 1);
+							LOG.debug("Second update for E: " + 1);
 						}
 
 						currentValueCounts.put(value, instance.getWeight());
@@ -543,14 +547,14 @@ public class Instances extends IInstances {
 						if(currentValueCount == null){
 
 							if(attribute.getName().equals("motor") && value.toString().equals("E")){
-								System.out.println("Third update for E: " + 1);
+								LOG.debug("Third update for E: " + 1);
 							}
 							currentValueCounts.put(value, instance.getWeight());							
 						}
 						else{
 
 							if(attribute.getName().equals("motor") && value.toString().equals("E")){
-								System.out.println("Fourth updates for E: " + (currentValueCount + instance.getWeight()));
+								LOG.debug("Fourth updates for E: " + (currentValueCount + instance.getWeight()));
 							}
 							currentValueCounts.put(value, currentValueCount + instance.getWeight());
 						}
@@ -1095,7 +1099,7 @@ public class Instances extends IInstances {
 			double actualValue = inst.getValue(classIndex).getNumericValueAsDouble();
 
 			double sum = 0.0;
-			sum = inst.dotProd(inst, numAttributes, parameters, classIndex);
+			sum = inst.dotProd(numAttributes, parameters, classIndex);
 			double error = (sum - actualValue) * inst.getValue(featureIndex).getNumericValueAsDouble();
 			mse += error;
 		}
@@ -1109,9 +1113,7 @@ public class Instances extends IInstances {
 		
 		double[] tempParams = new double[linearRegressionParams.length];
 		for(int i = 0; i < numIterations; i++){
-
 			for(int j = 0; j < linearRegressionParams.length; j++){
-
 				tempParams[j] = linearRegressionParams[j] - stepSize * partialDerivativeOfCostFunctionForLinearRegression(linearRegressionParams, j);
 			}
 			linearRegressionParams = tempParams;
