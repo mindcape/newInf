@@ -6,6 +6,11 @@ import static org.springframework.util.Assert.notNull;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+<<<<<<< HEAD
+=======
+import java.util.Date;
+import java.util.HashSet;
+>>>>>>> b3987ce37a68608ca596697fa48d93c785e16839
 import java.util.List;
 import java.util.Set;
 
@@ -97,12 +102,10 @@ public class ProjectService {
         assertNotBlank(username, "username cannot be blank");
         notNull(projectName, "project name is mandatory");
         
-        
         if (!projectRepository.isProjectNameAvailable(username, projectName)) {
             throw new IllegalArgumentException("Project Name is not available.");
         }
-        
-        
+
         Project project = null;
         if (id != null) {
           project =  findProjectById(username, id);

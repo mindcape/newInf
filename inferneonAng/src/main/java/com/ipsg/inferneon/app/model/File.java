@@ -5,8 +5,11 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 
 @Entity
@@ -27,7 +30,9 @@ public class File extends AbstractEntity {
     @Column(name = "EXT_FILE_SOURCE")
 	private String extFileParams;
 	
-	@ManyToOne
+    @ManyToOne(targetEntity=Project.class)
+    @JoinColumn(name = "project", referencedColumnName = "id", nullable = false)
+    @JsonBackReference
 	private Project project;
 	
 	public String getFileName() {

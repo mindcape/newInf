@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -54,9 +55,12 @@ public class Project extends AbstractEntity {
     @JsonManagedReference
     private Set<BigFile> files = new HashSet<>();
     
+
     @OneToMany(mappedBy = "project", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
     private Set<Activity> activities = new HashSet<>();
+
+ 
 
     public Project() {
 

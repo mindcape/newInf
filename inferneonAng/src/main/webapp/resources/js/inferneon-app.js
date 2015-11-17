@@ -37,7 +37,6 @@ inferneonApp.factory("MessageBus", function($rootScope) {
  */
 inferneonApp.controller('ProjectController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', 'MessageBus','$rootScope', 'editProjectId',
                                           function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService,MessageBus, $rootScope,editProjectId  ) {
-		
 		MessageService.clearMessages();
 		$scope.vm.editProjectId = editProjectId;
 		 if($scope.vm.editProjectId) {
