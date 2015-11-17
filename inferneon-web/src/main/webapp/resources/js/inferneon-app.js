@@ -270,6 +270,7 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 	
 	//$scope.progressVisible = false;
 	$scope.files = [];
+	$scope.uploadedFiles = [];
 	 $scope.setFiles = function(element) {
 		    $scope.$apply(function($scope) {
 		      console.log('files:', element.files);
@@ -282,7 +283,7 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		    };
 	
 	
-	 $scope.uploadFile = function(projectId) {
+	 $scope.uploadAllFiles = function(projectId) {
 		// var file = $scope.myFile;
 		// console.log(file);
 		 var uploadUrl = "/fileupload";
@@ -292,11 +293,41 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		     file: $scope.files, 
 		 }).progress(function(evt) {
 			 $scope.progressVisible = true;
-			 $scope.progress1 = Math.round(evt.loaded * 100 / evt.total);
+			 $scope.totalProgress = Math.round(evt.loaded * 100 / evt.total);
 			// uploadProgress(evt);
 		 }).success(function(responseText) {
 			 
 		 })
+	 }
+	 var uploaded = 0;
+	 $scope.uploadFile = function(index, projectId) {
+		 var uploadUrl = "/fileupload";
+		 Upload.upload({
+			 url: uploadUrl, 
+		     data:{projectId: projectId},
+		     file: $scope.files[index], 
+		 }).progress(function(evt) {
+			 $scope.progressVisible = true;
+			 $scope.files[index].progress = Math.round(evt.loaded * 100 / evt.total);
+		 }).success(function(responseText) {
+			 uploaded ++;
+			 $scope.totalProgress =getTotalProgress();
+		 })
+	 }
+	 
+	 function getTotalProgress() {
+		var notUploaded =  $scope.files.length - uploaded;
+		var totalUploaded = notUploaded ? $scope.files.length - notUploaded :$scope.files.length;
+		var ratio = 100 /$scope.files.length;
+		var current = 0 * ratio / 100;
+		return Math.round(totalUploaded * ratio + current);
+	 }
+	 
+	 $scope.removeFromQueue = function(index) {
+		 $scope.files.splice(index, 1);
+		 if($scope.files.length == 0) {
+			 $scope.progressVisible = false;
+		 }
 	 }
 	
 	  function uploadProgress(evt) {

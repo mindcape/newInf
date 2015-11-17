@@ -49,11 +49,11 @@ public class FileUploadController {
 	        BigFile file = null;
 	    	try {
 				byte[] bytes = multiFile.getBytes();
-				String fileName = "C:/temp/"+multiFile.getName()+".csv";
+				String fileName = "C:/temp/"+multiFile.getOriginalFilename();
 				
 				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(fileName)));
 				file = new BigFile();
-				file.setFileName(multiFile.getName()+".csv");
+				file.setFileName(multiFile.getOriginalFilename());
 				file.setFileLoc("C:/temp");
 				files.add(file);
 				bos.write(bytes);
