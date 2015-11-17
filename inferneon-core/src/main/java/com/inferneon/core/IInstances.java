@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.inferneon.core.exceptions.MatrixElementIndexOutOfBounds;
 import com.inferneon.core.matrices.IMatrix;
 import com.inferneon.supervised.FrequencyCounts;
@@ -12,6 +15,7 @@ import com.inferneon.supervised.neuralnetwork.MultilayerNeuralNetwork;
 
 public abstract class IInstances implements Serializable{
 
+	private static final Logger LOG = LoggerFactory.getLogger(IInstances.class);
 	public enum Context{
 		STAND_ALONE,
 		SPARK,
@@ -139,4 +143,36 @@ public abstract class IInstances implements Serializable{
 	
 	public abstract Impurity updateImpurity(long startIndex, long endIndex, Impurity impurity);
 
+	public abstract double partialDerivativeOfCostFunctionForLinearRegression(double[] parameters, int featureIndex);
+	
+	public abstract double[] gradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize);
+
+	public abstract double[] stochasticGradientDescentForLinearRegression(
+			double[] linearRegressionParams, int numIterations, Double stepSize); 
+	
+	/*
+	 * updates the parameters for each instance in StochasticGradientDescent.
+	 * It can be used for both stand-alone and spark.
+	 */
+	public double[] updateParams(Instance instance, double[] linearRegressionParams, Double stepSize) {
+		classIndex = getClassIndex();
+		double prod = instance.dotProd(attributes.size(), linearRegressionParams, classIndex);
+		double yReal = instance.getValue(classIndex).getNumericValueAsDouble();
+		double z = yReal - prod;
+		double factor = stepSize * z;
+
+		// Update coefficients for attributes
+		int n = instance.getValues().size();
+		for (int w = 0; w < n; w++) {
+			if(w == classIndex){
+				continue;
+			}
+			linearRegressionParams[w] += factor * instance.getValue(w).getNumericValueAsDouble();
+			LOG.debug("updation of weights linearRegressionParams[w]: {}" + linearRegressionParams[w]);
+		}
+		return linearRegressionParams;
+
+	}
+	
 }
