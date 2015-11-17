@@ -107,7 +107,8 @@ public class ProjectRepository {
      *
      */
     public Project findProjectById(String userName, Long id) {
-        return em.find(Project.class, id);
+    	Project find = em.find(Project.class, id);
+    	return find;
     }
 
     /**
@@ -117,13 +118,7 @@ public class ProjectRepository {
      */
     public Project save(Project project) {
     	project.setCreatedTS(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-    	
-    	Set<Attribute> attributes = project.getAttributes();
-    	for(Attribute att: attributes){
-    		att.setProject(project);
-    		System.out.println(att.toString());
-    	}
-        return em.merge(project);
+    	return em.merge(project);
     }
 
 
@@ -149,5 +144,14 @@ public class ProjectRepository {
 
         return predicates.toArray(new Predicate[]{});
     }
+
+	public boolean isProjectNameAvailable(String username, String projectName) {
+		 List<Project> projects = em.createNamedQuery(Project.FindProjectByNameAndUserName, Project.class)
+	                .setParameter("username", username)
+	                .setParameter("projectname", projectName)
+	                .getResultList();
+
+	        return projects.isEmpty();
+	}
 
 }

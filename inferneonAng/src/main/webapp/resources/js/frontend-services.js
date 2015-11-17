@@ -56,7 +56,8 @@ angular.module('frontendServices', ['commonServices','ngResource'])
                     url: '/project',
                     data: deletedProjectIds,
                     headers: {
-                        "Content-Type": "application/json"
+                    	"Content-Type": "application/json",
+                        "Accept": "text/plain"
                     }
                 })
                 .then(function (response) {
@@ -83,7 +84,8 @@ angular.module('frontendServices', ['commonServices','ngResource'])
                     url: '/project',
                     data: postData,
                     headers: {
-                        "Content-Type": "application/json"                  
+                    	"Content-Type": "application/json",
+                        "Accept": "text/plain"                 
                     }
                 }).then(function (response) {
               	  	console.log('reponse : '+response.data);
@@ -134,4 +136,5 @@ angular.module('frontendServices', ['commonServices','ngResource'])
                 });
             }
         };
-    }]);
+    }])
+	

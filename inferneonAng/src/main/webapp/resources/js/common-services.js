@@ -29,7 +29,7 @@ angular.module('commonServices', [])
           * Show Error message
           */
          showErrorMessage: function (errorMessage) {
-        	 this.clearAllMessages();
+        	 this.clearMessages();
              $rootScope.vm.errorMessages.push({description: errorMessage});
          }
          

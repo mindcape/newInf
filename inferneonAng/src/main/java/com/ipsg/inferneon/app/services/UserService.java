@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private static final Logger LOGGER = Logger.getLogger(UserService.class);
-    private static final Long DEFAULT_MAX_CAL_PER_DAY = 2000L;
+
 
     private static final Pattern PASSWORD_REGEX = Pattern.compile("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,}");
 
@@ -72,7 +72,7 @@ public class UserService {
             throw new IllegalArgumentException("The username is not available.");
         }
 
-        User user = new User(username, new BCryptPasswordEncoder().encode(password), email, DEFAULT_MAX_CAL_PER_DAY);
+        User user = new User(username, new BCryptPasswordEncoder().encode(password), email, 2000L);
 
         userRepository.save(user);
     }

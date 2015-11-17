@@ -42,31 +42,26 @@ public class TestDataInitializer {
         Transaction transaction = session.beginTransaction();
 
         User user = new User("test123", "$2a$10$x9vXeDsSC2109FZfIJz.pOZ4dJ056xBpbesuMJg3jZ.ThQkV119tS", "test@email.com", 1000L);
-        Attribute empId = new Attribute("EmployeeId",null,null,0);
-        Attribute empName = new Attribute("EmployeeName",null,null,1);
-        Attribute gender = new Attribute("Gender",null,"Male,Female",2);
-        Attribute empSal = new Attribute("EmployeeSalary",null,null,3);	
+        Attribute empId = new Attribute("EmployeeId","ATT",null,0);
+        Attribute empName = new Attribute("EmployeeName","ATT",null,1);
+        Attribute gender = new Attribute("Gender","ATTV","Male,Female",2);
+        Attribute empSal = new Attribute("EmployeeSalary","ATT",null,3);	
         Set<Attribute> empAttr = new HashSet<Attribute>();
         empAttr.add(empId);
         empAttr.add(empName);
         empAttr.add(empSal);
+        empAttr.add(gender);
         Project project = new Project();
-        project.setProjectName("Employees");
-        project.setAttributes(empAttr);
-        project.setCreatedTS(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-        project.setUser(user);
         empId.setProject(project);
         empName.setProject(project);
         gender.setProject(project);
         empSal.setProject(project);
-       /* session.persist(empId);
-        session.persist(empName);
-        session.persist(gender);
-        session.persist(empSal);*/
+        project.setProjectName("Employees");
+        project.setAttributes(empAttr);
+        project.setCreatedTS(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        project.setUser(user);
         session.persist(user);
         session.persist(project);
-
-
         transaction.commit();
     }
 }

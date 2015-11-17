@@ -5,10 +5,13 @@ import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -21,8 +24,16 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
  */
 @Entity
 @Table(name = "PROJECT")
+@NamedQueries({
+    @NamedQuery(
+            name = Project.FindProjectByNameAndUserName,
+            query = "select pr from Project pr where pr.projectName = :projectname and pr.user.username = :username"
+    )
+})
 public class Project extends AbstractEntity {
 
+	public static final String FindProjectByNameAndUserName = "project.findProjectByNameAndUserName";
+	
     @Column(name = "PROJECT_NAME" , nullable = false, length = 30)
 	private String projectName;
     
@@ -35,12 +46,17 @@ public class Project extends AbstractEntity {
     @Column(name = "UPDATED_TS")
     private Timestamp updatedTS;
     
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "project", cascade = { javax.persistence.CascadeType.PERSIST })
+    @OneToMany(mappedBy = "project",cascade = CascadeType.ALL,fetch = FetchType.EAGER, orphanRemoval=true)
     @JsonManagedReference
-    private Set<Attribute> attributes = new HashSet<Attribute>();
+    private Set<Attribute> attributes = new HashSet<>();
     
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
-    private Set<File> files = new HashSet<>();
+    @OneToMany(mappedBy = "project", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<BigFile> files = new HashSet<>();
+    
+    @OneToMany(mappedBy = "project", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<Activity> activities = new HashSet<>();
 
     public Project() {
 
@@ -58,7 +74,8 @@ public class Project extends AbstractEntity {
 
 
 	public void setAttributes(Set<Attribute> attributes) {
-		this.attributes = attributes;
+		this.attributes.clear();
+		this.attributes.addAll(attributes);
 	}
 
 	public String getProjectName() {
@@ -87,11 +104,11 @@ public class Project extends AbstractEntity {
 		this.updatedTS = updatedTS;
 	}
 
-	public Set<File> getFiles() {
+	public Set<BigFile> getFiles() {
 		return files;
 	}
 
-	public void setFiles(Set<File> files) {
+	public void setFiles(Set<BigFile> files) {
 		this.files = files;
 	}
 
@@ -119,5 +136,16 @@ public class Project extends AbstractEntity {
     @Override
     public int hashCode() {
     	return projectName.hashCode();
-    }    
+    }
+
+	public Set<Activity> getActivities() {
+		return activities;
+	}
+
+	public void setActivities(Set<Activity> activities) {
+		this.activities = activities;
+	}    
+    
+    
+    
 }

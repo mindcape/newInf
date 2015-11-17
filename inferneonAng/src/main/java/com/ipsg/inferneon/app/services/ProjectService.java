@@ -4,13 +4,10 @@ package com.ipsg.inferneon.app.services;
 import static com.ipsg.inferneon.app.services.ValidationUtils.assertNotBlank;
 import static org.springframework.util.Assert.notNull;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ipsg.inferneon.app.dao.ProjectRepository;
 import com.ipsg.inferneon.app.dao.UserRepository;
-import com.ipsg.inferneon.app.dto.ProjectDTO;
+import com.ipsg.inferneon.app.model.Activity;
+import com.ipsg.inferneon.app.model.ActivityStatus;
+import com.ipsg.inferneon.app.model.ActivityType;
 import com.ipsg.inferneon.app.model.Attribute;
+import com.ipsg.inferneon.app.model.BigFile;
 import com.ipsg.inferneon.app.model.Project;
-import com.ipsg.inferneon.app.model.SearchResult;
 import com.ipsg.inferneon.app.model.User;
 
 /**
@@ -98,11 +97,22 @@ public class ProjectService {
         assertNotBlank(username, "username cannot be blank");
         notNull(projectName, "project name is mandatory");
         
-        Project project = new Project();
+        
+        if (!projectRepository.isProjectNameAvailable(username, projectName)) {
+            throw new IllegalArgumentException("Project Name is not available.");
+        }
+        
+        
+        Project project = null;
         if (id != null) {
-            project.setId(id);
+          project =  findProjectById(username, id);
+        } else {
+        	project = new Project();
         }
         project.setProjectName(projectName);
+        for(Attribute att: attributes) {
+    		att.setProject(project);
+    	} 
         project.setAttributes(attributes);
          
         User user = userRepository.findUserByUsername(username);
@@ -114,6 +124,18 @@ public class ProjectService {
         
         return project;
     }
+
+    @Transactional
+	public void addFiles(String username, List<BigFile> files, Long projectId) {
+		Project project = findProjectById(username, projectId);
+		for(BigFile file: files) {
+			file.setProject(project);
+		}
+    	project.getFiles().addAll(files);
+    	project.getActivities().add(new Activity(ActivityType.FileUpload,ActivityStatus.STARTED,
+    			new Timestamp(Calendar.getInstance().getTimeInMillis()),project));
+    	projectRepository.save(project);		
+	}
 
     
 }

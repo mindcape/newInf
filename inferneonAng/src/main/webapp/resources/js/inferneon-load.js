@@ -14,6 +14,7 @@ require.config({
         'csrfInterceptor': '../bower_components/spring-security-csrf-token-interceptor/dist/spring-security-csrf-token-interceptor.min',
         'lodash': '../bower_components/lodash/dist/lodash',
         'bootstrap': '../bower_components/bootstrap/dist/js/bootstrap',
+        'ngFileUpload': '../bower_components/ng-file-upload/ng-file-upload',
         'jQuery': "../bower_components/jquery/dist/jquery.min", // needed only by the date time picker
         'editableTableWidgets': '../public/js/editable-table-widgets',
         'frontendServices': 'frontend-services',
@@ -56,8 +57,11 @@ require.config({
         'projects': {
         	deps: ['angular']
         },
+        'ngFileUpload': {
+        	deps: ['angular']
+        },
         'inferneonApp': {
-            deps: [ 'jQuery', 'lodash', 'angular','angularMessages','angularRoute','angularResource','ui.bootstrap.tpls','editableTableWidgets' , 'frontendServices', 'commonServices']
+            deps: [ 'jQuery', 'lodash', 'angular','angularMessages','angularRoute','angularResource','ui.bootstrap.tpls','editableTableWidgets' , 'frontendServices', 'commonServices','ngFileUpload']
         }
     }
 });

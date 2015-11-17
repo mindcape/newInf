@@ -1,6 +1,6 @@
 'use strict';
 
-var inferneonApp = angular.module('inferneonApp', ['ngRoute', 'ui.bootstrap','editableTableWidgets', 'frontendServices', 'commonServices','spring-security-csrf-token-interceptor'])
+var inferneonApp = angular.module('inferneonApp', ['ngRoute', 'ui.bootstrap','editableTableWidgets', 'frontendServices', 'commonServices','spring-security-csrf-token-interceptor', 'ngFileUpload'])
 
 /**
  * Configure Routes
@@ -35,110 +35,133 @@ inferneonApp.factory("MessageBus", function($rootScope) {
 /**
  * New Project Controller
  */
-inferneonApp.controller('ProjectController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', 'MessageBus','$rootScope', 'editProjectId', 
-                                          function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService,MessageBus, $rootScope, editProjectId ) {
-	 $scope.vm.editProjectId = editProjectId;
-	 if($scope.vm.editProjectId) {
-		 loadEditProjectDeatils($scope.vm.editProjectId);
-	 }
-	 $scope.vm.projects = {
-	     id : '',
-		 projectName: '',
-		 attributes: []
-	 };
-	
-	$scope.addNumericAtt = function() {
-		$scope.vm.projects.attributes.push({ 'attName':'', 'attType':'ATT'})
-	}
-	
-	$scope.addNominalAtt = function() {
-		$scope.vm.projects.attributes.push({ 'attName':'','attValidValues':'', 'attType':'ATTV'})
- 	}
-	
-	
-	
-	  $scope.saveProject = function() {
-		  console.log('Saving Data');
-		  console.log($scope.projectName);
-		  MessageService.clearMessages();
-		  var postData = {
-				  id : $scope.vm.projects.id,
-				  projectName: $scope.vm.projects.projectName,
-				  attributes: $scope.vm.projects.attributes
-	            };
-		  ProjectService.saveProjects(postData).then(function (data) {
-			 console.log("Changes saved successfully"+ JSON.stringify(data));
-			 MessageBus.broadcast("dataHasCome", data);
-			 $uibModalInstance.close();
-          },
-          function (errorMessage) {
-        	  MessageService.showErrorMessage(errorMessage);
-          });
-	  }
-	  /**
-	   * Cancel New Project
-	   */
-	  $scope.cancelProject = function(){
-		  $uibModalInstance.dismiss('cancel');
-		  console.log('Cancel creation of Project');
-       }
-	  
-	  function loadEditProjectDeatils (projectId) {
-	     	ProjectService.loadProject(projectId).then(function(data){
-	     		 console.log("Get the project details successfully"+ JSON.stringify(data));
-	     		MessageService.clearMessages();
-	     		 if (data && data.length == 0) {
-		             	MessageService.showInfoMessage("No results found.");
-		             } else {
-		            	 $scope.vm.projects.id = data.id;
-		            	 $scope.vm.projects.projectName = data.projectName;
-		            	 $scope.vm.projects.attributes = data.attributes;
-		             }
-	     	},
-	     	 function (errorMessage) {
-	         	MessageService.showErrorMessage(errorMessage);
-	             markAppAsInitialized();
-	     		
-	         });
-	     	
-	     }
-	  
+inferneonApp.controller('ProjectController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', 'MessageBus','$rootScope', 'editProjectId',
+                                          function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService,MessageBus, $rootScope,editProjectId  ) {
+		
+		MessageService.clearMessages();
+		$scope.vm.editProjectId = editProjectId;
+		 if($scope.vm.editProjectId) {
+			 loadEditProjectDeatils($scope.vm.editProjectId);
+		 }
+			$scope.vm.projects = {
+				id : '',
+				projectName : '',
+				attributes : [],
+				newAttrs:[]
+			};
+
+			$scope.addNumericAtt = function() {
+				$scope.vm.projects.attributes.push({
+					'attName' : '',
+					'attType' : 'ATT',
+					'attOrder':''
+				});
+			}
+
+			$scope.addNominalAtt = function() {
+				$scope.vm.projects.attributes.push({
+					'attName' : '',
+					'attValidValues' : '',
+					'attType' : 'ATTV',
+					'attOrder':''
+				});
+			}
+
+			$scope.removeDynamicRow = function($event) {
+				$(event.target).parent().remove();
+			}
+
+			$scope.vm.postProjects = {
+				projectName : '',
+				attributes : []
+			}
+			$scope.saveProject = function() {
+				console.log('Saving Data');
+				console.log($scope.projectName);
+				MessageService.clearMessages();
+				var postData = {
+					id : $scope.vm.projects.id,
+					projectName : $scope.vm.projects.projectName,
+					attributes : $scope.vm.projects.attributes
+				};
+				ProjectService.saveProjects(postData).then(
+						function(data) {
+							console.log("Changes saved successfully"+ JSON.stringify(data));
+							MessageBus.broadcast("dataHasCome", data);
+							$uibModalInstance.close();
+						}, function(errorMessage) {
+							MessageService.showErrorMessage(errorMessage);
+						});
+			}
+			/**
+			 * Cancel New Project
+			 */
+			$scope.cancelProject = function() {
+				$uibModalInstance.dismiss('cancel');
+				console.log('Cancel Project Save');
+			}
+			
+			function loadEditProjectDeatils (projectId) {
+		     	ProjectService.loadProject(projectId).then(function(data){
+		     		 console.log("Get the project details successfully"+ JSON.stringify(data));
+		     		MessageService.clearMessages();
+		     		 if (data && data.length == 0) {
+			             	MessageService.showInfoMessage("No results found.");
+			             } else {
+			            	 $scope.vm.projects.id = data.id;
+			            	 $scope.vm.projects.projectName = data.projectName;
+			            	 $scope.vm.projects.attributes = data.attributes;
+			             }
+		     	},
+		     	 function (errorMessage) {
+		         	MessageService.showErrorMessage(errorMessage);
+		         	MessageService.markAppAsInitialized();
+		     		
+		         });
+		     	
+			}
 	 
 }]);
 
 inferneonApp.controller('ProjectEditController',['$scope' ,'$http','$location', 'ProjectService', 'MessageService','$rootScope', '$routeParams','$uibModal',  
-                                                 function ($scope, $http, $location, ProjectService, MessageService, $rootScope, $routeParams,$uibModal){
-	$scope.prjId = '';
-	$scope.vm.projectData = [];
-	
-	if ($routeParams.projectEditId) {
-		$scope.prjId=$routeParams.projectEditId;
-		loadProjectDeatils($scope.prjId);
-    } else {
-      alert("false value" );
-	}
-	
-	/*$scope.saveEditProject = function() {
-		alert("Save : "+ $scope.prjId);
-	}*/
-	
-	
-	 function loadProjectDeatils (projectId) {
-     	ProjectService.loadProject(projectId).then(function(data){
-     		 console.log("Get the project details successfully"+ JSON.stringify(data));
-     		MessageService.clearMessages();
-     		$scope.vm.projectData  = data;
-            if ($scope.vm.projectData && $scope.vm.projectData.length == 0) {
-             	MessageService.showInfoMessage("No results found.");
-             }
-     	},
-     	 function (errorMessage) {
-         	MessageService.showErrorMessage(errorMessage);
-            // markAppAsInitialized();
-     		
-         });
-     	
-     }
+                                                 function ($scope, $http, $location, ProjectService, MessageService, $rootScope, $routeParams, $uibModal){
+			$scope.prjId = '';
+			$scope.vm.projectData = [];
+
+			if ($routeParams.projectEditId) {
+				$scope.prjId = $routeParams.projectEditId;
+				loadProjectDeatils($scope.prjId);
+			} else {
+				alert("false value");
+			}
+
+			$scope.saveEditProject = function() {
+				alert("Save : " + $scope.prjId);
+			}
+
+			function loadProjectDeatils(projectId) {
+				ProjectService.loadProject(projectId).then(
+						function(data) {
+							console.log("Get the project details successfully"
+									+ JSON.stringify(data));
+							MessageService.clearMessages();
+							$scope.vm.projectData = data;
+							$scope.vm.projects.projectName = data.projectName;
+							$scope.vm.projects.attributes = data.attributes;
+							
+							// markAppAsInitialized();
+							if ($scope.vm.projectData
+									&& $scope.vm.projectData.length == 0) {
+								MessageService
+										.showInfoMessage("No results found.");
+							}
+						}, function(errorMessage) {
+							MessageService.showErrorMessage(errorMessage);
+							MessageService.markAppAsInitialized();
+
+						});
+
+			}
 	 
 }]);
 
@@ -181,7 +204,6 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
 		                  return projectId;
 		                }
 		              }
-		           
 		        });
 		    	modalInstance.result.then(function() {
 		        	console.log('Clicked on Save');
@@ -243,4 +265,50 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
                UserService.logout();
            }
         }]);
-    
+
+inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload',
+                                            function ($scope, $http,$compile,Upload) {
+	
+	//$scope.progressVisible = false;
+	$scope.files = [];
+	 $scope.setFiles = function(element) {
+		    $scope.$apply(function($scope) {
+		      console.log('files:', element.files);
+		      // Turn the FileList object into an Array
+		        for (var i = 0; i < element.files.length; i++) {
+		          $scope.files.push(element.files[i])
+		        }
+		      $scope.progressVisible = false
+		      });
+		    };
+	
+	
+	 $scope.uploadFile = function(projectId) {
+		// var file = $scope.myFile;
+		// console.log(file);
+		 var uploadUrl = "/fileupload";
+		 Upload.upload({
+			 url: uploadUrl, 
+		     data:{projectId: projectId},
+		     file: $scope.files, 
+		 }).progress(function(evt) {
+			 $scope.progressVisible = true;
+			 $scope.progress1 = Math.round(evt.loaded * 100 / evt.total);
+			// uploadProgress(evt);
+		 }).success(function(responseText) {
+			 
+		 })
+	 }
+	
+	  function uploadProgress(evt) {
+	        $scope.$apply(function(){
+	            if (evt.lengthComputable) {
+	                $scope.progress1 = Math.round(evt.loaded * 100 / evt.total)
+	            } else {
+	                $scope.progress1 = 'unable to compute'
+	            }
+	        })
+	    }
+}]);
+
+
