@@ -104,7 +104,7 @@ public class ProjectController {
      */
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)    
     public List<ProjectDTO> saveProject(Principal principal, @RequestBody ProjectDTO project) {
     	
     	Set<Attribute> newAtts = new HashSet<Attribute>();
@@ -145,7 +145,7 @@ public class ProjectController {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> errorHandler(Exception exc) {
         LOGGER.error(exc.getMessage(), exc);
-        return new ResponseEntity<>(exc.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("ErrorMessage:"+exc.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
 

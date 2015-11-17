@@ -7,13 +7,9 @@
 				
 				<input placeholder='Project Name' type="text"
 				name="vm.projects.projectName" ng-model="vm.projects.projectName"
-				required unique-name> <input type="hidden"
-				name="vm.projects.id" /> <span
+				required unique-name>  <span
 				ng-show="newProject.projectName.$error.uniqueName">Name is
-				not unique.</span> <br></br> <input id="btnAdd" type="button"
-				value="Add Numeric" ng-click="addNumericAtt()" /> <input
-				id="btn2Add" type="button" value="Add Nominal"
-				ng-click="addNominalAtt()" /> <br /> <br />
+				not unique.</span> <br></br> 
 				
 				
 				<input type="hidden" name="vm.projects.id" />	

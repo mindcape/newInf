@@ -84,8 +84,7 @@ angular.module('frontendServices', ['commonServices','ngResource'])
                     url: '/project',
                     data: postData,
                     headers: {
-                    	"Content-Type": "application/json",
-                        "Accept": "text/plain"                 
+                    	"Content-Type": "application/json"     
                     }
                 }).then(function (response) {
               	  	console.log('reponse : '+response.data);

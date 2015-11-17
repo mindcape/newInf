@@ -11,10 +11,8 @@ import javax.persistence.EntityManagerFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.type.TimestampType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Attr;
 
 import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.Project;

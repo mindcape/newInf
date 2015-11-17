@@ -6,11 +6,6 @@ import static org.springframework.util.Assert.notNull;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
-<<<<<<< HEAD
-=======
-import java.util.Date;
-import java.util.HashSet;
->>>>>>> b3987ce37a68608ca596697fa48d93c785e16839
 import java.util.List;
 import java.util.Set;
 
