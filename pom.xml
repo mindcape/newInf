@@ -14,6 +14,7 @@
 		<module>inferneon-gui</module>
 		<module>inferneon-resources</module>
 		<module>inferneon-spark</module>
+		<module>inferneonAng</module>
 	</modules>
 	
 	<organization>
