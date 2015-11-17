@@ -282,7 +282,9 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		      });
 		    };
 	
-	
+	/**
+	 * Upload all files at one time
+	 */
 	 $scope.uploadAllFiles = function(projectId) {
 		// var file = $scope.myFile;
 		// console.log(file);
@@ -299,6 +301,9 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 			 
 		 })
 	 }
+	 /**
+	  * Upload individual files 
+	  */
 	 var uploaded = 0;
 	 $scope.uploadFile = function(index, projectId) {
 		 var uploadUrl = "/fileupload";
@@ -315,6 +320,9 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		 })
 	 }
 	 
+	 /**
+	  * Total progress bar calculation while uploading independant files
+	  */
 	 function getTotalProgress() {
 		var notUploaded =  $scope.files.length - uploaded;
 		var totalUploaded = notUploaded ? $scope.files.length - notUploaded :$scope.files.length;
@@ -322,7 +330,9 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		var current = 0 * ratio / 100;
 		return Math.round(totalUploaded * ratio + current);
 	 }
-	 
+	 /**
+	  * Remove file 
+	  */
 	 $scope.removeFromQueue = function(index) {
 		 $scope.files.splice(index, 1);
 		 if($scope.files.length == 0) {
