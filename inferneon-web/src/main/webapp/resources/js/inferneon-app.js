@@ -134,10 +134,6 @@ inferneonApp.controller('ProjectEditController',['$scope' ,'$http','$location', 
 				alert("false value");
 			}
 
-			$scope.saveEditProject = function() {
-				alert("Save : " + $scope.prjId);
-			}
-
 			function loadProjectDeatils(projectId) {
 				ProjectService.loadProject(projectId).then(
 						function(data) {
@@ -286,21 +282,11 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 	 * Upload all files at one time
 	 */
 	 $scope.uploadAllFiles = function(projectId) {
-		// var file = $scope.myFile;
-		// console.log(file);
-		 var uploadUrl = "/fileupload";
-		 Upload.upload({
-			 url: uploadUrl, 
-		     data:{projectId: projectId},
-		     file: $scope.files, 
-		 }).progress(function(evt) {
-			 $scope.progressVisible = true;
-			 $scope.totalProgress = Math.round(evt.loaded * 100 / evt.total);
-			// uploadProgress(evt);
-		 }).success(function(responseText) {
-			 
-		 })
+		 for (var i =0; i < $scope.files.length; i++){
+			 $scope.uploadFile(i, projectId);
+		 }
 	 }
+	 
 	 /**
 	  * Upload individual files 
 	  */
@@ -335,20 +321,13 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 	  */
 	 $scope.removeFromQueue = function(index) {
 		 $scope.files.splice(index, 1);
+		 $scope.totalProgress =getTotalProgress();
 		 if($scope.files.length == 0) {
 			 $scope.progressVisible = false;
 		 }
 	 }
 	
-	  function uploadProgress(evt) {
-	        $scope.$apply(function(){
-	            if (evt.lengthComputable) {
-	                $scope.progress1 = Math.round(evt.loaded * 100 / evt.total)
-	            } else {
-	                $scope.progress1 = 'unable to compute'
-	            }
-	        })
-	    }
+	  
 }]);
 
 
