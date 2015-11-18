@@ -33,7 +33,6 @@
                                 <th width="50%" >Name</th>
                                 <th width="15%">Size</th>
                                 <th width="10%">Progress</th>
-                                <th width="10%">Status</th>
                                 <th width="15%">Actions</th>
                             </tr>
                         </thead>
@@ -48,11 +47,6 @@
                                     <div class="progress" style="margin-bottom: 0;">
                                         <div class="item-progress-bar"  ng-style="{ 'width': file.progress + '%' }"></div>
                                     </div>
-                                </td>
-                                <td class="text-center">
-                                    <span ng-show="file.isSuccess"><i class="glyphicon glyphicon-ok"></i></span>
-                                    <span ng-show="file.isCancel"><i class="glyphicon glyphicon-ban-circle"></i></span>
-                                    <span ng-show="file.isError"><i class="glyphicon glyphicon-remove"></i></span>
                                 </td>
                                 <td nowrap>
                                     <button type="button" class="btn btn-success btn-xs" ng-click="uploadFile($index, vm.projectData.id)">
