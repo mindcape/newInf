@@ -303,6 +303,7 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		 }).success(function(responseText) {
 			 uploaded ++;
 			 $scope.totalProgress =getTotalProgress();
+			
 		 })
 	 }
 	 
