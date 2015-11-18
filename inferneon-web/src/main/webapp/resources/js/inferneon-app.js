@@ -303,6 +303,7 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		 }).success(function(responseText) {
 			 uploaded ++;
 			 $scope.totalProgress =getTotalProgress();
+			// $scope.files.splice(index, 1);
 			
 		 })
 	 }
@@ -327,6 +328,12 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 			 $scope.progressVisible = false;
 		 }
 	 }
+	 
+	
+	 
+	$scope.clearQueue = function (){
+		$scope.files = [];	 
+	}
 	
 	  
 }]);
