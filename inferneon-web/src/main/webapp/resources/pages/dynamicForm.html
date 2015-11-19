@@ -1,0 +1,53 @@
+<div class="modal-dialog" >
+	<h4 class="modal-title" id="myModalLabel"> </h4>
+	<tt-error-messages extra-styles="access-screen"></tt-error-messages>	
+	<form name="dynamicForm" id="dynamicForm" ng-controller="FileUploadCtrl">
+			<div class="modal-body">
+				<div class="row col-md-12">
+					Fill below details to save and run the algorithm.
+				</div>			
+				<div id="formFieldContainer" ng-repeat="field in fields.formFields">
+					<div ng-if="field.fieldType == 'TEXT'">
+						<div class="col-md-3">
+							<label>{{field.fieldLabel}} </label>
+						</div>
+						<div class="col-md-9">
+							<input type="text" ng-model="field.fieldName">
+						</div>
+					</div>
+					
+					<div ng-if="field.fieldType == 'SELECT'">
+						<div class="col-md-3">
+							<label>{{field.fieldLabel}} </label>
+						</div>
+						<div class="col-md-9">
+							<input type="text" ng-model="field.fieldName">
+						</div>
+					</div>
+					
+					<div ng-if="field.fieldType == 'RADIO'">
+						<div class="col-md-3">
+							<label>{{field.fieldLabel}} </label>
+						</div>
+						<div class="col-md-9">
+							<input type="text" ng-model="field.fieldName">
+						</div>
+					</div>
+					
+					<div ng-if="field.fieldType == 'CHECKBOX'">
+						<div class="col-md-3">
+							<label>{{field.fieldLabel}} </label>
+						</div>
+						<div class="col-md-9">
+							<input type="text" ng-model="field.fieldName">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				  <button class="btn btn-primary" ng-click="$close()">Save and Run the Algorithm</button>
+        		  <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
+			</div>
+	</form>
+
+</div>

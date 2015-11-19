@@ -261,11 +261,12 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
            }
         }]);
 
-inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload',
-                                            function ($scope, $http,$compile,Upload) {
+inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload','$timeout', '$uibModal',
+                                            function ($scope, $http,$compile,Upload,$timeout, $uibModal) {
 	
 	//$scope.progressVisible = false;
 	$scope.files = [];
+	$scope.fields = [];
 	$scope.uploadedFiles = [];
 	 $scope.setFiles = function(element) {
 		    $scope.$apply(function($scope) {
@@ -334,6 +335,34 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 	$scope.clearQueue = function (){
 		$scope.files = [];	 
 	}
+	
+	
+	 $scope.loadDynamicForm = function(projectId) {
+		 $http({
+			  method: 'GET', url: '/loadForm'
+			}).success(function(data, status, headers, config) {
+				console.log(data);
+				$scope.fields=data;
+				
+		    	var modalInstance = $uibModal.open({
+		            templateUrl: '/resources/pages/dynamicForm.html',
+		            controller: 'ProjectController',
+		            backdrop: false,
+		            resolve: {
+		                editProjectId: function () {
+		                  return projectId;
+		                }
+		              }
+		        });
+		    	modalInstance.result.then(function() {
+		        	console.log('Clicked on Save');
+		        }, function() {
+		            console.log('Clicked on Cancel');
+		        });
+		    	
+			})
+	    };
+	
 	
 	  
 }]);
