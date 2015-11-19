@@ -55,6 +55,13 @@ public class DynamicFormController {
 		formFields.add(formRadioField);
 		
 		
+		FormField checkBoxtField1 = new FormField("CheckBox1", FormField.Type.CHECKBOX, "CheckBox1", true);
+		formFields.add(checkBoxtField1);
+		
+		FormField checkBoxtField2 = new FormField("CheckBox2", FormField.Type.CHECKBOX, "CheckBox2", true);
+		formFields.add(checkBoxtField2);
+		
+		
 		form.setFormFields(formFields);
 		return form;
 	}
