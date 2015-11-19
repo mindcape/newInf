@@ -346,11 +346,11 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 				
 		    	var modalInstance = $uibModal.open({
 		            templateUrl: '/resources/pages/dynamicForm.html',
-		            controller: 'ProjectController',
+		            controller: 'DynamicFormController',
 		            backdrop: false,
 		            resolve: {
-		                editProjectId: function () {
-		                  return projectId;
+		                dataFields: function () {
+		                  return $scope.fields;
 		                }
 		              }
 		        });
@@ -368,3 +368,8 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 }]);
 
 
+inferneonApp.controller('DynamicFormController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', '$rootScope', 'dataFields',
+                                               function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService, $rootScope,dataFields  ) {
+	$scope.dynaFormFields = dataFields;
+	
+}]);

@@ -1,5 +1,8 @@
 package com.ipsg.inferneon.app.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FormField {
 
 	private String fieldName;
@@ -12,6 +15,7 @@ public class FormField {
 	};
 	private String fieldLabel;
 	private boolean validationRequired;
+	private List<FieldValues> fieldValues =new ArrayList<>();
 	
 	public FormField(String fieldName, Type type, String fieldLabel, boolean b) {
 		this.fieldName = fieldName;
@@ -55,6 +59,16 @@ public class FormField {
 
 	public void setValidationRequired(boolean validationRequired) {
 		this.validationRequired = validationRequired;
+	}
+
+
+	public List<FieldValues> getFieldValues() {
+		return fieldValues;
+	}
+
+
+	public void setFieldValues(List<FieldValues> fieldValues) {
+		this.fieldValues = fieldValues;
 	}
 		
 	
