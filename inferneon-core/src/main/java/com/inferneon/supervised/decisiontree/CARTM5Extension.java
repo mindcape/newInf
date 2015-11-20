@@ -125,6 +125,7 @@ public class CARTM5Extension extends Supervised {
 		BestAttributeSearchResult result = null;
 
 		List<Attribute> attributes = instances.getAttributes();
+		IInstances instsWithMaxImpurity = null;
 
 		int count = 0;
 		for(Attribute attribute : attributes){
@@ -132,7 +133,7 @@ public class CARTM5Extension extends Supervised {
 				count++;
 				continue;
 			}
-			instances.sort(attribute);
+			instances = instances.sort(attribute);
 
 			Impurity impurityForAttribute = getMaxImpurityForAttribute(instances, attribute, impurityOrder);
 			System.out.println(impurityForAttribute);
@@ -143,6 +144,7 @@ public class CARTM5Extension extends Supervised {
 				maxImpurity = impurityForAttribute;
 				double splitValue = impurityForAttribute.getSplitValue();
 				maxImpurity.setSplitValue(splitValue);
+				instsWithMaxImpurity = instances;
 			}
 			count++;
 		}
@@ -151,8 +153,8 @@ public class CARTM5Extension extends Supervised {
 			long splitPoint = (long)maxImpurity.getNumOnLeftGroup() -1;
 			double splitNum = maxImpurity.getSplitValue();
 			Value splitValue = new Value(splitNum);
-			IInstances splitBeforeThreshold = instances.getSubList(0, splitPoint + 1);
-			IInstances splitAfterThreshold = instances.getSubList(splitPoint + 1, instances.size());
+			IInstances splitBeforeThreshold = instsWithMaxImpurity.getSubList(0, splitPoint + 1);
+			IInstances splitAfterThreshold = instsWithMaxImpurity.getSubList(splitPoint + 1, instsWithMaxImpurity.size());
 			Attribute attribute = maxImpurity.getAttribute();
 			result = new BestAttributeSearchResult(attribute, maxImpurity, splitPoint,  splitValue, 
 					splitBeforeThreshold, splitAfterThreshold);

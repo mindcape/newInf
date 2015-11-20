@@ -512,6 +512,15 @@ public class SparkInstances extends IInstances implements Serializable{
 		this.attributes = attributes;
 		this.instances = instances;
 	}
+	
+	private SparkInstances(List<Attribute> attributes, int classIndex, JavaRDD<Instance> instances, int attributeIndex){
+		super(Context.SPARK);
+		this.classIndex = classIndex;
+		this.attributes = attributes;
+		this.instances = instances;
+		this.attributeIndex = attributeIndex;
+	}
+	
 
 	public SparkInstances( List<Attribute> attributes, int classIndex, String sourceURI){
 		super(Context.SPARK);
@@ -778,11 +787,9 @@ public class SparkInstances extends IInstances implements Serializable{
 	}
 
 	@Override
-	public void sort(final Attribute attribute) {
+	public IInstances sort(final Attribute attribute) {
 
 		final int attributeIndex = attributes.indexOf(attribute);
-		this.attributeIndex = attributeIndex;
-		//Long count = instances.count();
 
 		JavaPairRDD<Value, Instance> pair = instances.mapToPair(new PairFunction<Instance, Value, Instance>() {
 
@@ -794,10 +801,11 @@ public class SparkInstances extends IInstances implements Serializable{
 
 		ValueComparator valueComparator = new ValueComparator();
 		JavaPairRDD<Value, Instance> orderedInstances = pair.sortByKey(valueComparator, true);
-		instances = orderedInstances.values();
-		instances.cache();		
+		JavaRDD<Instance> newInstsRDD =  orderedInstances.values();
+		newInstsRDD.cache();		
+		SparkInstances newInstances = new SparkInstances(attributes, classIndex, newInstsRDD, attributeIndex);
 
-		sequenceCounts = null; // Reset so we get the correct values for a range
+		return newInstances;
 
 	}
 	

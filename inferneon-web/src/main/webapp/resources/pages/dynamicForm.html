@@ -12,7 +12,6 @@
 							<input type="text" ng-model="field.name">
 						</div>
 					</div>
-					
 					<div ng-if="field.type === 'SELECT'">
 						<div class="col-md-3">
 							<label>{{field.label}}:</label>
@@ -21,14 +20,13 @@
 							<select ng-model = "field.name" ng-options="selectField.key as selectField.value for selectField in field.keyValues"></select>
 						</div>
 					</div>
-					
 					<div ng-if="field.type === 'RADIO'" class="row">
 						<div class="col-sm-3" ><label>{{field.label}}:</label></div>
 						 <div ng-repeat="radioOption in field.keyValues" class="col-sm-3 nopadding">
 						 		{{radioOption.value}} <input type="radio" ng-model="field.name" ng-value="radioOption.key" value="{{radioOption.key}}"/>
+
 						 </div>
-					</div>
-					
+					</div>	 
 					<div ng-if="field.type === 'CHECKBOX'">
 						<div class="col-md-3">
 							<label>{{field.label}}:</label>
