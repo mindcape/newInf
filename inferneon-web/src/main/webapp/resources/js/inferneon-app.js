@@ -356,6 +356,7 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		        });
 		    	modalInstance.result.then(function() {
 		        	console.log('Clicked on Save');
+		        	
 		        }, function() {
 		            console.log('Clicked on Cancel');
 		        });
@@ -368,8 +369,29 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 }]);
 
 
-inferneonApp.controller('DynamicFormController', [ '$scope','$compile','$http','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', '$rootScope', 'dataFields',
-                                               function ($scope, $compile, $http, $routeParams, $uibModalInstance, ProjectService, MessageService, $rootScope,dataFields  ) {
+inferneonApp.controller('DynamicFormController', [ '$scope','$compile','$http','$q','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', '$rootScope', 'dataFields',
+                                               function ($scope, $compile, $http,$q, $routeParams, $uibModalInstance, ProjectService, MessageService, $rootScope,dataFields  ) {
 	$scope.dynaFormFields = dataFields;
+	
+	$scope.saveDynamicForm = function(){
+		var deferred = $q.defer();
+		console.log($scope.fields);
+		
+		$http({
+            method: 'POST',
+            url: '/saveForm',
+            data: $scope.fields,
+            headers: {
+            	"Content-Type": "application/json"     
+            }
+        }).then(function (response) {
+      	  	console.log('reponse : '+response.data);
+            if (response.status == 200) {
+            	 deferred.resolve(response.data);
+            } else {
+            	 deferred.reject("Error saving projects: " + response.data);
+            }
+        });
+	}
 	
 }]);

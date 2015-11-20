@@ -14,11 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ipsg.inferneon.app.dao.AlgorithmRepository;
 import com.ipsg.inferneon.app.dao.ProjectRepository;
 import com.ipsg.inferneon.app.dao.UserRepository;
 import com.ipsg.inferneon.app.model.Activity;
 import com.ipsg.inferneon.app.model.ActivityStatus;
 import com.ipsg.inferneon.app.model.ActivityType;
+import com.ipsg.inferneon.app.model.Algorithm;
 import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.BigFile;
 import com.ipsg.inferneon.app.model.Project;
@@ -36,6 +38,9 @@ public class ProjectService {
 
     @Autowired
     ProjectRepository projectRepository;
+    
+    @Autowired
+    AlgorithmRepository algorithmRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -134,6 +139,11 @@ public class ProjectService {
     			new Timestamp(Calendar.getInstance().getTimeInMillis()),project));
     	projectRepository.save(project);		
 	}
+    
+    @Transactional
+    public Algorithm getAlgorithmByName(String algorithmName) {
+    	return algorithmRepository.loadAlgorithmWithFormFields(algorithmName);
+    }
 
     
 }

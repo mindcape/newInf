@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ipsg.inferneon.app.model.FormField;
+
 public class FormData implements Serializable {
 
 	/**
@@ -23,7 +25,10 @@ public class FormData implements Serializable {
 	public void setFormFields(List<FormField> formFields) {
 		this.formFields = formFields;
 	}
+
+
 	
+
 	
 	
 	

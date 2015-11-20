@@ -1,52 +1,46 @@
 <div class="modal-dialog" >
-	<h4 class="modal-title" id="myModalLabel"> </h4>
+	<h4 class="modal-title" id="myModalLabel">Fill below details to save and run the algorithm. </h4>
 	<tt-error-messages extra-styles="access-screen"></tt-error-messages>	
 	<form name="dynamicForm" id="dynamicForm" >
 			<div class="modal-body">
-				<div class="row col-md-12">
-					Fill below details to save and run the algorithm.
-				</div>			
 				<div id="formFieldContainer" ng-repeat="field in dynaFormFields.formFields">
-					<div ng-if="field.fieldType == 'TEXT'">
+					<div ng-if="field.type === 'TEXT'">
 						<div class="col-md-3">
-							<label>{{field.fieldLabel}} </label>
+							<label>{{field.label}}:</label>
 						</div>
 						<div class="col-md-9">
-							<input type="text" ng-model="field.fieldName">
+							<input type="text" ng-model="field.name">
 						</div>
 					</div>
 					
-					<div ng-if="field.fieldType == 'SELECT'">
+					<div ng-if="field.type === 'SELECT'">
 						<div class="col-md-3">
-							<label>{{field.fieldLabel}} </label>
+							<label>{{field.label}}:</label>
 						</div>
 						<div class="col-md-9">
-							<select ng-model = "field.fieldName" ng-options="selectField.key as selectField.displayValue for selectField in field.fieldValues"></select>
-							
+							<select ng-model = "field.name" ng-options="selectField.key as selectField.value for selectField in field.keyValues"></select>
 						</div>
 					</div>
 					
-					<div ng-if="field.fieldType == 'RADIO'">
-						 <div ng-repeat="radioOption in field.fieldValues">
-						 	<div class="col-md-12">
-								<label>{{radioOption.displayValue}} </label>
-								<input type="radio" ng-value="radioOptions.key" ng-model="field.fieldName" />
-							</div>
+					<div ng-if="field.type === 'RADIO'" class="row">
+						<div class="col-sm-3" ><label>{{field.label}}:</label></div>
+						 <div ng-repeat="radioOption in field.keyValues" class="col-sm-3 nopadding">
+						 		{{radioOption.value}} <input type="radio" ng-model="field.name" ng-value="radioOption.key" value="{{radioOption.key}}"/>
 						 </div>
 					</div>
 					
-					<div ng-if="field.fieldType == 'CHECKBOX'">
+					<div ng-if="field.type === 'CHECKBOX'">
 						<div class="col-md-3">
-							<label>{{field.fieldLabel}} </label>
+							<label>{{field.label}}:</label>
 						</div>
 						<div class="col-md-9">
-							<input type="text" ng-model="field.fieldName">
+							<input type="text" ng-model="field.name">
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				  <button class="btn btn-primary" ng-click="$close()">Save and Run the Algorithm</button>
+				  <button class="btn btn-primary" ng-click="saveDynamicForm()">Save and Run the Algorithm</button>
         		  <button class="btn btn-warning" ng-click="$dismiss()">Cancel</button>
 			</div>
 	</form>
