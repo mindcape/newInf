@@ -58,6 +58,11 @@ public class Instances extends IInstances {
 		this.attributes = attributes;
 		this.classIndex = classIndex;
 	}
+	
+	public Instances(Context context, List<Instance> instances, List<Attribute> attributes, int classIndex, int setOrderedOnAttributeIndex){
+		this(context, instances, attributes, classIndex);
+		this.attributeIndex = setOrderedOnAttributeIndex;
+	}
 
 	public List<Instance> getInstances() {
 		return instances;
@@ -687,9 +692,20 @@ public class Instances extends IInstances {
 	}
 
 	@Override
-	public void sort(Attribute attribute) {
-		Collections.sort(instances, new InstanceComparator(attribute, attributes));
-		this.attributeIndex  = attributes.indexOf(attribute);		
+	public IInstances sort(Attribute attribute) {
+		
+		// Copy into a cloned instances first (we are not doing sorting in place)
+		List<Instance> clonedInstances = new ArrayList<>();
+		for(Instance currentInstance : instances){			
+			Instance newInst = new Instance(currentInstance.getValues());
+			newInst.setWeight(currentInstance.getWeight());
+			clonedInstances.add(newInst);
+		}
+		
+		Collections.sort(clonedInstances, new InstanceComparator(attribute, attributes));
+		int sortOnAttrIndex  = attributes.indexOf(attribute);			
+		Instances newInstances = new Instances(context, clonedInstances, attributes, classIndex, sortOnAttrIndex);	
+		return newInstances;
 	}
 
 	@Override

@@ -144,7 +144,7 @@ public class C45 {
 			if(attribute.getType() == Attribute.Type.NOMINAL && frequencyCounts.getTotalInstancesWithMissingValues() == 0){
 				newInstances = splitInstances.removeAttribute(attribute);
 			}
-
+			
 			train(decisionTreeNode, dtEdge, newInstances);
 		}
 	}
@@ -536,7 +536,7 @@ public class C45 {
 		List<Attribute> attributes = instances.getAttributes();
 		int attributeIndex = attributes.indexOf(attribute);
 
-		instances.sort(attribute);
+		instances = instances.sort(attribute);
 
 		long firstInstanceWithMissingValueForAttribute = frequencyCounts.getNumInstances() - 
 				frequencyCounts.getMissingValueInstancesCountForAttribute(attribute);

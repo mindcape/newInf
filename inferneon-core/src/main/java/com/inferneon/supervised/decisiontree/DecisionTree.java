@@ -82,17 +82,22 @@ public class DecisionTree extends DirectedAcyclicGraph<DecisionTreeNode, Decisio
 				DecisionTreeEdge edge = this.getEdge(node, target);
 				treeDesc.append(" " + edge);
 				if (target.isLeaf()) {
-					treeDesc.append(": ");
-					
-				} else {
+					treeDesc.append(": ");					
+				} 
+				//else {
 					emitTree(target, level + 1, treeDesc);
-				}
+				//}
 			}
 		}
 		else{
 			treeDesc.append(": ");
 			FrequencyCounts frequencyCounts = node.getFrequencyCounts();
-			treeDesc.append(node + " (" + frequencyCounts.getDistrbutionDesc() + ")" + System.getProperty("line.separator"));
+			if(frequencyCounts != null){
+				treeDesc.append(node + " (" + frequencyCounts.getDistrbutionDesc() + ")" + System.getProperty("line.separator"));
+			}
+			else{
+				treeDesc.append(node);
+			}
 		}
 	}
 	

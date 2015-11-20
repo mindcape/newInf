@@ -107,7 +107,7 @@ public abstract class IInstances implements Serializable{
 	/**
 	 * This implementation should sort instances based on the values of the attribute passed. The attribute should be of numeric (or real) type. 
 	 */
-	public abstract void sort(Attribute attribute);	
+	public abstract IInstances sort(Attribute attribute);	
 	
 	/**
 	 * This implementation should return a subset of instances that are already sort based on an attribute through the sort() function. 
