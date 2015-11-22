@@ -1,36 +1,24 @@
 package com.ipsg.inferneon.app.dto;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ipsg.inferneon.app.model.FormField;
-
-public class FormData implements Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 6324392572095913689L;
+public class FormData {
 	
+	private String name;
+	private String value;
 	
-	List<FormField> formFields = new ArrayList<>();
-
-
-	public List<FormField> getFormFields() {
-		return formFields;
+	public String getName() {
+		return name;
 	}
-
-
-	public void setFormFields(List<FormField> formFields) {
-		this.formFields = formFields;
+	public void setName(String name) {
+		this.name = name;
 	}
-
-
+	public String getValue() {
+		return value;
+	}
+	public void setValue(String value) {
+		this.value = value;
+	}
+	
+	
 	
 
-	
-	
-	
-	
 }

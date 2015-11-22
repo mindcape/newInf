@@ -373,6 +373,8 @@ inferneonApp.controller('DynamicFormController', [ '$scope','$compile','$http','
                                                function ($scope, $compile, $http,$q, $routeParams, $uibModalInstance, ProjectService, MessageService, $rootScope,dataFields  ) {
 	$scope.dynaFormFields = dataFields;
 	
+	$scope.savedFields = [];
+	
 	$scope.saveDynamicForm = function(){
 		var deferred = $q.defer();
 		console.log($scope.fields);
@@ -380,7 +382,7 @@ inferneonApp.controller('DynamicFormController', [ '$scope','$compile','$http','
 		$http({
             method: 'POST',
             url: '/saveForm',
-            data: $scope.fields,
+            data: {"formFields":$scope.dynaFormFields, "formData": $scope.savedFields },
             headers: {
             	"Content-Type": "application/json"     
             }
@@ -392,6 +394,20 @@ inferneonApp.controller('DynamicFormController', [ '$scope','$compile','$http','
             	 deferred.reject("Error saving projects: " + response.data);
             }
         });
+	}
+	
+	$scope.addSelectedValues = function(ele){
+		var found = false;
+		angular.forEach($scope.savedFields, function(field) {
+		      if (field.name === ele.field.name) {
+		    	  found = true;
+		    	  field.value = ele.field.selectedValue;
+		      }
+		})
+		if(!found) {
+			$scope.savedFields.push({"name":ele.field.name,
+				"value":ele.field.selectedValue});
+		}
 	}
 	
 }]);
