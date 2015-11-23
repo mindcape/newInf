@@ -30,12 +30,18 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
     @NamedQuery(
             name = Algorithm.LoadAlgorithmById,
             query = "select al from Algorithm al where al.id = :algorithmId"
+    ),
+    
+    @NamedQuery(
+            name = Algorithm.LoadAll,
+            query = "select al from Algorithm al"
     )
 })
 public class Algorithm extends AbstractEntity {
 	
 	public static final String LoadAlgorithFormFieldsByName  = "LoadAlgorithFormFieldsByName";
 	public static final String LoadAlgorithmById  = "LoadAlgorithmById";
+	public static final String LoadAll  = "LoadAll";
 	
 	@Column(name = "ALGORITHM_NAME", unique = true, nullable = false, length = 100)
 	private String algorithmName;

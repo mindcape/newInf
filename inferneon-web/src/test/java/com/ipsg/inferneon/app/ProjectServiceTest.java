@@ -8,6 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ipsg.inferneon.app.dto.ProjectDTO;
+import com.ipsg.inferneon.app.model.Algorithm;
 import com.ipsg.inferneon.app.model.Project;
 import com.ipsg.inferneon.app.model.SearchResult;
 import com.ipsg.inferneon.app.services.ProjectService;
@@ -102,6 +103,12 @@ public class ProjectServiceTest {
 
         
         
+    }
+    
+    @Test
+    public void getAllAlgorithms() {
+    	List<Algorithm> algorithmsList = projectService.getAllAlgorithm();
+    	assertTrue(algorithmsList.size() > 0);
     }
 
 

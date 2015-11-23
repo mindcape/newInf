@@ -165,6 +165,25 @@ angular.module('frontendServices', ['commonServices','ngResource'])
       		return deferred.promise;
       		 
       	  }
+        
+        
+        /**
+    	 * Load project service or Search project Service
+    	 */
+        loadAllAlgorithms: function() {
+            var deferred = $q.defer();
+            $http.get('/loadAllAlgorithms/')
+            .then(function (response) {
+                if (response.status == 200) {
+                    deferred.resolve(response.data);
+                }
+                else {
+                    deferred.reject('Error retrieving list of projects');
+                }
+            });
+
+            return deferred.promise;
+        }
         	
         	}
         }]);

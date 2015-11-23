@@ -1,6 +1,7 @@
 package com.ipsg.inferneon.app.controllers;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,5 +40,14 @@ public class DynamicFormController {
 		formData.setProjectId(1l);//TODO Remove this once it is sent from ui
 		projectService.saveAndRunAnalysis(formData,principal.getName());		
 	}
+	
+	@RequestMapping(value="/loadAllAlgorithms", method=RequestMethod.GET)
+	@ResponseBody
+	public List<Algorithm> getAllAlgorithms(){
+		FormInput form = new FormInput();
+		List<Algorithm> algorithmList = projectService.getAllAlgorithm();
+		return algorithmList;
+	}
+	
 
 }

@@ -1,5 +1,7 @@
 package com.ipsg.inferneon.app.dao;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -28,5 +30,13 @@ public class AlgorithmRepository {
 				.setParameter("algorithmId", algorithmId).getSingleResult();
 		return algorithm;
 	}
+	
+	
+	public List<Algorithm> loadAllAlgorithms() {
+		List<Algorithm> algorithmList  = em.createNamedQuery(Algorithm.LoadAll, Algorithm.class).getResultList();
+				
+		return algorithmList;
+	}
+	
 
 }

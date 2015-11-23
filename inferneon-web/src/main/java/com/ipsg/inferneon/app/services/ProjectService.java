@@ -152,6 +152,14 @@ public class ProjectService {
     public Algorithm getAlgorithmById(Long algorithmId) {
     	return algorithmRepository.loadAlgorithmById(algorithmId);
     }
+    
+    @Transactional
+    public List<Algorithm> getAllAlgorithm() {
+    	return algorithmRepository.loadAllAlgorithms();
+    }
+    
+    
+    
 
     @Transactional
 	public void saveAndRunAnalysis(FormInput formData, String userName) {

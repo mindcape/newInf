@@ -261,8 +261,8 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
            }
         }]);
 
-inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload','$timeout', '$uibModal',
-                                            function ($scope, $http,$compile,Upload,$timeout, $uibModal) {
+inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload','$timeout', '$uibModal','AlgorithmService',
+                                            function ($scope, $http,$compile,Upload,$timeout, $uibModal, AlgorithmService) {
 	
 	//$scope.progressVisible = false;
 	$scope.files = [];
@@ -364,6 +364,28 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 		    	
 			})
 	    };
+	    
+	    
+	    
+	    /**
+	     * function to load the project list 
+	     */
+        function loadAlgorithmsList() {
+        	AlgorithmService.loadAllAlgorithms().then(function(data){
+        		MessageService.clearMessages();
+        		$scope.vm.data  = data;
+                markAppAsInitialized();
+                if ($scope.vm.data && $scope.vm.data.length == 0) {
+                	MessageService.showInfoMessage("No results found.");
+                }
+        	},
+        	 function (errorMessage) {
+            	MessageService.showErrorMessage(errorMessage);
+                markAppAsInitialized();
+        		
+            });
+        	
+        }
 	
 	
 	  
@@ -407,7 +429,7 @@ inferneonApp.controller('DynamicAlgorithmFormController', [ '$scope','$compile',
 		
 	}
 	
-	$scope.addCheckBoxSelectedValues = function(ele) {
+	/*$scope.addCheckBoxSelectedValues = function(ele) {
 		var found = false;
 		angular.forEach( $scope.dynaFormFields.formFields, function(field) {
 		      if (field.name === ele.field.name) {
@@ -416,6 +438,6 @@ inferneonApp.controller('DynamicAlgorithmFormController', [ '$scope','$compile',
 		    	  field.selectedValue = ele.field.selectedValue;
 		      }
 		})
-	}
+	}*/
 	
 }]);
