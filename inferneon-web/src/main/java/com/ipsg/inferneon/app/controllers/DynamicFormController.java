@@ -24,7 +24,8 @@ public class DynamicFormController {
 	@ResponseBody
 	public FormInput getFormDefinition(){
 		FormInput form = new FormInput();
-		Algorithm algorithm = projectService.getAlgorithmByName("DecisionTree");
+		//Algorithm algorithm = projectService.getAlgorithmByName("DecisionTree");
+		Algorithm algorithm = projectService.getAlgorithmByName("MultilayerPerceptron");
 		form.setFormFields(algorithm.getFields());
 		/*form.setAlgorithmId(algorithmId);
 		form.setProjectId(projectId);*/

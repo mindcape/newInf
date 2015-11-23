@@ -407,4 +407,15 @@ inferneonApp.controller('DynamicAlgorithmFormController', [ '$scope','$compile',
 		
 	}
 	
+	$scope.addCheckBoxSelectedValues = function(ele) {
+		var found = false;
+		angular.forEach( $scope.dynaFormFields.formFields, function(field) {
+		      if (field.name === ele.field.name) {
+		    	  found = true;
+		    	  field.value = ele.field.selectedValue;
+		    	  field.selectedValue = ele.field.selectedValue;
+		      }
+		})
+	}
+	
 }]);

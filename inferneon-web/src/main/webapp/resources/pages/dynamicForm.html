@@ -4,20 +4,20 @@
 	<form name="dynamicForm" id="dynamicForm" >
 			<div class="modal-body">
 				<div id="formFieldContainer" ng-repeat="field in dynaFormFields.formFields">
-					<div ng-if="field.type === 'TEXT'">
-						<div class="col-md-3">
+					<div ng-if="field.type === 'TEXT'" class="row">
+						<div class="col-md-5 nopadding">
 							<label>{{field.label}}:</label>
 						</div>
-						<div class="col-md-9">
-							<input type="text" ng-model="field.name">
+						<div class="col-md-6">
+							<input type="text" ng-model="field.selectedValue">
 						</div>
 					</div>
-					<div ng-if="field.type === 'SELECT'">
-						<div class="col-md-3">
+					<div ng-if="field.type === 'SELECT'" class="row">
+						<div class="col-md-5 nopadding">
 							<label>{{field.label}}:</label>
 						</div>
-						<div class="col-md-9">
-							<select ng-model = "field.name" ng-options="selectField.key as selectField.value for selectField in field.keyValues"></select>
+						<div class="col-md-6">
+							<select ng-model = "field.selectedValue" ng-options="selectField.key as selectField.value for selectField in field.keyValues"></select>
 						</div>
 					</div>
 					<div ng-if="field.type === 'RADIO'" class="row">
@@ -28,13 +28,14 @@
 
 						 </div>
 					</div>	 
-					<div ng-if="field.type === 'CHECKBOX'">
-						<div class="col-md-3">
+					<div ng-if="field.type === 'CHECKBOX'" class="row">
+						<div class="col-md-5 nopadding">
 							<label>{{field.label}}:</label>
 						</div>
-						<div class="col-md-9">
-							<input type="text" ng-model="field.name">
-						</div>
+						 <div ng-repeat="checkBox in field.keyValues" class="col-sm-1 nopadding">
+						 		{{checkBox.value}} <input type="checkbox" ng-value="checkBox.key" />
+
+						 </div>
 					</div>
 				</div>
 			</div>

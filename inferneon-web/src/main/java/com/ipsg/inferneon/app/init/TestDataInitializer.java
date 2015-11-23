@@ -93,7 +93,35 @@ public class TestDataInitializer {
         dtCollapseTree.setAlgorithm(decisionTree);
         decisionTree.getFields().add(dtCollapseTree);
         session.persist(decisionTree);        
-        transaction.commit();
+        //transaction.commit();
         //sessionFactory.close();
+        
+        
+        
+        
+        Algorithm multilayerPerceptron = new Algorithm();
+        multilayerPerceptron.setAlgorithmName("MultilayerPerceptron");
+        multilayerPerceptron.setReportType("MultilayerPerceptron");
+       
+        FormField hiddenLayers = new FormField("noOfHiddenLayers",FormFieldType.TEXT.name(),"Number of hidden Layers",true);
+        hiddenLayers.setAlgorithm(multilayerPerceptron);
+        multilayerPerceptron.getFields().add(hiddenLayers);
+        
+        FormField learningRateDecay = new FormField("learningRateDecay",FormFieldType.CHECKBOX.name(),"Learning Rate Decay",true);
+        learningRateDecay.getKeyValues().add(new FieldKeyValue("yes", "YES",learningRateDecay));
+        learningRateDecay.getKeyValues().add(new FieldKeyValue("no", "NO",learningRateDecay));
+        learningRateDecay.setAlgorithm(multilayerPerceptron);
+        multilayerPerceptron.getFields().add(learningRateDecay);
+        
+        FormField momentum = new FormField("momentum",FormFieldType.TEXT.name(),"Momentum",true);
+        momentum.setAlgorithm(multilayerPerceptron);
+        multilayerPerceptron.getFields().add(momentum);
+        
+        FormField learningRate = new FormField("learningRate",FormFieldType.TEXT.name(),"Learning Rate",true);
+        learningRate.setAlgorithm(multilayerPerceptron);
+        multilayerPerceptron.getFields().add(learningRate);
+        
+        session.persist(multilayerPerceptron);        
+        transaction.commit();
     }
 }
