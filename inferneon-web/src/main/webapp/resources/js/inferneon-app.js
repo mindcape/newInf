@@ -346,8 +346,9 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 				
 		    	var modalInstance = $uibModal.open({
 		            templateUrl: '/resources/pages/dynamicForm.html',
-		            controller: 'DynamicFormController',
+		            controller: 'DynamicAlgorithmFormController',
 		            backdrop: false,
+		           // scope: $scope,
 		            resolve: {
 		                dataFields: function () {
 		                  return $scope.fields;
@@ -369,45 +370,41 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 }]);
 
 
-inferneonApp.controller('DynamicFormController', [ '$scope','$compile','$http','$q','$routeParams', '$uibModalInstance', 'ProjectService', 'MessageService', '$rootScope', 'dataFields',
-                                               function ($scope, $compile, $http,$q, $routeParams, $uibModalInstance, ProjectService, MessageService, $rootScope,dataFields  ) {
+inferneonApp.controller('DynamicAlgorithmFormController', [ '$scope','$compile','$http','$q','$routeParams', '$uibModalInstance', 'AlgorithmService', 'MessageService', '$rootScope', 'dataFields',
+                                               function ($scope, $compile, $http,$q, $routeParams, $uibModalInstance, AlgorithmService, MessageService, $rootScope,dataFields  ) {
 	$scope.dynaFormFields = dataFields;
-	
 	$scope.savedFields = [];
-	
-	$scope.saveDynamicForm = function(){
-		var deferred = $q.defer();
-		console.log($scope.fields);
-		
-		$http({
-            method: 'POST',
-            url: '/saveForm',
-            data: {"formFields":$scope.dynaFormFields, "formData": $scope.savedFields },
-            headers: {
-            	"Content-Type": "application/json"     
-            }
-        }).then(function (response) {
-      	  	console.log('reponse : '+response.data);
-            if (response.status == 200) {
-            	 deferred.resolve(response.data);
-            } else {
-            	 deferred.reject("Error saving projects: " + response.data);
-            }
-        });
+	/**
+	 * Saving Alogrithm form
+	 */
+	$scope.saveDynamicAlgorithmForm = function() {
+		console.log('Saving Data');
+		MessageService.clearMessages();
+		// for the time being hardcoded the projectId and algorithmId 
+		var postData ={
+				formFields : $scope.dynaFormFields.formFields,
+				projectId : 100,
+				algorithmId : 11
+		};
+		AlgorithmService.saveAlgorithmForm(postData).then(
+				function(data) {
+					console.log("Changes saved successfully"+ JSON.stringify(data));
+					$uibModalInstance.close();
+				}, function(errorMessage) {
+					MessageService.showErrorMessage(errorMessage);
+				});
 	}
 	
 	$scope.addSelectedValues = function(ele){
 		var found = false;
-		angular.forEach($scope.savedFields, function(field) {
+		angular.forEach( $scope.dynaFormFields.formFields, function(field) {
 		      if (field.name === ele.field.name) {
 		    	  found = true;
 		    	  field.value = ele.field.selectedValue;
+		    	  field.selectedValue = ele.field.selectedValue;
 		      }
 		})
-		if(!found) {
-			$scope.savedFields.push({"name":ele.field.name,
-				"value":ele.field.selectedValue});
-		}
+		
 	}
 	
 }]);

@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -33,6 +34,9 @@ public class FormField extends AbstractEntity {
 	
 	@Column(name = "VALIDATION_REQ")
 	private Boolean validationRequired;
+	
+	@Transient
+	private String selectedValue;
 	
 	
 	public FormField() {
@@ -110,6 +114,14 @@ public class FormField extends AbstractEntity {
 	public String toString() {
 		return "FormField [name=" + name + ", type=" + type + ", label=" + label + ", validationRequired="
 				+ validationRequired + ", algorithm=" + algorithm + "]";
+	}
+
+	public String getSelectedValue() {
+		return selectedValue;
+	}
+
+	public void setSelectedValue(String selectedValue) {
+		this.selectedValue = selectedValue;
 	}
 
     

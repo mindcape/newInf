@@ -136,4 +136,36 @@ angular.module('frontendServices', ['commonServices','ngResource'])
             }
         };
     }])
+    
+   .service('AlgorithmService', ['$http', '$q',  'MessageService',  '$resource', function($http, $q, $resource, MessageService) {
+        return {
+        	
+        	   /**
+             * Save Project Service
+             */
+            saveAlgorithmForm: function(postData) {
+              var deferred = $q.defer();
+      		  console.log('Saving Data');
+      		  $http({
+                    method: 'POST',
+                    url: '/saveForm',
+                    data: postData,
+                    headers: {
+                    	"Content-Type": "application/json"     
+                    }
+                }).then(function (response) {
+              	  	console.log('reponse : '+response.data);
+                    if (response.status == 200) {
+                    	 deferred.resolve(response.data);
+                    } else {
+                    	 deferred.reject("Error saving projects: " + response.data);
+                    }
+                });
+                
+      		return deferred.promise;
+      		 
+      	  }
+        	
+        	}
+        }]);
 	

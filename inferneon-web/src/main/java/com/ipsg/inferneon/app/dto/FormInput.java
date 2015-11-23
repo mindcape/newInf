@@ -15,9 +15,9 @@ public class FormInput implements Serializable {
 	
 	
 	List<FormField> formFields = new ArrayList<>();
+	int projectId ;
+	int algorithmId;
 	
-	List<FormData> formData = new ArrayList<>();
-
 
 	public List<FormField> getFormFields() {
 		return formFields;
@@ -29,21 +29,23 @@ public class FormInput implements Serializable {
 	}
 
 
-	public List<FormData> getFormData() {
-		return formData;
+	public int getProjectId() {
+		return projectId;
 	}
 
 
-	public void setFormData(List<FormData> formData) {
-		this.formData = formData;
+	public void setProjectId(int projectId) {
+		this.projectId = projectId;
 	}
 
 
-	
-	
+	public int getAlgorithmId() {
+		return algorithmId;
+	}
 
-	
-	
-	
+
+	public void setAlgorithmId(int algorithmId) {
+		this.algorithmId = algorithmId;
+	}
 	
 }
