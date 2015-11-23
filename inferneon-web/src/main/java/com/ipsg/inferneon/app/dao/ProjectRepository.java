@@ -1,24 +1,26 @@
 package com.ipsg.inferneon.app.dao;
 
 
-import org.apache.log4j.Logger;
-import org.springframework.stereotype.Repository;
-
-import com.ipsg.inferneon.app.model.Attribute;
-import com.ipsg.inferneon.app.model.Project;
-import com.ipsg.inferneon.app.model.User;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Repository;
+
+import com.ipsg.inferneon.app.model.Activity;
+import com.ipsg.inferneon.app.model.Project;
+import com.ipsg.inferneon.app.model.User;
 
 /**
  *
@@ -145,6 +147,13 @@ public class ProjectRepository {
         return predicates.toArray(new Predicate[]{});
     }
 
+	/**
+	 * Verifies whether Project Name is available for this user. 
+	 * Project Name should be unique by user.
+	 * @param username
+	 * @param projectName
+	 * @return True or False
+	 */
 	public boolean isProjectNameAvailable(String username, String projectName) {
 		 List<Project> projects = em.createNamedQuery(Project.FindProjectByNameAndUserName, Project.class)
 	                .setParameter("username", username)
@@ -152,6 +161,14 @@ public class ProjectRepository {
 	                .getResultList();
 
 	        return projects.isEmpty();
+	}
+
+	/**
+	 * Saves a project activity.
+	 * @param activity
+	 */
+	public void saveProjectActivity(Activity activity) {
+		em.persist(activity);		
 	}
 
 }

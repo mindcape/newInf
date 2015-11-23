@@ -2,7 +2,6 @@ package com.ipsg.inferneon.app.dao;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
 
@@ -21,6 +20,12 @@ public class AlgorithmRepository {
 		Algorithm algorithm = em.createNamedQuery(Algorithm.LoadAlgorithFormFieldsByName, Algorithm.class)
 				.setParameter("algorithmname", algorithmName).getSingleResult();
 
+		return algorithm;
+	}
+
+	public Algorithm loadAlgorithmById(Long algorithmId) {
+		Algorithm algorithm = em.createNamedQuery(Algorithm.LoadAlgorithmById, Algorithm.class)
+				.setParameter("algorithmId", algorithmId).getSingleResult();
 		return algorithm;
 	}
 

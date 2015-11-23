@@ -1,5 +1,7 @@
 package com.ipsg.inferneon.app.controllers;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,8 +33,10 @@ public class DynamicFormController {
 	
 	@RequestMapping(value="/saveForm", method=RequestMethod.POST)
 	@ResponseBody
-	public void saveForm(@RequestBody FormInput formData) {
-		System.out.println("In Request");
+	public void saveForm( Principal principal,@RequestBody FormInput formData) {
+		formData.setAlgorithmId(1l);//TODO Remove this once it is sent from ui
+		formData.setProjectId(1l);//TODO Remove this once it is sent from ui
+		projectService.saveAndRunAnalysis(formData,principal.getName());		
 	}
 
 }

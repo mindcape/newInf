@@ -1,14 +1,20 @@
 package com.ipsg.inferneon.app.model;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 
 
@@ -32,17 +38,19 @@ public class Activity extends AbstractEntity {
     @Column(name = "END_TS")
     private Timestamp endTs;
     
-    @ManyToOne(targetEntity=Project.class)
+    @ManyToOne(targetEntity=Project.class,fetch=FetchType.LAZY)
     @JoinColumn(name = "project", referencedColumnName = "id", nullable = false)
     @JsonBackReference
 	private Project project;
     
-    
+    @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonManagedReference
+    private List<AlgorithmData> algorithmData = new ArrayList<>();
     
 	public Activity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
+	
 	public Activity(ActivityType activityType, ActivityStatus status, Timestamp startTS, Project project) {
 		super();
 		this.activityType = activityType.name();
@@ -73,5 +81,19 @@ public class Activity extends AbstractEntity {
 	}
 	public void setProject(Project project) {
 		this.project = project;
+	}
+	public String getActivityType() {
+		return activityType;
+	}
+	public void setActivityType(String activityType) {
+		this.activityType = activityType;
+	}
+
+	public List<AlgorithmData> getAlgorithmData() {
+		return algorithmData;
+	}
+
+	public void setAlgorithmData(List<AlgorithmData> algorithmData) {
+		this.algorithmData = algorithmData;
 	}
 }

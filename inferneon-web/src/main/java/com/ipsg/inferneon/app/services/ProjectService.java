@@ -17,12 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ipsg.inferneon.app.dao.AlgorithmRepository;
 import com.ipsg.inferneon.app.dao.ProjectRepository;
 import com.ipsg.inferneon.app.dao.UserRepository;
+import com.ipsg.inferneon.app.dto.FormInput;
 import com.ipsg.inferneon.app.model.Activity;
 import com.ipsg.inferneon.app.model.ActivityStatus;
 import com.ipsg.inferneon.app.model.ActivityType;
 import com.ipsg.inferneon.app.model.Algorithm;
+import com.ipsg.inferneon.app.model.AlgorithmData;
 import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.BigFile;
+import com.ipsg.inferneon.app.model.FormField;
 import com.ipsg.inferneon.app.model.Project;
 import com.ipsg.inferneon.app.model.User;
 
@@ -144,6 +147,26 @@ public class ProjectService {
     public Algorithm getAlgorithmByName(String algorithmName) {
     	return algorithmRepository.loadAlgorithmWithFormFields(algorithmName);
     }
+    
+    @Transactional
+    public Algorithm getAlgorithmById(Long algorithmId) {
+    	return algorithmRepository.loadAlgorithmById(algorithmId);
+    }
+
+    @Transactional
+	public void saveAndRunAnalysis(FormInput formData, String userName) {
+		Algorithm algorithm = getAlgorithmById(formData.getAlgorithmId());
+		Project project = findProjectById(userName,formData.getProjectId());
+		Activity activity = new Activity(ActivityType.RunAlgorithm, ActivityStatus.INITIATED, 
+				new Timestamp(Calendar.getInstance().getTimeInMillis()), project);
+		activity.setProject(project);
+		for(FormField field: formData.getFormFields()) {
+			AlgorithmData algData = new AlgorithmData(activity,algorithm,field.getName(),field.getSelectedValue());
+			activity.getAlgorithmData().add(algData);			
+		}
+		
+		projectRepository.saveProjectActivity(activity);
+	}
 
     
 }
