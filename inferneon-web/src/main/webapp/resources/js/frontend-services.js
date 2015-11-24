@@ -164,7 +164,7 @@ angular.module('frontendServices', ['commonServices','ngResource'])
                 
       		return deferred.promise;
       		 
-      	  }
+      	  },
         
         
         /**
