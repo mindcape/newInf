@@ -261,10 +261,11 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
            }
         }]);
 
-inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload','$timeout', '$uibModal','AlgorithmService',
-                                            function ($scope, $http,$compile,Upload,$timeout, $uibModal, AlgorithmService) {
+inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload','$timeout', '$uibModal','AlgorithmService','MessageService',
+                                            function ($scope, $http,$compile,Upload,$timeout, $uibModal, AlgorithmService,MessageService) {
 	
 	//$scope.progressVisible = false;
+	loadAlgorithmsList();
 	$scope.files = [];
 	$scope.fields = [];
 	$scope.uploadedFiles = [];
@@ -337,9 +338,18 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
 	}
 	
 	
-	 $scope.loadDynamicForm = function(projectId) {
+	 $scope.loadDynamicForm = function(algorithm) {
+		 var algorithmNa = algorithm.selectedItem.algorithmName;
+		 if (algorithmNa == 'option0'){
+			 return;
+		 }
+		// alert(algorithm.selectedItem.algorithmName);
 		 $http({
-			  method: 'GET', url: '/loadForm'
+			  method: 'GET', 
+			  url: '/loadForm',
+			  params: {
+				  algorithmName: algorithmNa
+              }
 			}).success(function(data, status, headers, config) {
 				console.log(data);
 				$scope.fields=data;
@@ -373,8 +383,8 @@ inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload'
         function loadAlgorithmsList() {
         	AlgorithmService.loadAllAlgorithms().then(function(data){
         		MessageService.clearMessages();
-        		$scope.vm.data  = data;
-                markAppAsInitialized();
+        		$scope.vm.algorithmData  = data;
+//                markAppAsInitialized();
                 if ($scope.vm.data && $scope.vm.data.length == 0) {
                 	MessageService.showInfoMessage("No results found.");
                 }

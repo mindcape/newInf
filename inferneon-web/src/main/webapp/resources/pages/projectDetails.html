@@ -22,10 +22,10 @@
 	  	 <div class="container">
 	  	 	<div class="row">
 	  	 		<div class="col-md-12">
-	  	 			<button type="button" class="btn btn-xs" ng-click="loadDynamicForm()">
-                    	<span class="glyphicon glyphicon-load"></span> OpenForm
-                    </button>
-	  	 		
+	  	 			<label>Algorithm:</label>
+                    <select ng-model="selectedItem" ng-options="algorithm.algorithmName for algorithm in vm.algorithmData track by algorithm.id" ng-change="loadDynamicForm(this)">
+    					<option value="">-- Select an option--</option>
+        			</select>
 	  	 		</div>
 	  	 	</div>
 	  	 	<div class="row">

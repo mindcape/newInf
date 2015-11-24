@@ -23,10 +23,10 @@ public class DynamicFormController {
 	
 	@RequestMapping(value="/loadForm", method=RequestMethod.GET)
 	@ResponseBody
-	public FormInput getFormDefinition(){
+	public FormInput getFormDefinition(String algorithmName){
 		FormInput form = new FormInput();
 		//Algorithm algorithm = projectService.getAlgorithmByName("DecisionTree");
-		Algorithm algorithm = projectService.getAlgorithmByName("MultilayerPerceptron");
+		Algorithm algorithm = projectService.getAlgorithmByName(algorithmName);
 		form.setFormFields(algorithm.getFields());
 		/*form.setAlgorithmId(algorithmId);
 		form.setProjectId(projectId);*/

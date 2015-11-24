@@ -107,7 +107,7 @@ public class TestDataInitializer {
         hiddenLayers.setAlgorithm(multilayerPerceptron);
         multilayerPerceptron.getFields().add(hiddenLayers);
         
-        FormField learningRateDecay = new FormField("learningRateDecay",FormFieldType.CHECKBOX.name(),"Learning Rate Decay",true);
+        FormField learningRateDecay = new FormField("learningRateDecay",FormFieldType.RADIO.name(),"Learning Rate Decay",true);
         learningRateDecay.getKeyValues().add(new FieldKeyValue("yes", "YES",learningRateDecay));
         learningRateDecay.getKeyValues().add(new FieldKeyValue("no", "NO",learningRateDecay));
         learningRateDecay.setAlgorithm(multilayerPerceptron);
