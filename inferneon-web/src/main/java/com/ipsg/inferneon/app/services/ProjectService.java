@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ipsg.inferneon.app.dao.AlgorithmRepository;
+import com.ipsg.inferneon.app.dao.FileRepository;
 import com.ipsg.inferneon.app.dao.ProjectRepository;
 import com.ipsg.inferneon.app.dao.UserRepository;
 import com.ipsg.inferneon.app.dto.FormInput;
@@ -47,6 +48,9 @@ public class ProjectService {
 
     @Autowired
     UserRepository userRepository;
+    
+    @Autowired
+    FileRepository fileRepository;
 
     /**
      *
@@ -176,5 +180,7 @@ public class ProjectService {
 		projectRepository.saveProjectActivity(activity);
 	}
 
-    
+    public BigFile findFileById(String projectName, Long fileId) {
+    	return fileRepository.findFileById(projectName,fileId);
+    }  
 }

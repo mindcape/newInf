@@ -9,6 +9,7 @@
 	</div>
 	<div class="row margin-bottom-40">
 		<div class="col-md-12"><span class=".label-primary">Files</span></div>
+		
 	</div>
 
 	<div class="row margin-bottom-40">
@@ -101,4 +102,16 @@
 	</div>
 	
 </form>
+<form name="fileControle" ng-controller="FileUploadCtrls">
+<div ng-repeat="bigfile in vm.data">
+					<table align="center">
+					
+					<tr>
+						<td>{{bigfile.fileName}} </td>
+						
+						<td>{{bigfile.dateCreated}}</td> 
+				</tr>
+				</table>
+				</div>
+		</form>
 </div>

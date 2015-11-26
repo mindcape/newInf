@@ -7,12 +7,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,8 +26,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.ipsg.inferneon.app.dto.ProjectDTO;
+import com.ipsg.inferneon.app.dto.UserInfoDTO;
 import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.Project;
+import com.ipsg.inferneon.app.model.User;
 import com.ipsg.inferneon.app.services.ProjectService;
 
 /**
@@ -54,22 +61,14 @@ public class ProjectController {
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.GET)
     public List<ProjectDTO> loadProjectsByUser(
-            Principal principal,           
-            @RequestParam(value = "pageNumber") Integer pageNumber) {
-
-
+            Principal principal,         
+            @RequestParam(value = "pageNumber") Integer projectId,HttpSession session,HttpServletRequest request) {
+    	System.out.println("Inside project contriller class in loadProjectByUserMethod +++++++++++");
         List<Project> result = projectService.findProjects(principal.getName(),1);
+       // System.out.println("result+=============="+result.toString());
         return result.stream()
                 .map(ProjectDTO::mapFromProjectEntity)
                 .collect(Collectors.toList());
-      /*  int resultsCount = result.size();
-        int totalPages = resultsCount / 10;
-
-        if (resultsCount % 10 > 0) {
-            totalPages++;
-        }
-
-        return new ProjectsDTO(pageNumber, totalPages, ProjectDTO.mapFromProjectsEntities(result));*/
     }
     
     
@@ -87,13 +86,14 @@ public class ProjectController {
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value="/loadProjectById", method = RequestMethod.GET)
     public ProjectDTO findProjectById( Principal principal,           
-            @RequestParam(value = "projectId") Long projectId) {
+            @RequestParam(value = "projectId") Long projectId,HttpSession session) {
+    	session.setAttribute("object", projectId);
     	
     	Project result = projectService.findProjectById(principal.getName(),projectId);
+    	
     	 return ProjectDTO.mapFromProjectEntity(result);
             	
             }
-
    /* *//**
      *
      * saves a list of projects - they be either new or existing
@@ -106,7 +106,6 @@ public class ProjectController {
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.POST)    
     public List<ProjectDTO> saveProject(Principal principal, @RequestBody ProjectDTO project) {
-    	
     	Set<Attribute> newAtts = new HashSet<Attribute>();
     	for(Attribute att:project.getAttributes()){
     		newAtts.add(new Attribute(att.getAttName(),att.getAttType(),att.getAttValidValues(),att.getAttOrder()));   

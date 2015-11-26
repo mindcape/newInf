@@ -8,18 +8,27 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.ipsg.inferneon.app.dto.FileUploadDTO;
+import com.ipsg.inferneon.app.dto.ProjectDTO;
 import com.ipsg.inferneon.app.model.BigFile;
+import com.ipsg.inferneon.app.model.Project;
+import com.ipsg.inferneon.app.services.FileService;
 import com.ipsg.inferneon.app.services.ProjectService;
 
 
@@ -37,7 +46,31 @@ public class FileUploadController {
 
     @Autowired
     private ProjectService projectService;
-    
+    @Autowired
+    private FileService fileService;
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(method = RequestMethod.GET)
+    public List<FileUploadDTO> loadFilesByProject(
+            Principal principal,           
+            @RequestParam(value = "pageNumber") Integer pageNumber,HttpSession session) {
+    	Long  project_id = (Long)session.getAttribute("object");
+        List<BigFile> result = fileService.findFiles(principal.getName(),project_id);
+        System.out.println("result:"+result.toString());
+        return result.stream()
+                .map(FileUploadDTO::mapFromBigFileEntity)
+                .collect(Collectors.toList());
+    }
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value="/loadFileById", method = RequestMethod.GET)
+    public FileUploadDTO findFileById( Principal principal,           
+            @RequestParam(value = "fileId") Long fileId) {
+    	
+    	BigFile result = fileService.findFileById(principal.getName(),fileId);
+    	 return FileUploadDTO.mapFromBigFileEntity(result);
+            	
+            }
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, consumes = { "multipart/form-data" })
     public List<BigFile> uploadFile(Principal principal, MultipartHttpServletRequest request, @RequestParam(value = "projectId") Long projectId ){

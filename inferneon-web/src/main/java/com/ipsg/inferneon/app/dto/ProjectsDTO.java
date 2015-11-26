@@ -19,7 +19,11 @@ public class ProjectsDTO {
         this.projects = projects;
     }
 
-    public long getCurrentPage() {
+    public ProjectsDTO() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public long getCurrentPage() {
         return currentPage;
     }
 

@@ -22,6 +22,27 @@ angular.module('frontendServices', ['commonServices','ngResource'])
 
                 return deferred.promise;
             },
+            /**
+        	 * Load project service or Search project Service
+        	 */
+            searchFiles: function(pageNumber) {
+                var deferred = $q.defer();
+                $http.get('/fileupload/',{
+                    params: {
+                        pageNumber: pageNumber
+                    }
+                })
+                .then(function (response) {
+                    if (response.status == 200) {
+                        deferred.resolve(response.data);
+                    }
+                    else {
+                        deferred.reject('Error retrieving list of files');
+                    }
+                });
+
+                return deferred.promise;
+            },
             
             /**
         	 * Load project service or Search project Service
@@ -39,6 +60,24 @@ angular.module('frontendServices', ['commonServices','ngResource'])
                     }
                     else {
                         deferred.reject('Error retrieving list of projects');
+                    }
+                });
+
+                return deferred.promise;
+            },
+            loadFile: function(fileId) {
+                var deferred = $q.defer();
+                $http.get('/fileupload/loadFileById/',{
+                    params: {
+                        fileId: fileId
+                    }
+                })
+                .then(function (response) {
+                    if (response.status == 200) {
+                        deferred.resolve(response.data);
+                    }
+                    else {
+                        deferred.reject('Error retrieving list of file');
                     }
                 });
 
@@ -83,7 +122,7 @@ angular.module('frontendServices', ['commonServices','ngResource'])
                     method: 'POST',
                     url: '/project',
                     data: postData,
-                    headers: {
+                  headers: {
                     	"Content-Type": "application/json"     
                     }
                 }).then(function (response) {

@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
 import com.ipsg.inferneon.app.model.Activity;
+import com.ipsg.inferneon.app.model.BigFile;
 import com.ipsg.inferneon.app.model.Project;
 import com.ipsg.inferneon.app.model.User;
 
@@ -108,7 +109,7 @@ public class ProjectRepository {
      * finds a project given its id
      *
      */
-    public Project findProjectById(String userName, Long id) {
+    public Project findProjectById(String projectName, Long id) {
     	Project find = em.find(Project.class, id);
     	return find;
     }

@@ -219,7 +219,7 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
             	ProjectService.searchProjects(1).then(function(data){
             		MessageService.clearMessages();
             		$scope.vm.data  = data;
-                    markAppAsInitialized();
+                  markAppAsInitialized();
                     if ($scope.vm.data && $scope.vm.data.length == 0) {
                     	MessageService.showInfoMessage("No results found.");
                     }
@@ -260,6 +260,66 @@ inferneonApp.controller('InferneonCtrl', ['$scope' ,'$http','$location', '$rootS
                UserService.logout();
            }
         }]);
+
+inferneonApp.controller('FileUploadCtrls', ['$scope' ,'$http','$location', '$rootScope', 'ProjectService', 'UserService', 'MessageService','$timeout', '$uibModal',
+                                            function ($scope, $http,$location, $rootScope, ProjectService, UserService, MessageService, $timeout, $uibModal) {
+
+  	$scope.vm.data = [];
+  	$scope.vm = {
+              files: [],
+              errorMessages: [],
+              infoMessages: [],
+          	projectsListData: []
+          };
+  	/**
+  	 * this $on method will receive the data from the broad cast factory
+  	 */
+  	$scope.$on("dataHasCome", function(event, data){
+          console.log(event.name);
+          console.log(data);
+          $scope.vm.data = data;
+      })
+  	    
+      loadFilesList();
+
+      /**
+       * function to load the project list 
+       */
+      function loadFilesList() {
+      	ProjectService.searchFiles(1).then(function(data){
+      		MessageService.clearMessages();
+      		$scope.vm.data  = data;
+              markAppAsInitialized();
+              if ($scope.vm.data && $scope.vm.data.length == 0) {
+              	MessageService.showInfoMessage("No results found.");
+              }
+      	},
+      	 function (errorMessage) {
+          	MessageService.showErrorMessage(errorMessage);
+              markAppAsInitialized();
+      		
+          });
+      	
+      }
+      function updateProjectInfo() {
+          ProjectService.getProjectInfo()
+              .then(function (projectInfo) {
+                  $scope.vm.projectName = projectInfo.projectName;
+              },
+              function (errorMessage) {
+              	MessageService.showErrorMessage(errorMessage);
+              });
+      }
+      /**
+       * Application initialization method.
+       */
+      function markAppAsInitialized() {
+          if ($scope.vm.appReady == undefined) {
+              $scope.vm.appReady = true;
+          }
+      }
+
+  }]);
 
 inferneonApp.controller('FileUploadCtrl', ['$scope' ,'$http','$compile','Upload','$timeout', '$uibModal','AlgorithmService','MessageService',
                                             function ($scope, $http,$compile,Upload,$timeout, $uibModal, AlgorithmService,MessageService) {

@@ -18,10 +18,10 @@ public class FieldKeyValue {
     @GeneratedValue
 	private Long id;
 	
-	@Column(name="KEY", nullable=false)
+	@Column(name="FIELD_KEY", nullable=false)
 	private String key;
 	
-	@Column(name="VALUE",nullable=false)
+	@Column(name="FIELD_VALUE",nullable=false)
 	private String value;
 	
 	

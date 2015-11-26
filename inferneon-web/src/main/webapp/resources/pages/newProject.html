@@ -1,5 +1,7 @@
 <div class="modal-dialog">
-	<h4 class="modal-title" id="myModalLabel"><div ng-if ="vm.editProjectId != ''">Edit Project</div> <div ng-if ="vm.editProjectId == ''">New Project</h4>
+	<h4 class="modal-title" id="myModalLabel">
+	<div ng-if ="vm.editProjectId != ''">Edit Project</div>
+	 <div ng-if ="vm.editProjectId == ''">New Project</div></h4>
 	<tt-error-messages extra-styles="access-screen"></tt-error-messages>	
 	<form name="newProject">
 			<div class="modal-body">
@@ -65,6 +67,7 @@
                     </span> -->
 
 			
+		</div>
 		</div>
 	</form>
 

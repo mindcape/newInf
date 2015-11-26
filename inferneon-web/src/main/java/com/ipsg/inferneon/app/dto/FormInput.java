@@ -19,6 +19,20 @@ public class FormInput implements Serializable {
 	Long algorithmId;
 	
 
+	public FormInput() {
+		// TODO Auto-generated constructor stub
+	}
+
+
+	public FormInput(List<FormField> formFields, Long projectId,
+			Long algorithmId) {
+		super();
+		this.formFields = formFields;
+		this.projectId = projectId;
+		this.algorithmId = algorithmId;
+	}
+
+
 	public List<FormField> getFormFields() {
 		return formFields;
 	}

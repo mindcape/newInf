@@ -7,14 +7,24 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 
 @Entity
-@Table(name = "FILE")
+@Table(name = "BIGFILE")
+@NamedQueries({
+    @NamedQuery(
+            name = BigFile.FindFileByNameAndProjectName,
+            query = "select fl from BigFile fl where fl.fileName = :filename and fl.project.projectName = :projectname"
+    )
+})
 public class BigFile extends AbstractEntity {
+	public static final String FindFileByNameAndProjectName = "BigFile.findFiletByNameAndProjectName";
+
     @Column(name = "FILE_NAME")
 	private String fileName;
     
@@ -76,5 +86,9 @@ public class BigFile extends AbstractEntity {
 		this.project = project;
 	}
 	
-	
+	 @Override
+	    public boolean equals(Object o) {
+	    	BigFile newFile = (BigFile)o;
+	    	return this.fileName.equals(newFile.getFileName());    	
+	    }
 }

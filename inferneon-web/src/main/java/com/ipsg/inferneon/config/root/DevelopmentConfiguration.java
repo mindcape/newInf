@@ -37,9 +37,9 @@ public class DevelopmentConfiguration {
     public DriverManagerDataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://springsample.ceopbugav9au.us-west-2.rds.amazonaws.com:3306/inferneon_database");
-        dataSource.setUsername("mindcape");
-        dataSource.setPassword("mindcape");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/inferneon_test");
+        dataSource.setUsername("root");
+        dataSource.setPassword("ipsg");
         /*dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setUrl("jdbc:postgresql://localhost:5432/postgres");
         dataSource.setUsername("test");

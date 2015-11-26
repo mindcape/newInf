@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public class Project extends AbstractEntity {
 
 	public static final String FindProjectByNameAndUserName = "project.findProjectByNameAndUserName";
-	
+	//public static final String PROJECT_FILES = "project.projectFiles";
     @Column(name = "PROJECT_NAME" , nullable = false, length = 30)
 	private String projectName;
     
