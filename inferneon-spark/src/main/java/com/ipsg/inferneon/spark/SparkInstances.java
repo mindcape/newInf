@@ -18,11 +18,13 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.DoubleFunction;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.mllib.linalg.DenseVector;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.storage.StorageLevel;
 
 import scala.Tuple2;
@@ -1174,15 +1176,23 @@ public class SparkInstances extends IInstances implements Serializable{
 	@Override
 	public double partialDerivativeOfCostFunctionForLinearRegression(
 			double[] parameters, int featureIndex) {
-		// TODO Auto-generated method stub
-		return 0;
+
+		return SparkUtils.getSumOfErrors(instances, attributes.size() -1, 
+				parameters, classIndex, featureIndex) / instances.count();
 	}
 
 	@Override
 	public double[] gradientDescentForLinearRegression(
 			double[] linearRegressionParams, int numIterations, Double stepSize) {
-		// TODO Auto-generated method stub
-		return null;
+
+		double[] tempParams = new double[linearRegressionParams.length];
+		for(int i = 0; i < numIterations; i++){
+			for(int j = 0; j < linearRegressionParams.length; j++){
+				tempParams[j] = linearRegressionParams[j] - stepSize * partialDerivativeOfCostFunctionForLinearRegression(linearRegressionParams, j);
+			}
+			linearRegressionParams = tempParams;
+		}
+		return linearRegressionParams;
 	}
 
 	@Override

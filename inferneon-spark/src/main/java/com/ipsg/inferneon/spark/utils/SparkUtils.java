@@ -8,7 +8,10 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import com.inferneon.core.Instance;
 import com.ipsg.inferneon.spark.commonfunctions.AddDistributionWrappers;
+import com.ipsg.inferneon.spark.commonfunctions.AddDoubleToInstanceError;
 import com.ipsg.inferneon.spark.commonfunctions.AddDoubleToInstanceWeight;
+import com.ipsg.inferneon.spark.commonfunctions.AddErrorWrapper;
+import com.ipsg.inferneon.spark.commonfunctions.AddInstanceErrors;
 import com.ipsg.inferneon.spark.commonfunctions.AddInstanceWeights;
 import com.ipsg.inferneon.spark.commonfunctions.WeightSumWrapper;
 
@@ -29,4 +32,15 @@ public class SparkUtils {
 		
 		return total.sumOfWeights();
 	}	
+	
+	public static Double getSumOfErrors(JavaRDD<Instance> instances, int numAttributes,
+			double[] parameters, int classIndex, int featureIndex){
+		AddErrorWrapper initial = new AddErrorWrapper(0.0);
+		AddErrorWrapper total =  instances.aggregate(initial, 
+				new AddDoubleToInstanceError(numAttributes, parameters, classIndex, featureIndex),
+				new AddInstanceErrors());
+		
+		return total.getError();
+	}	
+	
 }

@@ -1114,8 +1114,7 @@ public class Instances extends IInstances {
 			Instance inst = instances.get(j);
 			double actualValue = inst.getValue(classIndex).getNumericValueAsDouble();
 
-			double sum = 0.0;
-			sum = inst.dotProd(numAttributes, parameters, classIndex);
+			double sum = inst.dotProd(numAttributes, parameters, classIndex);
 			double error = (sum - actualValue) * inst.getValue(featureIndex).getNumericValueAsDouble();
 			mse += error;
 		}
