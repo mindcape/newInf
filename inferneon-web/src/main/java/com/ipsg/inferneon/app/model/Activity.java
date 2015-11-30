@@ -13,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -40,12 +43,18 @@ public class Activity extends AbstractEntity {
     
     @ManyToOne(targetEntity=Project.class,fetch=FetchType.LAZY)
     @JoinColumn(name = "project", referencedColumnName = "id", nullable = false)
+    @Fetch(FetchMode.SELECT)
     @JsonBackReference
 	private Project project;
     
     @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonManagedReference
     private List<AlgorithmData> algorithmData = new ArrayList<>();
+    
+    
+    @OneToMany(mappedBy = "activity", fetch=FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<BigFile> files = new ArrayList<>();
     
 	public Activity() {
 		super();
@@ -96,4 +105,13 @@ public class Activity extends AbstractEntity {
 	public void setAlgorithmData(List<AlgorithmData> algorithmData) {
 		this.algorithmData = algorithmData;
 	}
+
+	public List<BigFile> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<BigFile> files) {
+		this.files = files;
+	}
+	
 }

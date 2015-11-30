@@ -74,8 +74,26 @@ public class ProjectService {
         return projects;
     }
     
+    /**
+     * Find project by id. Loads only project object.
+     * @param userName
+     * @param projectId
+     * @return Project.
+     */
     public Project findProjectById(String userName, Long projectId) {
     	return projectRepository.findProjectById(userName,projectId);
+    }
+    
+    
+    /**
+     * Loads project details including activities, file details and algorithm data details.
+     * 
+     * @param userName
+     * @param projectId
+     * @return Project object.
+     */
+    public Project loadProjectDetailsById(String userName, Long projectId) {
+    	return projectRepository.loadProjectDetailsById(userName,projectId);
     }
 
     /**
@@ -115,7 +133,7 @@ public class ProjectService {
 
         Project project = null;
         if (id != null) {
-          project =  findProjectById(username, id);
+          project =  findProjectById(username, id);//This needs change....
         } else {
         	project = new Project();
         }
@@ -138,12 +156,13 @@ public class ProjectService {
     @Transactional
 	public void addFiles(String username, List<BigFile> files, Long projectId) {
 		Project project = findProjectById(username, projectId);
+		Activity act = new Activity(ActivityType.FileUpload,ActivityStatus.STARTED,
+    			new Timestamp(Calendar.getInstance().getTimeInMillis()),project);
 		for(BigFile file: files) {
-			file.setProject(project);
+			file.setActivity(act);;
 		}
-    	project.getFiles().addAll(files);
-    	project.getActivities().add(new Activity(ActivityType.FileUpload,ActivityStatus.STARTED,
-    			new Timestamp(Calendar.getInstance().getTimeInMillis()),project));
+		act.setFiles(files);
+    	project.getActivities().add(act);
     	projectRepository.save(project);		
 	}
     

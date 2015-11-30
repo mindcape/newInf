@@ -48,8 +48,8 @@ public class TestConfiguration {
 /*        dataSource.setDriverClassName(org.hsqldb.jdbcDriver.class.getName());
         dataSource.setUrl("jdbc:hsqldb:mem:mydb");
         dataSource.setUsername("sa");
-        dataSource.setPassword("jdbc:hsqldb:mem:mydb");
-*/        return dataSource;
+        dataSource.setPassword("jdbc:hsqldb:mem:mydb");*/
+        return dataSource;
     }
 
     @Bean(name = "entityManagerFactory")

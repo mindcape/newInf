@@ -12,6 +12,7 @@ require.config({
         'angularResource': '../bower_components/angular-resource/angular-resource',
         'ui.bootstrap.tpls': '../bower_components/angular-bootstrap/ui-bootstrap-tpls.min',
         'csrfInterceptor': '../bower_components/spring-security-csrf-token-interceptor/dist/spring-security-csrf-token-interceptor.min',
+         'd3': '///bower_components/d3/d3.min',
         'lodash': '../bower_components/lodash/dist/lodash',
         'bootstrap': '../bower_components/bootstrap/dist/js/bootstrap',
         'ngFileUpload': '../bower_components/ng-file-upload/ng-file-upload',

@@ -31,13 +31,19 @@
 	  	 	</div>
 	  	 	<div class="row">
 	  	 		<div class="col-md-3">
-                     <label for="fileToUpload">Select a File to Upload</label><br />
+                    <label for="fileToUpload">Select a File to Upload</label><br />
        				<input type="file" class="btn btn-success btn-s"  id="fileToUpload" multiple onchange="angular.element(this).scope().setFiles(this)" />
-	  	 		</div>
+       				<p>Queue length: {{ files.length }}</p>
+					<button type="button" class="btn btn-success btn-s" ng-click="uploadAllFiles(vm.projectData.id)" ng-disabled="!files.length">
+						<span class="glyphicon glyphicon-upload"></span> Upload all
+					</button>
+					<button type="button" class="btn btn-danger btn-s" ng-click="clearQueue()" ng-disabled="!files.length"> 
+						<span class="glyphicon glyphicon-trash"></span> Remove all
+					</button>
+				</div>
 	  	 		<div class="col-md-9" style="margin-bottom: 40px">
 	  	 			<h3>Upload queue</h3>
-	  	 			<p>Queue length: {{ files.length }}</p>
-	  	 			 <table class="table">
+	  	 			<table class="table">
                         <thead>
                             <tr>
                                 <th width="50%" >Name</th>
@@ -72,46 +78,42 @@
                             </tr>
                         </tbody>
                     </table>
-                     <div>
+                    <div>
                         <div>
                             Queue progress:
-                            <!-- <div ng-show="progressVisible">
-					            <div class="percent">{{progress}}%</div>
-					            <div class="progress-bar">
-					                <div class="uploaded" ng-style="{'width': progress+'%'}"></div>
-					            </div>
-					        </div> -->
 					        <div ng-show="progressVisible" class="progress" style="">
                                 <div class="progress-bar" ng-style="{'width': totalProgress+'%'}"></div>
                             </div>
-					        
                         </div>
-                        <button type="button" class="btn btn-success btn-s" ng-click="uploadAllFiles(vm.projectData.id)" ng-disabled="!files.length">
-                            <span class="glyphicon glyphicon-upload"></span> Upload all
-                        </button>
-                        <!-- <button type="button" class="btn btn-warning btn-s" ng-click="cancelAll()" ng-disabled="!files.isUploading">
-                            <span class="glyphicon glyphicon-ban-circle"></span> Cancel all
-                        </button> -->
-                        <button type="button" class="btn btn-danger btn-s" ng-click="clearQueue()" ng-disabled="!files.length">
-                            <span class="glyphicon glyphicon-trash"></span> Remove all
-                        </button>
                     </div>
+             	</div>
+             	</div>   
+            	<div class="row">
+	  	 		<div class="col-md-3">
+                    
+				</div>
+	  	 		<div class="col-md-9" style="margin-bottom: 40px">       
+                    <h3>Uploaded Files</h3>
+                    <div ng-repeat="bigfile in vm.data">
+						<table align="center">
+							<thead>
+	                            <tr>
+	                                <th width="50%" >Name</th>
+	                                <th width="15%">Uploaded Time</th>
+	                            </tr>
+                        	</thead>
+                        	<tbody>
+								<tr>
+									<td>{{bigfile.fileName}} </td>
+									<td>{{bigfile.dateCreated}}</td> 
+								</tr>
+							</tbody>
+						</table>
+					</div>
 	  	 		</div>
 	  	 	</div>
-	  	 </div>
+	  	
 	</div>
-	
 </form>
-<form name="fileControle" ng-controller="FileUploadCtrls">
-<div ng-repeat="bigfile in vm.data">
-					<table align="center">
-					
-					<tr>
-						<td>{{bigfile.fileName}} </td>
-						
-						<td>{{bigfile.dateCreated}}</td> 
-				</tr>
-				</table>
-				</div>
-		</form>
+
 </div>

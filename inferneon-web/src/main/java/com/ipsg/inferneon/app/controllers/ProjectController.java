@@ -43,16 +43,11 @@ public class ProjectController {
 
     Logger LOGGER = Logger.getLogger(ProjectController.class);
 
-//    private static final long DAY_IN_MS = 1000 * 60 * 60 * 24;
-
-
     @Autowired
     private ProjectService projectService;
 
     /**
      * search Projects for the current user by date and time ranges.
-     *
-     *
      * @param principal  - the current logged in user
      * @param pageNumber - the page number (each page has 10 entries)
      * @return - @see ProjectsDTO with the current page, total pages and the list of projects
@@ -63,9 +58,7 @@ public class ProjectController {
     public List<ProjectDTO> loadProjectsByUser(
             Principal principal,         
             @RequestParam(value = "pageNumber") Integer projectId,HttpSession session,HttpServletRequest request) {
-    	System.out.println("Inside project contriller class in loadProjectByUserMethod +++++++++++");
         List<Project> result = projectService.findProjects(principal.getName(),1);
-       // System.out.println("result+=============="+result.toString());
         return result.stream()
                 .map(ProjectDTO::mapFromProjectEntity)
                 .collect(Collectors.toList());
@@ -73,11 +66,7 @@ public class ProjectController {
     
     
     /**
-     * 
      * search Project for the current user by Project Id
-     * 
-     * 
-     * 
      * @param principal
      * @param projectId
      * @return ProjectDTO
@@ -88,16 +77,12 @@ public class ProjectController {
     public ProjectDTO findProjectById( Principal principal,           
             @RequestParam(value = "projectId") Long projectId,HttpSession session) {
     	session.setAttribute("object", projectId);
-    	
-    	Project result = projectService.findProjectById(principal.getName(),projectId);
-    	
-    	 return ProjectDTO.mapFromProjectEntity(result);
-            	
-            }
-   /* *//**
-     *
+		Project result = projectService.loadProjectDetailsById(principal.getName(), projectId);
+		return ProjectDTO.mapFromProjectEntity(result);
+
+	}
+   /**
      * saves a list of projects - they be either new or existing
-     *
      * @param principal - the current logged in user
      * @param projects - the list of projects to save
      * @return - an updated version of the saved projects
@@ -109,11 +94,8 @@ public class ProjectController {
     	Set<Attribute> newAtts = new HashSet<Attribute>();
     	for(Attribute att:project.getAttributes()){
     		newAtts.add(new Attribute(att.getAttName(),att.getAttType(),att.getAttValidValues(),att.getAttOrder()));   
-    		System.out.println(att.toString());
     	}
-
         projectService.saveProject(principal.getName(), project.getId(), project.getProjectName(), newAtts);
-
         List<Project> allProjects = projectService.findProjects(principal.getName(), 1);
         return allProjects.stream()
                 .map(ProjectDTO::mapFromProjectEntity)

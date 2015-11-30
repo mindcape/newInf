@@ -50,9 +50,7 @@ public class Project extends AbstractEntity {
     @JsonManagedReference
     private Set<Attribute> attributes = new HashSet<>();
     
-    @OneToMany(mappedBy = "project", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private Set<BigFile> files = new HashSet<>();
+
     
 
     @OneToMany(mappedBy = "project", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
@@ -107,13 +105,7 @@ public class Project extends AbstractEntity {
 		this.updatedTS = updatedTS;
 	}
 
-	public Set<BigFile> getFiles() {
-		return files;
-	}
 
-	public void setFiles(Set<BigFile> files) {
-		this.files = files;
-	}
 
 	public User getUser() {
         return user;
@@ -126,7 +118,7 @@ public class Project extends AbstractEntity {
 	@Override
 	public String toString() {
 		return "Project [projectName=" + projectName + ", user=" + user + ", createdTS=" + createdTS + ", updatedTS="
-				+ updatedTS + ", attributes=" + attributes + ", files=" + files + "]";
+				+ updatedTS + ", attributes=" + attributes + "]";
 	}
     
     @Override

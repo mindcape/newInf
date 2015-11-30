@@ -7,11 +7,13 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -19,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
 import com.ipsg.inferneon.app.model.Activity;
-import com.ipsg.inferneon.app.model.BigFile;
 import com.ipsg.inferneon.app.model.Project;
 import com.ipsg.inferneon.app.model.User;
 
@@ -75,8 +76,7 @@ public class ProjectRepository {
      * @return -  a list of matching projects, or an empty collection if no match found
      */
     public List<Project> findProjectsByUser(String username, int pageNumber) {
-
-        CriteriaBuilder cb = em.getCriteriaBuilder();
+       CriteriaBuilder cb = em.getCriteriaBuilder();
 
         // the actual search query that returns one page of results
         CriteriaQuery<Project> searchQuery = cb.createQuery(Project.class);
@@ -84,13 +84,7 @@ public class ProjectRepository {
         searchQuery.select(searchRoot);
         searchQuery.where(getCommonWhereCondition(cb, username, searchRoot));
         searchQuery.orderBy(cb.desc(searchRoot.get("id")));
-//        List<Order> orderList = new ArrayList();
-//        orderList.add(cb.desc(searchRoot.get("date")));
-//        orderList.add(cb.asc(searchRoot.get("time")));
-//        searchQuery.orderBy(orderList);
-        
         TypedQuery<Project> filterQuery = em.createQuery(searchQuery);
-
         return filterQuery.getResultList();
     }
 
@@ -109,10 +103,48 @@ public class ProjectRepository {
      * finds a project given its id
      *
      */
-    public Project findProjectById(String projectName, Long id) {
-    	Project find = em.find(Project.class, id);
-    	return find;
+    public Project findProjectById(String username, Long projectId) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Project> searchQuery = cb.createQuery(Project.class);
+        Root<Project> project = searchQuery.from(Project.class);
+        searchQuery.select(project);
+        searchQuery.where(cb.equal(project.<Long>get("id"), projectId));
+        //Joins to project
+        List<Predicate> predicates = new ArrayList<>();
+        Join<Project, User> user = project.join("user");
+        predicates.add(cb.equal(user.<String>get("username"), username));
+        searchQuery.where(predicates.toArray(new Predicate[]{}));
+        Project result =  em.createQuery(searchQuery).getSingleResult();
+        return result;
     }
+    
+    
+    /**
+    *
+    * finds a project given its id
+    *
+    */
+    @SuppressWarnings("unused")
+    public Project loadProjectDetailsById(String username, Long projectId) throws NoResultException{
+       CriteriaBuilder cb = em.getCriteriaBuilder();
+       CriteriaQuery<Project> searchQuery = cb.createQuery(Project.class);
+       Root<Project> project = searchQuery.from(Project.class);
+       Root<Activity> activity = searchQuery.from(Activity.class);
+       searchQuery.select(project);
+       searchQuery.where(cb.equal(project.<Long>get("id"), projectId));
+       //Joins to project
+       List<Predicate> predicates = new ArrayList<>();
+       Join<Project, User> user = project.join("user");
+       Join<Project, Activity> file = project.join("activities",JoinType.LEFT);
+       predicates.add(cb.equal(user.<String>get("username"), username));
+       searchQuery.where(predicates.toArray(new Predicate[]{}));
+       Project result =  em.createQuery(searchQuery).getSingleResult();
+       if(result != null) {
+    	   result.setActivities(result.getActivities());
+       }
+       return result;
+   }
+    
 
     /**
      *
@@ -129,22 +161,7 @@ public class ProjectRepository {
 
         List<Predicate> predicates = new ArrayList<>();
         Join<Project, User> user = searchRoot.join("user");
-
         predicates.add(cb.equal(user.<String>get("username"), username));
-       
-
-//        if (toDate != null) {
-//            predicates.add(cb.lessThanOrEqualTo(searchRoot.<Date>get("date"), toDate));
-//        }
-//
-//        if (fromTime != null) {
-//            predicates.add(cb.greaterThanOrEqualTo(searchRoot.<Date>get("time"), fromTime));
-//        }
-//
-//        if (toTime != null) {
-//            predicates.add(cb.lessThanOrEqualTo(searchRoot.<Date>get("time"), toTime));
-//        }
-
         return predicates.toArray(new Predicate[]{});
     }
 

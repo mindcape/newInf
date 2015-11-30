@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -18,13 +19,18 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @Table(name = "BIGFILE")
 @NamedQueries({
     @NamedQuery(
+            name = BigFile.FindFilesByProjectId,
+            query = "select fl from BigFile fl where fl.activity.activityType = 'FileUpload' and fl.activity.project.id = :projectId"
+    ), 
+    @NamedQuery(
             name = BigFile.FindFileByNameAndProjectName,
-            query = "select fl from BigFile fl where fl.fileName = :filename and fl.project.projectName = :projectname"
+            query = "select fl from BigFile fl where fl.fileName = :filename and fl.activity.project.projectName = :projectname"
     )
 })
 public class BigFile extends AbstractEntity {
-	public static final String FindFileByNameAndProjectName = "BigFile.findFiletByNameAndProjectName";
-
+	public static final String FindFilesByProjectId = "BigFile.FindFilesByProjectId";
+	public static final String FindFileByNameAndProjectName = "FindFileByNameAndProjectName";
+	
     @Column(name = "FILE_NAME")
 	private String fileName;
     
@@ -40,10 +46,10 @@ public class BigFile extends AbstractEntity {
     @Column(name = "EXT_FILE_SOURCE")
 	private String extFileParams;
 	
-    @ManyToOne(targetEntity=Project.class)
-    @JoinColumn(name = "project", referencedColumnName = "id", nullable = false)
-    @JsonBackReference
-	private Project project;
+    @ManyToOne(targetEntity=Activity.class,fetch=FetchType.LAZY)
+	@JoinColumn(name = "activity", nullable = false)
+	@JsonBackReference
+	private Activity activity;
 	
 	public String getFileName() {
 		return fileName;
@@ -78,15 +84,15 @@ public class BigFile extends AbstractEntity {
 		this.extFileParams = extFileParams;
 	}
 
-	public Project getProject() {
-		return project;
+	public Activity getActivity() {
+		return activity;
 	}
 
-	public void setProject(Project project) {
-		this.project = project;
+	public void setActivity(Activity activity) {
+		this.activity = activity;
 	}
-	
-	 @Override
+
+	@Override
 	    public boolean equals(Object o) {
 	    	BigFile newFile = (BigFile)o;
 	    	return this.fileName.equals(newFile.getFileName());    	

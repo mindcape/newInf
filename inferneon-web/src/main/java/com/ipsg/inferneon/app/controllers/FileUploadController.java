@@ -25,9 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.ipsg.inferneon.app.dto.FileUploadDTO;
-import com.ipsg.inferneon.app.dto.ProjectDTO;
 import com.ipsg.inferneon.app.model.BigFile;
-import com.ipsg.inferneon.app.model.Project;
 import com.ipsg.inferneon.app.services.FileService;
 import com.ipsg.inferneon.app.services.ProjectService;
 
@@ -41,13 +39,14 @@ import com.ipsg.inferneon.app.services.ProjectService;
 @RequestMapping("fileupload")
 public class FileUploadController {
 	
-	
     Logger LOGGER = Logger.getLogger(FileUploadController.class);
 
     @Autowired
     private ProjectService projectService;
+    
     @Autowired
     private FileService fileService;
+    
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.GET)
@@ -61,16 +60,16 @@ public class FileUploadController {
                 .map(FileUploadDTO::mapFromBigFileEntity)
                 .collect(Collectors.toList());
     }
+    
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value="/loadFileById", method = RequestMethod.GET)
     public FileUploadDTO findFileById( Principal principal,           
             @RequestParam(value = "fileId") Long fileId) {
-    	
     	BigFile result = fileService.findFileById(principal.getName(),fileId);
-    	 return FileUploadDTO.mapFromBigFileEntity(result);
-            	
-            }
+    	return FileUploadDTO.mapFromBigFileEntity(result);
+    }
+    
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, consumes = { "multipart/form-data" })
     public List<BigFile> uploadFile(Principal principal, MultipartHttpServletRequest request, @RequestParam(value = "projectId") Long projectId ){

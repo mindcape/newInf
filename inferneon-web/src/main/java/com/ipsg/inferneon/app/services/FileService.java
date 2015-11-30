@@ -19,7 +19,7 @@ public class FileService {
 	@Transactional(readOnly = true)
 	public List<BigFile> findFiles(String projectName,Long pageNumber) {
 
-		List<BigFile> files = fileRepository.findFilesByProject(projectName,pageNumber);
+		List<BigFile> files = fileRepository.findFilesByProjectName(projectName,pageNumber);
 
 		return files;
 	}

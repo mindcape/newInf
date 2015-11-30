@@ -7,6 +7,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
@@ -20,6 +23,7 @@ public class AlgorithmData extends AbstractEntity {
 	
 	@ManyToOne(targetEntity=Algorithm.class,fetch=FetchType.LAZY)
 	@JoinColumn(name = "algorithm", nullable = false)
+	@Fetch(FetchMode.SELECT)
 	@JsonBackReference
 	private Algorithm algorithm;
 	
