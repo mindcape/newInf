@@ -47,14 +47,14 @@ public class Project extends AbstractEntity {
     private Timestamp updatedTS;
     
     @OneToMany(mappedBy = "project",cascade = CascadeType.ALL,fetch = FetchType.EAGER, orphanRemoval=true)
-    @JsonManagedReference
+    @JsonManagedReference(value="project-att")
     private Set<Attribute> attributes = new HashSet<>();
     
 
     
 
     @OneToMany(mappedBy = "project", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value="project-act")
     private Set<Activity> activities = new HashSet<>();
 
  

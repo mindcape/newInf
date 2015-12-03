@@ -44,16 +44,16 @@ public class Activity extends AbstractEntity {
     @ManyToOne(targetEntity=Project.class,fetch=FetchType.LAZY)
     @JoinColumn(name = "project", referencedColumnName = "id", nullable = false)
     @Fetch(FetchMode.SELECT)
-    @JsonBackReference
+    @JsonBackReference(value="project-act")
 	private Project project;
     
     @OneToMany(mappedBy = "activity", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JsonManagedReference
+	@JsonManagedReference(value="activity-alg")
     private List<AlgorithmData> algorithmData = new ArrayList<>();
     
     
     @OneToMany(mappedBy = "activity", fetch=FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value="activity-files")
     private List<BigFile> files = new ArrayList<>();
     
 	public Activity() {

@@ -54,7 +54,7 @@ public class FormField extends AbstractEntity {
     
     @ManyToOne(targetEntity=Algorithm.class)
     @JoinColumn(name = "algorithm", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value="Alg-fields")
 	private Algorithm algorithm;
 
 	public String getName() {

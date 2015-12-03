@@ -13,11 +13,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,10 +24,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.ipsg.inferneon.app.dto.ProjectDTO;
-import com.ipsg.inferneon.app.dto.UserInfoDTO;
 import com.ipsg.inferneon.app.model.Attribute;
 import com.ipsg.inferneon.app.model.Project;
-import com.ipsg.inferneon.app.model.User;
 import com.ipsg.inferneon.app.services.ProjectService;
 
 /**
@@ -62,6 +58,12 @@ public class ProjectController {
         return result.stream()
                 .map(ProjectDTO::mapFromProjectEntity)
                 .collect(Collectors.toList());
+    }
+    
+    @ResponseBody
+    @RequestMapping(value="/showGraph",method=RequestMethod.GET)
+    public String showGraph(){
+    	return "success";
     }
     
     

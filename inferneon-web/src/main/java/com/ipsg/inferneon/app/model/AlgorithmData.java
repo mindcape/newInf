@@ -18,13 +18,12 @@ public class AlgorithmData extends AbstractEntity {
 	
 	@ManyToOne(targetEntity=Activity.class,fetch=FetchType.LAZY)
 	@JoinColumn(name = "activity", nullable = false)
-	@JsonBackReference
+	@JsonBackReference(value="activity-alg")
 	private Activity activity;
 	
 	@ManyToOne(targetEntity=Algorithm.class,fetch=FetchType.LAZY)
 	@JoinColumn(name = "algorithm", nullable = false)
 	@Fetch(FetchMode.SELECT)
-	@JsonBackReference
 	private Algorithm algorithm;
 	
 	@Column(name="FIELD_NAME")

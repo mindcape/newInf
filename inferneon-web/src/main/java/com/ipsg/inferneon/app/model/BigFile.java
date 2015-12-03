@@ -48,7 +48,7 @@ public class BigFile extends AbstractEntity {
 	
     @ManyToOne(targetEntity=Activity.class,fetch=FetchType.LAZY)
 	@JoinColumn(name = "activity", nullable = false)
-	@JsonBackReference
+	@JsonBackReference(value="activity-files")
 	private Activity activity;
 	
 	public String getFileName() {

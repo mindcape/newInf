@@ -50,7 +50,7 @@ public class Algorithm extends AbstractEntity {
 	public String reportType;
 
 	@OneToMany(mappedBy = "algorithm", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JsonManagedReference
+	@JsonManagedReference(value="Alg-fields")
 	private List<FormField> fields = new ArrayList<>();
 	
 //	@OneToMany(mappedBy = "algorithm", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

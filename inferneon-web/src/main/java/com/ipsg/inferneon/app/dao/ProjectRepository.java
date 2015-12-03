@@ -108,11 +108,11 @@ public class ProjectRepository {
         CriteriaQuery<Project> searchQuery = cb.createQuery(Project.class);
         Root<Project> project = searchQuery.from(Project.class);
         searchQuery.select(project);
-        searchQuery.where(cb.equal(project.<Long>get("id"), projectId));
         //Joins to project
         List<Predicate> predicates = new ArrayList<>();
         Join<Project, User> user = project.join("user");
         predicates.add(cb.equal(user.<String>get("username"), username));
+        predicates.add(cb.equal(project.<Long>get("id"), projectId));
         searchQuery.where(predicates.toArray(new Predicate[]{}));
         Project result =  em.createQuery(searchQuery).getSingleResult();
         return result;
@@ -129,14 +129,13 @@ public class ProjectRepository {
        CriteriaBuilder cb = em.getCriteriaBuilder();
        CriteriaQuery<Project> searchQuery = cb.createQuery(Project.class);
        Root<Project> project = searchQuery.from(Project.class);
-       Root<Activity> activity = searchQuery.from(Activity.class);
        searchQuery.select(project);
-       searchQuery.where(cb.equal(project.<Long>get("id"), projectId));
        //Joins to project
        List<Predicate> predicates = new ArrayList<>();
        Join<Project, User> user = project.join("user");
        Join<Project, Activity> file = project.join("activities",JoinType.LEFT);
        predicates.add(cb.equal(user.<String>get("username"), username));
+       predicates.add(cb.equal(project.<Long>get("id"), projectId));
        searchQuery.where(predicates.toArray(new Predicate[]{}));
        Project result =  em.createQuery(searchQuery).getSingleResult();
        if(result != null) {

@@ -41,14 +41,14 @@ public class TestConfiguration {
     @Bean(name = "datasource")
     public DriverManagerDataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:~/inferneon_db");
-        dataSource.setUsername("sa");
-        dataSource.setPassword("");
-/*        dataSource.setDriverClassName(org.hsqldb.jdbcDriver.class.getName());
+/*        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:tcp://localhost/~/infy");
+        dataSource.setUsername("test");
+        dataSource.setPassword("test");*/
+        dataSource.setDriverClassName(org.hsqldb.jdbcDriver.class.getName());
         dataSource.setUrl("jdbc:hsqldb:mem:mydb");
         dataSource.setUsername("sa");
-        dataSource.setPassword("jdbc:hsqldb:mem:mydb");*/
+        dataSource.setPassword("jdbc:hsqldb:mem:mydb");
         return dataSource;
     }
 

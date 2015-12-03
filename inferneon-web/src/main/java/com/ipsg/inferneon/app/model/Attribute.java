@@ -31,7 +31,7 @@ public class Attribute extends AbstractEntity{
 	
     @ManyToOne(targetEntity=Project.class)
     @JoinColumn(name = "project", referencedColumnName = "id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value="project-att")
 	private Project project;
 	
     @Column(name = "ATT_ORDER")
